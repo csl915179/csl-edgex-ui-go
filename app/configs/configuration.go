@@ -51,6 +51,7 @@ type Service struct {
 type Scheme struct {
 	User    string
 	Gateway string
+	Device	string
 }
 
 type Database struct {

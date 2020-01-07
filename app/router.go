@@ -40,6 +40,13 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/exportshow", controller.ExportShow).Methods(http.MethodPost)
 
 	s.HandleFunc("/profile/download", controller.DowloadProfile).Methods(http.MethodGet)
+	//新增配置文件管理
+	//s.HandleFunc("/profile/testgetname", controller.ListProfile).Methods(http.MethodGet)
+
+	// 新增仿真设备管理
+	s.HandleFunc("/cldevices/ls", controller.GetDeviceList).Methods(http.MethodGet)
+	s.HandleFunc("/cldevices/startsimpledevice", controller.StartSimpledevice).Methods(http.MethodGet)
+	s.HandleFunc("/cldevices/stopsimpledevice", controller.StopSimpledevice).Methods(http.MethodGet)
 
 	s1 := r.PathPrefix("").Subrouter()
 	s1.HandleFunc("/ws", component.WebSocketHandler)

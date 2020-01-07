@@ -37,6 +37,7 @@ func main() {
 	flag.StringVar(&confFilePath, "conf", "", "Specify local configuration file path")
 
 	flag.Usage = usage.HelpCallback
+	confFilePath = "res/configuration.toml"
 	flag.Parse()
 
 	err := configs.LoadConfig(confFilePath)
@@ -57,8 +58,7 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-
 	log.Println("EdgeX UI Server Listen At " + server.Addr)
-
 	log.Fatal(server.ListenAndServe())
+
 }

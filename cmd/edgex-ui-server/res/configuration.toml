@@ -3,6 +3,7 @@ Host = "localhost"
 Port = 4000
 Labels = []
 OpenMsg = "edgeX ui started"
+#StaticResourcesPath = "./static"
 StaticResourcesPath = "./static"
 
 #Using an default memory db automatically if not configed here.
@@ -10,11 +11,12 @@ StaticResourcesPath = "./static"
 Host = "localhost"
 Name = "edgex-ui-go"
 Port = 27017
-Username = "su"
-Password = "su"
+Username = "edgex-ui-go"
+Password = "edgex-ui-go"
   [Database.Scheme]
   User = "user"
   Gateway = "gateway"
+  Device = "device"
 
 [DynamicProxy]
 CoreDataPath     = "/core-data"

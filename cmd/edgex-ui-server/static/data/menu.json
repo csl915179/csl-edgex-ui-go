@@ -37,5 +37,15 @@
 		"url": "/pages/ruleengine.html",
 		"icon":"fa fa-wrench",
 		"children":[]
+	},{
+		"title":"配置文件管理",
+		"url": "/pages/profile.html",
+		"icon":"",
+		"children":[]
+	},{
+	"title":"设备管理",
+	"url": "/pages/devicemanage.html",
+	"icon":"",
+	"children":[]
 	}
 ]
