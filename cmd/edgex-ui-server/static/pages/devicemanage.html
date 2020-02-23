@@ -2,40 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Profile</title>
+    <title>Device</title>
     <script  src="/js/pages/devicemanagement.js"></script>
 </head>
 <body>
-    <button id="boot-device" onclick="devicecontrolModle.startSimpledevice()">启动设备</button>
+    <button id="list-device" onclick="getDeviceListModule.getDeviceList()">查看设备列表</button>
+    <button id="boot-device" onclick="getDeviceListModule.startDevice)">启动设备</button>
     <button id="stop-device" onclick="devicecontrolModle.stopSimpledevice()">停止设备</button>
 
     <div class="panel-body" style="padding:0;">
-        <button id="get-device-list" onclick="getDeviceListModule.getDeviceList()">查看设备列表</button>
         <div id="device_list">
             <table class="table table-responsive table-hover table-striped">
                 <thead>
-                <tr class="warning">
-                    <th>选择</th>
-                    <th>编号</th>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Version</th>
-                    <th>Localprofile</th>
-                    <th>Configdir</th>
-                    <th>Created</th>
-                    <th>Modified</th>
-                    <th>Inuse</th>
-                </tr>
+                    <tr class="warning">
+                        <th>选择</th>
+                        <th>编号</th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Version</th>
+                        <th>Localprofile</th>
+                        <th>Configdir</th>
+                        <th>Created</th>
+                        <th>Modified</th>
+                        <th>Inuse</th>
+                    </tr>
                 </thead>
                 <tbody>
                 </tbody>
                 <tfoot>
-                <tr align="center">
-                    <td colspan=7>No Data.</td>
-                </tr>
+                    <tr align="center">
+                        <td colspan=7>No Data.</td>
+                    </tr>
                 </tfoot>
             </table>
+
+
+
         </div>
     </div>
 

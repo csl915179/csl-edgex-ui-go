@@ -21,7 +21,7 @@ $(document).ready(function(){
 var gatewayManagementModule = {
 	selectedRow:null,
 	gatewayDataCache:[],
-	loadGatewayList:function(){
+	loadGatewayList:function(){//列出设备列表
 		$.ajax({
 			url: '/api/v1/gateway',
 			type: 'GET',

@@ -4,10 +4,119 @@
     <meta charset="UTF-8">
     <title>Profile</title>
     <script  src="/js/pages/profile.js"></script>
+    <script  src="js/js-yaml/dist/js-yaml.js"></script>
+    <link href="/css/profile.css" rel="stylesheet">
 </head>
 <body>
-    <button id="get-profile" onclick="profileManagementModule.loadProfileList()">获取配置文件列表</button>
-    <button id="get-profile" onclick="profileManagementModule.loadDeviceList()">获取所有设备</button>
+    <!-- device profile start -->
+    <div id="profile-list-pannel">
+        <div class="edgexfoundry-device-service-main" style="position:relative;">
+            <h3>设备服务列表</h3>
+            <button id="list-deviceservice" onclick="getDeviceServiceListModule.getDeviceServiceList()">刷新列表</button>
+
+            <div class="pannel-body">
+                <div id="deviceservice_list">
+                    <table class="table table-responsive table-hover table-striped">
+                        <thead>
+                        <tr class="warning">
+                            <th>编号</th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Version</th>
+                            <th>Created</th>
+                            <th>Modified</th>
+                            <th>启动状态</th>
+                            <th>详细信息</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        <tr align="center">
+                            <td colspan=7>No Data.</td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- device profile main -->
+    <div id="serviceDetail-list-pannel">
+        <div id="profile_pannel_body">
+            <h3 id="pannel-title">详细信息</h3>
+            <abbr id="service-in-use">当前服务启动状态:</abbr>
+            <br/>
+            <h4>当前服务可以提供的DeviceResource列表</h4>
+            <div id="deviceRes_list">
+                <table class="table table-responsive table-hover table-striped">
+                    <thead>
+                    <tr class="warning">
+                        <th>编号</th>
+                        <th>名称</th>
+                        <th>类型</th>
+                        <th>介绍</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                    <tr align="center">
+                        <td colspan=7>No Data.</td>
+                    </tr>
+                    </tfoot>
+                </table>
+                </table>
+            <br/>
+            <h4>当前服务对应的profile列表：</h4>
+            <button onclick="manageProfileModule.getMatchedDeviceResourceList()">刷新</button>
+            <div id="profile_list">
+                <table class="table table-responsive table-hover table-striped">
+                    <thead>
+                    <tr class="warning">
+                        <th>编号</th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Version</th>
+                        <th>Created</th>
+                        <th>Modified</th>
+                        <th>查看json</th>
+                        <th>查看yaml</th>
+                        <th>修改</th>
+                        <th>删除</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                    <tr align="center">
+                        <td colspan=7>No Data.</td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="btm_control_pannel" align="center">
+                <input type='button' value="返回上一页" onclick="manageProfileModule.getBack()"/>
+                <input type='button' id="creat" value="新建一个适用于此服务的配置文件"/>
+            </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="profile-preview-pannel">
+        <h3 id="profile_detail_title"/>
+        <div class="profile_preview_control_pannel" align="center">
+            <input type='button' value="返回上一页" onclick="manageProfileModule.backToDetail()"/>
+            <input type='button' id="dowonloadbutton" value="下载到本地"/>
+        </div>
+        <pre id="profile_detail"/>
+    </div>
+
+
 </body>
 
 
