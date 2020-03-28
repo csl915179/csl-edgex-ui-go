@@ -12,8 +12,8 @@
     <div id="profile-list-pannel">
         <div class="edgexfoundry-device-service-main" style="position:relative;">
             <h3>设备服务列表</h3>
+            <h5>要想编写一个profile，必须首先选择一个现有的设备服务，以确定可以使用的DeviceResource</h5>
             <button id="list-deviceservice" onclick="getDeviceServiceListModule.getDeviceServiceList()">刷新列表</button>
-
             <div class="pannel-body">
                 <div id="deviceservice_list">
                     <table class="table table-responsive table-hover table-striped">
@@ -23,11 +23,12 @@
                             <th>ID</th>
                             <th>Name</th>
                             <th>Description</th>
-                            <th>Version</th>
-                            <th>Created</th>
-                            <th>Modified</th>
-                            <th>启动状态</th>
-                            <th>详细信息</th>
+                            <th>Addressable</th>
+                            <th>OperatingState</th>
+                            <th>AdminState</th>
+                            <th>Created Time</th>
+                            <th>Modified Time</th>
+                            <th>查看详细信息</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -47,7 +48,6 @@
     <div id="serviceDetail-list-pannel">
         <div id="profile_pannel_body">
             <h3 id="pannel-title">详细信息</h3>
-            <abbr id="service-in-use">当前服务启动状态:</abbr>
             <br/>
             <h4>当前服务可以提供的DeviceResource列表</h4>
             <div id="deviceRes_list">
@@ -57,7 +57,9 @@
                         <th>编号</th>
                         <th>名称</th>
                         <th>类型</th>
-                        <th>介绍</th>
+                        <th>RW</th>
+                        <th>单位类型</th>
+                        <th>单位RW</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -100,13 +102,13 @@
             </div>
             <div class="btm_control_pannel" align="center">
                 <input type='button' value="返回上一页" onclick="manageProfileModule.getBack()"/>
-                <input type='button' id="creat" value="新建一个适用于此服务的配置文件"/>
+                <input type='button' id="creatProfile" value="新建一个适用于此服务的配置文件"/>
             </div>
             </div>
         </div>
     </div>
 
-
+    <!-- 浏览profile -->
     <div id="profile-preview-pannel">
         <h3 id="profile_detail_title"/>
         <div class="profile_preview_control_pannel" align="center">
@@ -114,6 +116,351 @@
             <input type='button' id="dowonloadbutton" value="下载到本地"/>
         </div>
         <pre id="profile_detail"/>
+    </div>
+
+
+
+    <div id="creat-profile">
+        <button onclick="editProfileModel.CreatProfile()">测试</button>
+        <div class="panel panel-success" id="basic-profile-info" style="display: none">
+            <div class="panel-heading">
+                <h3 class="panel-title">定义基本信息</h3>
+            </div>
+            <div>
+                <b>name:(必选) &nbsp</b>
+                <input type="text" required="required" id="edit-profile-profilename"/>
+                <b>&nbsp manufacture: &nbsp</b>
+                <input type="text" id="edit-profile-profilemanufacturer"/>
+                <b>&nbsp model: &nbsp</b>
+                <input type="text" id="edit-profile-profilemodel"/>
+                <b>&nbsp labels: &nbsp</b>
+                <input type="text" id="edit-profile-profilelabels"/>
+            </div>
+            <div align="center">
+                <button id="cancel-basic-profile-info">取消</button>
+                &nbsp
+                <button id="submit-basic-profile-info">下一步</button>
+            </div>
+        </div>
+
+        <div class="panel panel-success" id="deviceResource-info" style="display: none">
+            <div class="panel-heading">
+                <h3 class="panel-title">定义DeviceResource</h3>
+            </div>
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">现有的DeviceResource列表</h3>
+                </div>
+                <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                    <div class="panel-heading" style="padding:5px 2px;">
+                        <button id="add_deviceResource">新建项目</button>
+                        <button id="show_deviceResource_list">刷新列表</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="deviceResource-list" style="padding:0;overflow:auto;">
+                    <table class="table table-responsive table-hover table-striped">
+                        <thead>
+                        <tr class="warning">
+                            <th>编号</th>
+                            <th>名称</th>
+                            <th>Description</th>
+                            <th>tag</th>
+                            <th>详细信息</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        <tr align="center">
+                            <td colspan=7>No Data.</td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel panel-success" id="deviceResource-detail" style="display: none">
+                <div class="panel-heading">
+                    <h3 class="panel-title">deviceResource详细信息</h3>
+                </div>
+                <div class="panel panel-default">
+                    <button id="close-deviceResource-detail">关闭</button>
+                </div>
+                <div class="panel-body" style="padding:0">
+                    <div>
+                        <h5>基本信息</h5>
+                        <b>name: &nbsp</b>
+                        <span id="deviceResource-detail-deviceResourcename"/>
+                        <b>&nbsp description: &nbsp</b>
+                        <span id="deviceResource-detail-deviceResourcedescription"/>
+                        <b>&nbsp tag: &nbsp</b>
+                        <span id="deviceResource-detail-deviceResourcetag"/>
+                    </div>
+                    <div>
+                        <h5>Value信息</h5>
+                        <b>readWrite: &nbsp</b>
+                        <span id="deviceResource-detail-deviceResourceValueReadWrite"/>
+                        <b>&nbsp defaultValue: &nbsp</b>
+                        <span id="deviceResource-detail-deviceResourceValueDefaultValue"/>
+                        <b>&nbsp minimum: &nbsp</b>
+                        <span id="deviceResource-detail-deviceResourceValueMinium"/>
+                        <b>&nbsp maximum: &nbsp</b>
+                        <span id="deviceResource-detail-deviceResourceValueMaxium"/>
+                    </div>
+                    <div>
+                        <h5>Units信息</h5>
+                        <b>readWrite: &nbsp</b>
+                        <span id="deviceResource-detail-deviceResourceUnitsReadWrite"/>
+                        <b>&nbsp defaultValue: &nbsp</b>
+                        <span id="deviceResource-detail-deviceResourceUnitsDefaultValue"/>
+                    </div>
+                    <div>
+                        <button id="deviceResource-detail-edit">编辑这条信息</button>
+                        <button id="deviceResource-detail-delete">删除这条信息</button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-success" id="define-deviceResource" style="display: none">
+                <div class="panel-heading">
+                    <h3 class="panel-title">新建DeviceResource项目</h3>
+                </div>
+                <div>
+                    <h5>基本信息</h5>
+                    <b>name: &nbsp</b>
+                    <select required="required" id="define-deviceResource-deviceResourcename"></select>
+                    <b>&nbsp description: &nbsp</b>
+                    <input type="text" id="define-deviceResource-deviceResourcedescription"/>
+                    <b>&nbsp tag: &nbsp</b>
+                    <input type="text" id="define-deviceResource-deviceResourcetag"/>
+                </div>
+                <div>
+                    <h5>Value信息</h5>
+                    <b>readWrite: &nbsp</b>
+                    <select id="define-deviceResource-deviceResourceValueReadWrite"/>
+                    <b>&nbsp defaultValue: &nbsp</b>
+                    <input type="text" id="define-deviceResource-deviceResourceValueDefaultValue"/>
+                    <b>&nbsp minimum: &nbsp</b>
+                    <input type="text" id="define-deviceResource-deviceResourceValueMinium"/>
+                    <b>&nbsp maximum: &nbsp</b>
+                    <input type="text" id="define-deviceResource-deviceResourceValueMaxium"/>
+                </div>
+                <div>
+                    <h5>Units信息</h5>
+                    <b>readWrite: &nbsp</b>
+                    <select id="define-deviceResource-deviceResourceUnitsReadWrite"/>
+                    <b>&nbsp defaultValue: &nbsp</b>
+                    <input type="text" id="define-deviceResource-deviceResourceUnitsDefaultValue"/>
+                </div>
+                <div align="center">
+                    <button id="define-deviceResource-Cancel">取消</button>
+                    <button id="define-deviceResource-Submit">确定</button>
+                </div>
+            </div>
+            <div align="center">
+                <button id="back-deviceResource-info">上一步</button>
+                &nbsp
+                <button id="submit-deviceResource-info">下一步</button>
+            </div>
+        </div>
+
+        <div class="panel panel-success" id="deviceCommand-info" style="display: none">
+            <div class="panel-heading">
+                <h3 class="panel-title">定义deviceCommand</h3>
+            </div>
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">现有的deviceCommand列表</h3>
+                </div>
+                <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                    <div class="panel-heading" style="padding:5px 2px;">
+                        <button id="add_deviceCommand">新建项目</button>
+                        <button id="show_deviceCommand_list">刷新列表</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="deviceCommand-list" style="padding:0;overflow:auto;">
+                    <table class="table table-responsive table-hover table-striped">
+                        <thead>
+                        <tr class="warning">
+                            <th>编号</th>
+                            <th>校验状态</th>
+                            <th>名称</th>
+                            <th>get</th>
+                            <th>set</th>
+                            <th>详细信息</th>
+                            <th>删除</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        <tr align="center">
+                            <td colspan=7>No Data.</td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel panel-success" id="deviceCommand-detail" style="display: none">
+                <div class="panel-heading">
+                    <h3 class="panel-title">deviceCommand详细信息</h3>
+                </div>
+                <div class="panel panel-default">
+                    <button id="close-deviceCommand-detail">关闭</button>
+                    <button id="edit-deviceCommand-detail">修改</button>
+                </div>
+                <div class="panel-body" style="padding:0">
+                    <b>name:</b>
+                    <span id="deviceCommand-detail-name"/>
+                    <div class="panel panel-success">
+                        <div class="panel-heading"><h3 class="panel-title">get列表</h3></div>
+                        <table id="deviceCommand-detail-get" class="table table-responsive table-hover table-striped">
+                            <thead>
+                            <tr class="warning">
+                                <th>编号</th>
+                                <th>DeviceResource</th>
+                                <th>Parameter</th>
+                                <th>校验状态</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot style="display: none">
+                            <tr align="center">
+                                <td colspan=7>No Data.</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="panel panel-success">
+                        <div class="panel-heading"><h3  class="panel-title">set列表</h3></div>
+                        <table id="deviceCommand-detail-set" class="table table-responsive table-hover table-striped">
+                            <thead>
+                            <tr class="warning">
+                                <th>编号</th>
+                                <th>DeviceResource</th>
+                                <th>Parameter</th>
+                                <th>校验状态</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot style="display: none">
+                            <tr align="center">
+                                <td colspan=7>No Data.</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-success" id="edit-deviceCommand-DefineNewCommandName" style="display: none">
+                <div class="panel-heading">
+                    <h3 class="panel-title">指定新建DeviceCommand名称</h3>
+                </div>
+                <div>
+                    <b>name: &nbsp</b>
+                    <input type="text" required="required" id="edit-deviceCommand-DefineNewCommandName-name"/>
+                    <b><font color="red">名称指定后不可修改，如需修改需删除此DeviceCommand重新定义!</font></b>
+                </div>
+                <div align="center">
+                    <button id="edit-deviceCommand-DefineNewCommandName-Cancel">取消</button>
+                    &nbsp
+                    <button id="edit-deviceCommand-DefineNewCommandName-Submit">下一步</button>
+                </div>
+            </div>
+
+            <div class="panel panel-success" id="edit-deviceCommand" style="display: none">
+                <div class="panel-heading">
+                    <h3 class="panel-title">新建/修改deviceCommand</h3>
+                </div>
+                <div class="panel panel-default">
+                    <button id="cancel-edit-deviceCommand">取消</button>
+                    <button id="submit-edit-deviceCommand">确定</button>
+                </div>
+                <div class="panel-body" style="padding:0">
+                    <b>name:&nbsp</b>
+                    <span id="edit-deviceCommand-name"/>
+                    <div class="panel panel-success">
+                        <div class="panel-heading"><h3 class="panel-title">get列表</h3></div>
+                        <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                            <div class="panel-heading" style="padding:5px 2px;">
+                                <button class="edit-deviceCommand-new" content="get">增加一个get项目</button>
+                            </div>
+                        </div>
+                        <table id="edit-deviceCommand-get" class="table table-responsive table-hover table-striped">
+                            <thead>
+                            <tr class="warning">
+                                <th>编号</th>
+                                <th>DeviceResource</th>
+                                <th>Parameter</th>
+                                <th>校验状态</th>
+                                <th>删除</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot style="display: none">
+                            <tr align="center">
+                                <td colspan=7>No Data.</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="panel panel-success">
+                        <div class="panel-heading"><h3  class="panel-title">set列表</h3></div>
+                        <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                            <div class="panel-heading" style="padding:5px 2px;">
+                                <button class="edit-deviceCommand-new" content="set">增加一个set项目</button>
+                            </div>
+                        </div>
+                        <table id="edit-deviceCommand-set" class="table table-responsive table-hover table-striped">
+                            <thead>
+                            <tr class="warning">
+                                <th>编号</th>
+                                <th>DeviceResource</th>
+                                <th>Parameter</th>
+                                <th>校验状态</th>
+                                <th>删除</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot style="display: none">
+                                <tr align="center">
+                                    <td colspan=7>No Data.</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="panel panel-success" id="edit-deviceCommand-defineDeviceResource" style="display: none">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">新建<span id="edit-deviceCommand-defineDeviceResource-type"/>项目</h3>
+                        </div>
+                        <div>
+                            <b>name: &nbsp</b>
+                            <select required="required" id="edit-deviceCommand-defineDeviceResource-deviceResourcename"></select>
+                            <b>&nbsp parameter: &nbsp</b>
+                            <input type="text" id="edit-deviceCommand-defineDeviceResource-deviceResourceparameter"/>
+                        </div>
+                        <div align="center">
+                            <button id="edit-deviceCommand-defineDeviceResource-Cancel">取消</button>
+                            <button id="edit-deviceCommand-defineDeviceResource-Submit">确定</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div align="center">
+                <button id="back-deviceCommand-info">上一步</button>
+                &nbsp
+                <button id="submit-deviceCommand-info">下一步</button>
+            </div>
+        </div>
+
     </div>
 
 

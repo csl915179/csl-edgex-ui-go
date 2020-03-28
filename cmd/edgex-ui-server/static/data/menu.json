@@ -42,10 +42,5 @@
 		"url": "/pages/profile.html",
 		"icon":"",
 		"children":[]
-	},{
-	"title":"设备管理",
-	"url": "/pages/devicemanage.html",
-	"icon":"",
-	"children":[]
 	}
 ]

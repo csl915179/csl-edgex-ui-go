@@ -42,7 +42,7 @@ orgEdgexFoundry.deviceService = (function(){
 
 		loadDevice: null,
 		renderDevice: null,
-    refreshDevice: null,
+    	refreshDevice: null,
 		addDevice: null,
 		editDevice:null,
 		uploadDevice: null,
@@ -50,12 +50,17 @@ orgEdgexFoundry.deviceService = (function(){
 		deleteDevice: null,
 		hideDevicePanel: null,
 		renderCommandList: null,
-    addProtocol: null,
-    addProtocolField: null,
-    resetProtocol: null,
-    setProtocol: null,
-    getProtocolFormValue: null,
-    removeProtocolField: null,
+
+		showAutoeventList: null,
+		showEventList: null,//列出event列表
+
+
+    	addProtocol: null,
+    	addProtocolField: null,
+    	resetProtocol: null,
+    	setProtocol: null,
+    	getProtocolFormValue: null,
+    	removeProtocolField: null,
 
 		loadDeviceProfile: null,
 		renderDeviceProfile: null,
@@ -181,20 +186,19 @@ orgEdgexFoundry.deviceService = (function(){
 	DeviceService.prototype.renderDeviceService = function(deviceServices){
 		$("#edgexfoundry-device-service-list table tbody").empty();
 		$.each(deviceServices,function(i,v){
-      var rowData = "<tr>";
-      rowData += "<td>" + (i + 1) +"</td>";
-      rowData += "<td>" +  v.id + "</td>";
-      rowData += "<td>" +  v.name + "</td>";
-			rowData += "<td>" +  (v.description?v.description:"") + "</td>";
-      rowData += "<td>" +  (v.labels?v.labels.join(','):"") + "</td>";
-			rowData += '<td class="device-service-addressable-search-icon"><input type="hidden" value=\''+JSON.stringify(v.addressable)+'\'>' + '<i class="fa fa-search-plus fa-lg"></i>' + '</td>';
-      rowData += "<td>" +  v.operatingState + "</td>";
-      rowData += "<td>" +  v.adminState + "</td>";
-			rowData += '<td class="device-service-devices-inlcuded-icon"><input type="hidden" value=\''+v.name+'\'>' + '<i class="fa fa-sitemap fa-lg"></i>' + '</td>';
-      rowData += "<td>" +  dateToString(v.created) + "</td>";
-      rowData += "<td>" +  dateToString(v.modified) + "</td>";
-      rowData += "</tr>";
-      $("#edgexfoundry-device-service-list table tbody").append(rowData);
+      		var rowData = "<tr>";
+      		rowData += "<td>" + (i + 1) +"</td>";
+      		rowData += "<td>" +  v.id + "</td>";
+      		rowData += "<td>" +  v.name + "</td>";
+      		rowData += "<td>" +  (v.description?v.description:"") + "</td>";
+      		rowData += '<td class="device-service-addressable-search-icon"><input type="hidden" value=\''+JSON.stringify(v.addressable)+'\'>' + '<i class="fa fa-search-plus fa-lg"></i>' + '</td>';
+      		rowData += "<td>" +  v.operatingState + "</td>";
+      		rowData += "<td>" +  v.adminState + "</td>";
+      		rowData += '<td class="device-service-devices-inlcuded-icon"><input type="hidden" value=\''+v.name+'\'>' + '<i class="fa fa-sitemap fa-lg"></i>' + '</td>';
+      		rowData += "<td>" +  dateToString(v.created) + "</td>";
+      		rowData += "<td>" +  dateToString(v.modified) + "</td>";
+      		rowData += "</tr>";
+      	$("#edgexfoundry-device-service-list table tbody").append(rowData);
     });
 		$(".device-service-addressable-search-icon").on('click',function(){
 			var addressable = JSON.parse($(this).children('input[type="hidden"]').val());
@@ -204,7 +208,7 @@ orgEdgexFoundry.deviceService = (function(){
 
 		$(".device-service-devices-inlcuded-icon").on('click',function(){
 			var serviceName = $(this).children('input[type="hidden"]').val();
-      deviceService.selectedDeviceServiceName = serviceName;
+      		deviceService.selectedDeviceServiceName = serviceName;
 			deviceService.loadDevice(serviceName);
 			$("#edgexfoundry-device-main").show();
 		});
@@ -281,6 +285,7 @@ orgEdgexFoundry.deviceService = (function(){
 			// rowData += '<td class="device-addressable-icon"><input type="hidden" value=\''+JSON.stringify(v.addressable)+'\'>' + '<i class="fa fa-eye fa-lg"></i>' + '</td>';
 
 			rowData += '<td class="device-command-icon"><input type="hidden" value=\''+v.id+'\'>' + '<i class="fa fa-terminal fa-lg"></i>' + '</td>';
+			rowData += '<td class="device-event-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'>' + '<i class="fa fa-terminal fa-lg"></i>' + '</td>';
 			rowData += "<td>" +  v.profile.name + "</td>";
 			rowData += "<td>" +  v.operatingState + "</td>";
 			rowData += "<td>" +  v.adminState + "</td>";
@@ -306,16 +311,20 @@ orgEdgexFoundry.deviceService = (function(){
 				url:'/core-command/api/v1/device/' + deviceId,
 				type: 'GET',
 				success:function(data){
-					deviceService.renderCommandList(data.commands);
+					deviceService.renderCommandList(data);
 					$(".edgexfoundry-device-command").show();
 				}
 			});
 		});
-	}
+		$("#edgexfoundry-device-list .device-event-icon").on('click',function(){
+			var device = JSON.parse($(this).children('input').val());
+			deviceService.showAutoEventList(device);
+		});
+	};
 
 	DeviceService.prototype.editDevice = function(device){
-    deviceService.resetProtocol();
-    deviceService.setProtocol(device.protocols);
+    	deviceService.resetProtocol();
+    	deviceService.setProtocol(device.protocols);
 
 		$(".edgexfoundry-device-update-or-add .add-device").hide();
 		$(".edgexfoundry-device-update-or-add .update-device").show();
@@ -369,10 +378,8 @@ orgEdgexFoundry.deviceService = (function(){
 			profile: {
 				name: $(".edgexfoundry-device-form input[name='deviceProfile']").val().trim(),
 			}
-		}
-
+	}
     device['protocols'] = deviceService.getProtocolFormValue();
-
     $.ajax({
       url: '/core-metadata/api/v1/device',
       type: method,
@@ -408,7 +415,7 @@ orgEdgexFoundry.deviceService = (function(){
         }
       }
     });
-	}
+	},
 
 	DeviceService.prototype.deleteDevice = function(device){
 		bootbox.confirm({
@@ -448,9 +455,10 @@ orgEdgexFoundry.deviceService = (function(){
 				}
 			}
 		});
-	}
+	},
 
-	DeviceService.prototype.renderCommandList = function(commands){
+	DeviceService.prototype.renderCommandList = function(data){
+  		var commands = data.commands;
 		$(".edgexfoundry-device-command table tbody").empty();
 		$.each(commands,function(i,v){
 			var rowData = '<tr>';
@@ -463,7 +471,7 @@ orgEdgexFoundry.deviceService = (function(){
 					if(v.put && v.put.parameterNames) {
 						rowData	+= '&nbsp;<input type="radio" name="commandRadio_'+v.id+'" value="set"  style="width:20px;">&nbsp;set'
 					}else{
-            rowData	+= '<span style="visibility:hidden;">&nbsp;<input type="radio" name="commandRadio_'+v.id+'" value="set"  style="width:20px;">&nbsp;set</span>'
+            			rowData	+= '<span style="visibility:hidden;">&nbsp;<input type="radio" name="commandRadio_'+v.id+'" value="set"  style="width:20px;">&nbsp;set</span>'
           }
 					rowData	+= '</td>';
 
@@ -481,7 +489,9 @@ orgEdgexFoundry.deviceService = (function(){
 					rowData += '</tr>';
       $(".edgexfoundry-device-command table tbody").append(rowData);
     });
-	}
+	},
+
+
 
 	DeviceService.prototype.sendCommand = function(command){
 		$('#'+command.id+'').prop('disabled',true);
@@ -495,7 +505,6 @@ orgEdgexFoundry.deviceService = (function(){
 				var p = $('.edgexfoundry-device-command table tbody input[name="' + param + command.id + '"]').val();
 				paramBody[param] = p;
 			});
-			console.log(JSON.stringify(paramBody))
 			$.ajax({
 				url:cmdUrl,
 				type:'PUT',
@@ -516,17 +525,77 @@ orgEdgexFoundry.deviceService = (function(){
 			$.ajax({
 				url:cmdUrl,
 				type:'GET',
-				success:function(data){
-					$('.edgexfoundry-device-command tbody input[name="reading_value'+command.id+'"]').val(JSON.stringify(data));
-					$('#'+command.id+'').prop('disabled',false);
+				success:function(data, status, xhr){
+					var ContentType = xhr.getResponseHeader("content-type");
+					if (ContentType == "application/json"){
+						$('.edgexfoundry-device-command tbody input[name="reading_value'+command.id+'"]').val(JSON.stringify(data));
+						$('#'+command.id+'').prop('disabled',false);
+					}
 				},
-				error:function(){
+				error:function(data, status, xhr){
 					$('.edgexfoundry-device-command tbody input[name="reading_value'+command.id+'"]').val("failed");
 					$('#'+command.id+'').prop('disabled',false);
 				}
 			});
 		}
-	}
+	},
+
+
+
+
+	//CSL added on 20200310
+
+	DeviceService.prototype.showAutoEventList = function(data){
+		$(".edgexfoundry-device-event").show('fast');
+		$(".autoevent-pannel table tbody").empty();
+		if(data.autoEvents != null){
+			$.each(data.autoEvents,function(i,v){
+				var rowData = '<tr>';
+				rowData += '<td>' + (v.resource) +'</td>';
+				rowData += '<td>' + (v.frequency) + '</td>';
+				rowData += '<td>' + (v.onChange) + '</td>';
+				rowData += "</tr>";
+				$(".autoevent-pannel table tbody").append(rowData);
+				$(".autoevent-pannel table tfoot").hide();
+			});
+		}
+		$("#ShowEventListButton").off('click').on('click',function(){
+			deviceService.showEventList(data.name);
+		});
+		$("#ShutDownAutoEvent").off('click').on('click',function(){
+			$("#device-event-pannel").hide();
+			$(".edgexfoundry-device-event").hide();
+		});
+	};
+
+	DeviceService.prototype.showEventList = function(name){
+		$("#device-event-pannel").show("fast");
+		document.getElementById("device-in-use").innerHTML = name;
+		$.ajax({
+			url: '/core-data/api/v1/event/device/' + name + '/' + document.getElementById("event_number").value,
+			type: 'GET',
+			success: function(data){
+				var jsonPretty = JSON.stringify(data,null,2);
+				document.getElementById("autoevent_detail").innerHTML = jsonPretty;
+			},
+
+		});
+		$("#SetEventNumButton").off('click').on('click',function(){
+			$.ajax({
+				url: '/core-data/api/v1/event/device/' + name + '/' + document.getElementById("event_number").value,
+				type: 'GET',
+				success: function(data){
+					var jsonPretty = JSON.stringify(data,null,2);
+					document.getElementById("autoevent_detail").innerHTML = jsonPretty;
+				},
+			});
+		});
+		$("#ShutDownDeviceEvent").off('click').on('click',function(){
+			$("#device-event-pannel").hide();
+		});
+
+  	};
+
 	//========device end
 
 	//========device profile start
@@ -633,8 +702,8 @@ orgEdgexFoundry.deviceService = (function(){
 
 		var form = $("#add-profile-panel form")[0];
 		form.action = "/core-metadata/api/v1/deviceprofile/uploadfile?X-Session-Token=" + window.sessionStorage.getItem('X_Session_Token');
-		form.method = "POST"
-		form.enctype="multipart/form-data"
+		form.method = "POST";
+		form.enctype="multipart/form-data";
 		form.submit();
 		var iframe = $("#add-profile-panel iframe")[0];
 		iframe.onload = function(event) {

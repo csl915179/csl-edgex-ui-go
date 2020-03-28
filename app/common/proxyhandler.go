@@ -57,7 +57,6 @@ func ProxyHandler(w http.ResponseWriter, r *http.Request, path string, prefix st
 	case configs.ProxyConf.SupportSchedulerPath:
 		targetAddr += configs.ProxyConf.SupportSchedulerPort
 	}
-
 	origin, _ := url.Parse(targetAddr)
 
 	director := func(req *http.Request) {

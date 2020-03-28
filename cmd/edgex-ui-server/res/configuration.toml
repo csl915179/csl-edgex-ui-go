@@ -17,7 +17,6 @@ Password = "edgex-ui-go"
   User = "user"
   Gateway = "gateway"
   Device = "device"
-
 [DynamicProxy]
 CoreDataPath     = "/core-data"
 CoreDataPort     = "48080"

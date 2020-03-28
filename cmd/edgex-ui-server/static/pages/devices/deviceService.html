@@ -22,6 +22,7 @@
 	<meta charset="UTF-8">
 	<link href="/css/devices/deviceService.css" rel="stylesheet">
 	<script type="text/javascript" src="/js/pages/devices/deviceService.js"></script>
+    <script type="text/javascript" src="/js/import/cbor/cbor.js"></script>
 </head>
 
 <body>
@@ -51,7 +52,6 @@
 								<th>ID</th>
 								<th>Name</th>
 								<th>Description</th>
-								<th>Labels</th>
 								<th>Addressable</th>
 								<th>OperatingState</th>
 								<th>AdminState</th>
@@ -141,6 +141,7 @@
 									<th>Labels</th>
 									<!-- <th>Addressable</th> -->
 									<th>Commands</th>
+									<th>Event</th>
 									<th>Profile</th>
 									<th>OperatingState</th>
 									<th>AdminState</th>
@@ -160,13 +161,14 @@
 
 					<!-- command start -->
 					<div class="edgexfoundry-device-command" style="display:none;">
-						<div class="panel panel-success">
-						  <div class="panel-heading">
-						    <h3 class="panel-title">Commands</h3>
-						  </div>
-						  <div class="panel-body" style="padding:0;overflow:auto;">
-								<table class="table table-responsive table-hover table-striped">
-									<thead>
+						<div class="command-table">
+							<div class="panel panel-success">
+								<div class="panel-heading">
+									<h3 class="panel-title">Commands</h3>
+								</div>
+								<div class="panel-body" style="padding:0;overflow:auto;">
+									<table class="table table-responsive table-hover table-striped">
+										<thead>
 										<tr class="active">
 											<th>Name</th>
 											<th>Method</th>
@@ -174,23 +176,90 @@
 											<th>Parameter</th>
 											<th>Operation</th>
 										</tr>
-									</thead>
-									<tbody>
-									</tbody>
-									<tfoot style="display:none;">
+										</thead>
+										<tbody>
+										</tbody>
+										<tfoot style="display:none;">
 										<tr align="center">
 											<td colspan=13>No Data.</td>
 										</tr>
-									</tfoot>
-								</table>
-						  </div>
+										</tfoot>
+									</table>
+								</div>
+							</div>
 						</div>
 					</div>
 					<!-- command end -->
+
+					<!-- CSL added on 20200310 -->
+					<!-- Event Start -->
+					<div  class="edgexfoundry-device-event" style="display:none;">
+						<div class="autoevent-pannel">
+							<div class="panel panel-success">
+								<div class="panel-heading">
+									<h3 class="panel-title">
+										Autoevent
+										<button style="float:right" id="ShutDownAutoEvent">关闭</button>
+									</h3>
+								</div>
+								<div class="panel-body" style="padding:0;overflow:auto;">
+									<table class="table table-responsive table-hover table-striped">
+										<thead>
+										<tr class="active">
+											<th>Resource</th>
+											<th>Frequency</th>
+											<th>Onchange</th>
+										</tr>
+										</thead>
+										<tbody>
+										</tbody>
+										<tfoot>
+											<tr align="center">
+												<td>No Data.</td>
+											</tr>
+										</tfoot>
+									</table>
+									<div align="center">
+										<button id="ShowEventListButton">查看event列表</button>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+						<div id="device-event-pannel">
+							<div class="panel panel-success">
+								<div class="panel-heading">
+									<h3 class="panel-title">
+										查看event
+										<button style="float:right" id="ShutDownDeviceEvent">关闭</button>
+									</h3>
+								</div>
+								<div id="event-title" align="center">
+									<b>当前设备名:</b>
+									<span id="device-in-use"/>
+									&nbsp
+									<b>查看Event</b>
+									&nbsp
+									<b>设置条数</b>
+									<input id="event_number" type="number" Value=1 min=1 name="number" />
+									<input type="button" id="SetEventNumButton" name="submit" value="确定"/>
+								</div>
+								<div id="autoevent-body">
+									<pre id="autoevent_detail"/>
+								</div>
+							</div>
+						</div>
+					</div>
+				<!-- Event end-->
+
 				</div>
 			</div>
-			<!-- device list end -->
 		</div>
+
+
+		<!-- device list end -->
+
 
 		<!-- device update or add start -->
 		<div class="edgexfoundry-device-update-or-add" style="display:none;">
@@ -263,6 +332,43 @@
 									<td>DeviceProfile</td>
 									<td><input class="form-control" type="text" name="deviceProfile" value="" placeholder="copy from deviceProfile list"></td>
 								</tr>
+							</table>
+						</fieldset>
+
+						<fieldset>
+							<legend>DeviceAutoevent</legend>
+							<table class="table table-responsive table-hover table-striped">
+								<thead>
+									<tr class="active">
+										<th>Resource</th>
+										<th>Frequency</th>
+										<th>Onchange</th>
+										<th/>
+									</tr>
+								</thead>
+								<tbody>
+									<th>
+										<input type="text"/>
+									</th>
+									<th>
+										<input type="text"/>
+										<select value="s">
+											<option value ="s">s</option>
+											<option value ="s">m</option>
+											<option value ="s">ms</option>
+											<option value ="s">h</option>
+										</select>
+									</th>
+									<th>
+										<label><input type="radio" name="onchange" value="true">true</label>
+										<label><input type="radio" name="onchange" value="false">false</label>
+									</th>
+									<th>
+										<div class="edgexIconBtn add-protocol" style="float:left;margin-top:7px;">
+									</th>
+								</tbody>
+								<tfoot>
+								</tfoot>
 							</table>
 						</fieldset>
 
@@ -344,7 +450,6 @@
  				 </div>
 		    </div>
 		  </div>
-
 		  <div class="panel-body" style="padding:0;overflow:auto;">
 				<table class="table table-responsive table-hover table-striped">
 					<thead>
@@ -372,6 +477,7 @@
 		</div>
 	</div>
 	<!-- device profile end -->
+
 
 </body>
 

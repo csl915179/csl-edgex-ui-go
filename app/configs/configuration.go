@@ -89,6 +89,7 @@ type DynamicProxy struct {
 
 	SupportSchedulerPath string
 	SupportSchedulerPort string
+
 }
 
 func LoadConfig(confFilePath string) error {
