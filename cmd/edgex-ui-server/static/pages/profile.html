@@ -461,6 +461,298 @@
             </div>
         </div>
 
+        <div class="panel panel-success" id="coreCommand-info" style="display: none">
+            <div class="panel-heading">
+                <h3 class="panel-title">定义coreCommand</h3>
+            </div>
+            <div class="panel panel-success">
+                <b>必须在现有的DeviceCommand范围内定义CoreCommand，否则请求数据时会返回404...</b>
+            </div>
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">现有的CoreCommand列表</h3>
+                </div>
+                <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                    <div class="panel-heading" style="padding:5px 2px;">
+                        <button id="show_coreCommand_list">刷新列表</button>
+                    </div>
+                </div>
+                <div class="panpel panel-success" style="padding:0;overflow:auto;">
+                    <table id="Defined-coreCommand-list" class="table table-responsive table-hover table-striped">
+                        <thead>
+                        <tr class="warning">
+                            <th>编号</th>
+                            <th>校验状态</th>
+                            <th>名称</th>
+                            <th>get</th>
+                            <th>put</th>
+                            <th>详细信息</th>
+                            <th>修复</th>
+                            <th>移除</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        <tr align="center">
+                            <td colspan=7>No Data.</td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="panpel panel-success" id="coreCommand-Detail" style="display: none">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">CoreCommand&nbsp<span class="coreCommand-Detail"/>&nbsp的详细信息</h3>
+                    </div>
+                    <div class="panel panel-default">
+                        <button id="close-coreCommand-Detail">关闭</button>
+                        <button id="coreCommand-Detail-edit">编辑</button>
+                    </div>
+                    <b>name:&nbsp</b>
+                    <span class="coreCommand-Detail"/>
+                    <div class="panel panel-success">
+                            <div class="panel-heading"><h3 class="panel-title">get列表</h3></div>
+                            <b>path:&nbsp</b><span id="coreCommand-Detail-get-path"/>
+                            <table id="coreCommand-Detail-get-code" class="table table-responsive table-hover table-striped">
+                                <thead>
+                                <tr class="warning">
+                                    <th>编号</th>
+                                    <th>code</th>
+                                    <th>Description</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                                <tfoot style="display: none">
+                                <tr align="center">
+                                    <td colspan=7>No Data.</td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                            <div class="panel-heading"><h3 class="panel-title">返回200时对应get的expectedValues列表</h3></div>
+                            <table id="coreCommand-Detail-get-expectedValues" class="table table-responsive table-hover table-striped">
+                                <thead>
+                                <tr class="warning">
+                                    <th>编号</th>
+                                    <th>name</th>
+                                    <th>校验状态</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                                <tfoot style="display: none">
+                                <tr align="center">
+                                    <td colspan=7>No Data.</td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    <div class="panel panel-success">
+                        <div class="panel-heading"><h3 class="panel-title">put列表</h3></div>
+                        <b>path: </b><span id="coreCommand-Detail-put-path"/>
+                        <table id="coreCommand-Detail-put-code" class="table table-responsive table-hover table-striped">
+                            <thead>
+                            <tr class="warning">
+                                <th>编号</th>
+                                <th>code</th>
+                                <th>Description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot style="display: none">
+                            <tr align="center">
+                                <td colspan=7>No Data.</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                        <div class="panel-heading"><h3 class="panel-title">put的parameterNames列表</h3></div>
+                        <table id="coreCommand-Detail-put-parameterNames" class="table table-responsive table-hover table-striped">
+                            <thead>
+                            <tr class="warning">
+                                <th>编号</th>
+                                <th>name</th>
+                                <th>校验状态</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot style="display: none">
+                            <tr align="center">
+                                <td colspan=7>No Data.</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">现有的还没有用于定义CoreCommand的DeviceCommand列表</h3>
+                </div>
+                <div class="panel-body" style="padding:0;overflow:auto;">
+                    <table id="Undefined-coreCommand-list" class="table table-responsive table-hover table-striped">
+                        <thead>
+                        <tr class="warning">
+                            <th>编号</th>
+                            <th>校验状态</th>
+                            <th>名称</th>
+                            <th>get</th>
+                            <th>set</th>
+                            <th>详细信息</th>
+                            <th>使用</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        <tr align="center">
+                            <td colspan=7>No Data.</td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="panel panel-success" id="Undefined-coreCommand-detail" style="display: none">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">DeviceCommand&nbsp<span class="Undefined-coreCommand-detail-name"/>&nbsp详细信息</h3>
+                    </div>
+                    <div class="panel-body" style="padding:0;overflow:auto;">
+                        <b>Name：&nbsp</b><span class="Undefined-coreCommand-detail-name"/>
+                        <div class="panel-success">
+                            <div class="panel-heading"><h3 class="panel-title">get列表</h3></div>
+                            <table id="Undefined-coreCommand-detail-get" class="table table-responsive table-hover table-striped">
+                                <thead>
+                                <tr class="warning">
+                                    <th>编号</th>
+                                    <th>name</th>
+                                    <th>parameter</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                                <tfoot>
+                                <tr align="center">
+                                    <td colspan=7>No Data.</td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div class="panel-success">
+                            <div class="panel-heading"><h3 class="panel-title">set列表</h3></div>
+                            <table id="Undefined-coreCommand-detail-set" class="table table-responsive table-hover table-striped">
+                                <thead>
+                                <tr class="warning">
+                                    <th>编号</th>
+                                    <th>name</th>
+                                    <th>parameter</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                                <tfoot>
+                                <tr align="center">
+                                    <td colspan=7>No Data.</td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div align="center">
+                            <button id="Undefined-coreCommand-detail-close">关闭</button>
+                            <button id="Undefined-coreCommand-detail-utilize">使用这个DeviceCommand</button>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+
+            <div class="panpel panel-success" id="Edit-coreCommand" style="display: none">
+                <div class="panel-heading">
+                    <h3 class="panel-title">定义/编辑CoreCommand</h3>
+                </div>
+                <div class="panel panel-default">
+                    <button id="close-Edit-coreCommand">关闭</button>
+                    <button id="submit-Edit-coreCommand">确定</button>
+                </div>
+                <b>name:&nbsp</b>
+                <span id="Edit-coreCommand-name"/>
+                <div class="panel panel-success">
+                    <div class="panel-heading"><h3 class="panel-title">get列表</h3></div>
+                    <b>path:&nbsp</b><span id="Edit-coreCommand-get-path"/>
+                    <table id="Edit-coreCommand-get-code" class="table table-responsive table-hover table-striped">
+                        <thead>
+                        <tr class="warning">
+                            <th>code</th>
+                            <th>Description</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>200</td><td><input id="Edit-coreCommand-get-200"/></td></tr>
+                            <tr><td>500</td><td><input id="Edit-coreCommand-get-500"/></td></tr>
+                            <tr><td>503</td><td><input id="Edit-coreCommand-get-503"/></td></tr>
+                        </tbody>
+                        <tfoot style="display: none">
+                        </tfoot>
+                    </table>
+                    <div class="panel-heading"><h3 class="panel-title">返回200时对应get的expectedValues</h3></div>
+                    <div class="panel-body" id="Edit-coreCommand-get-expectedValues"/>
+                </div>
+                <div class="panel panel-success">
+                    <div class="panel-heading"><h3 class="panel-title">put列表</h3></div>
+                    <b>path: </b><span id="Edit-coreCommand-put-path"/>
+                    <table id="Edit-coreCommand-put-code" class="table table-responsive table-hover table-striped">
+                        <thead>
+                        <tr class="warning">
+                            <th>code</th>
+                            <th>Description</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>200</td><td><input id="Edit-coreCommand-put-200"/></td></tr>
+                            <tr><td>500</td><td><input id="Edit-coreCommand-put-500"/></td></tr>
+                            <tr><td>503</td><td><input id="Edit-coreCommand-put-503"/></td></tr>
+                        </tbody>
+                        <tfoot style="display: none">
+                        <tr align="center">
+                        </tr>
+                        </tfoot>
+                    </table>
+                    <div class="panel-heading"><h3 class="panel-title">put的parameterNames列表</h3></div>
+                    <div class="panel-body" id="Edit-coreCommand-put-parameterNames"/>
+                </div>
+            </div>
+            <div align="center">
+                <button id="back-CoreCommand-info">上一步</button>
+                &nbsp
+                <button id="submit-CoreCommand-info">下一步</button>
+            </div>
+        </div>
+
+        <div class="panel panel-success" id="Submit-Profile" style="display: none">
+            <div class="panel-heading">
+                <h3 class="panel-title">完成配置文件定义</h3>
+            </div>
+            <div class="panel panel-success">
+                配置文件定义完毕！<br/>
+                <button id="Submit-Profile-viewJson">查看json</button>
+                <button id="Submit-Profile-viewYaml">查看Yaml</button>
+                <button id="Submit-Profile-Submit">确定上传</button>
+            </div>
+            <div class="panel panel-success" id="Submit-Profile-ViewDetail" style="display: none">
+                <pre id="Submit-Profile-detail"/>
+                <div align="center">
+                    <button id="Submit-Profile-detail-download">下载到本地</button>
+                    &nbsp
+                    <button id="Submit-Profile-detail-back">返回</button>
+                </div>
+            </div>
+            <div align="center">
+                <button id="back-Submit-Profile">上一步</button>
+            </div>
+        </div>
+
     </div>
 
 
