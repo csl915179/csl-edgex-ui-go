@@ -165,6 +165,8 @@ orgEdgexFoundry.deviceService = (function(){
 
   }
 
+  DeviceService.prototype.addAutoEventField = function(){}
+
 	// =======device service start
 	DeviceService.prototype.loadDeviceService = function(){
 		$.ajax({
@@ -322,7 +324,8 @@ orgEdgexFoundry.deviceService = (function(){
 		});
 	};
 
-	DeviceService.prototype.editDevice = function(device){
+	/*
+  	DeviceService.prototype.editDevice = function(device){
     	deviceService.resetProtocol();
     	deviceService.setProtocol(device.protocols);
 
@@ -341,7 +344,9 @@ orgEdgexFoundry.deviceService = (function(){
 		$("#edgexfoundry-device-list").hide();
 		$("#edgexfoundry-device-main .edgexfoundry-device-update-or-add").show();
 	}
+	 */
 
+	/*
 	DeviceService.prototype.addDevice = function(){
     deviceService.resetProtocol();
     deviceService.addProtocol();
@@ -351,6 +356,7 @@ orgEdgexFoundry.deviceService = (function(){
 		$(".edgexfoundry-device-update-or-add .add-device").show();
 		$(".edgexfoundry-device-form")[0].reset();
 	}
+	 */
 
 	DeviceService.prototype.cancelAddOrUpdateDevice = function(){
 		$("#edgexfoundry-device-list").show();
@@ -626,7 +632,7 @@ orgEdgexFoundry.deviceService = (function(){
 			rowData += "<td>" +  v.id + "</td>";
 			rowData += "<td>" +  v.name + "</td>";
 			rowData += "<td>" +  v.description + "</td>";
-			rowData += "<td>" +  v.labels.join(',') + "</td>";
+			rowData += "<td>" +  v.labels + "</td>";
 			rowData += "<td>" +  dateToString(v.created) + "</td>";
 			rowData += "<td>" +  dateToString(v.modified) + "</td>";
 			rowData += "</tr>";

@@ -262,6 +262,7 @@
 
 
 		<!-- device update or add start -->
+		<!--
 		<div class="edgexfoundry-device-update-or-add" style="display:none;">
 			<div class="panel panel-success">
 				<div class="panel-heading">
@@ -399,6 +400,141 @@
 				</div>
 			</div>
 		</div>
+		-->
+
+		<div class="edgexfoundry-device-update-or-add" style="display:none;">
+			<div class="panel panel-success">
+				<div class="panel-heading">
+					<h3 class="panel-title">Add or Update Device</h3>
+				</div>
+				<div class="panel panel-default" style="border:none;outline:none;margin:0;">
+					<div class="panel-heading" style="padding:5px 2px;">
+						<div class="edgexIconBtn add-device"  onclick="orgEdgexFoundry.deviceService.uploadDevice('new');">
+							<i class="fa fa-check fa-lg" aria-hidden="true"></i>
+						</div>
+						<div class="edgexIconBtn update-device" style="display:none;" onclick="orgEdgexFoundry.deviceService.uploadDevice();">
+							<i class="fa fa-check fa-lg" aria-hidden="true"></i>
+						</div>
+						<div class="edgexIconBtn" onclick="orgEdgexFoundry.deviceService.cancelAddOrUpdateDevice()">
+							<i class="fa fa-close fa-lg" aria-hidden="true"></i>
+						</div>
+					</div>
+				</div>
+
+				<div class="panel-body" style="padding:0;width:100%;overflow:auto;">
+					<form class="edgexfoundry-device-form" style="width:100%;">
+						<fieldset>
+							<legend>DeviceService & DeviceProfile</legend>
+							<table>
+								<tr>
+									<td>DeviceService</td>
+									<td><select class="form-control" required="required" id="deviceServiceName"/></td>
+									<td>DeviceProfile</td>
+									<td><select class="form-control" required="required" id="deviceProfile"/></td>
+								</tr>
+							</table>
+						</fieldset>
+
+						<fieldset>
+							<legend>Device</legend>
+							<table>
+								<tr>
+									<td>ID</td>
+									<td><input class="form-control" type="text" name="deviceID" disabled value=""></td>
+									<td>Name</td>
+									<td><input class="form-control" type="text" name="deviceName" value=""></td>
+									<td>Description</td>
+									<td><input class="form-control" type="text" name="deviceDescription" value=""></td>
+								</tr>
+								<tr>
+									<td>Labels</td>
+									<td><input class="form-control" type="text" name="deviceLabels" value=""></td>
+									<td>AdminState</td>
+									<td>
+										<select class="form-control" name="deviceAdminState">
+											<option>UNLOCKED</option>
+											<option>LOCKED</option>
+										</select>
+									</td>
+									<td>OperatingState</td>
+									<td>
+										<select class="form-control" name="deviceOperatingState">
+											<option>ENABLED</option>
+											<option>DISABLED</option>
+										</select>
+									</td>
+								</tr>
+							</table>
+						</fieldset>
+
+						<fieldset>
+							<legend>DeviceAutoevent</legend>
+							<button>增加</button>
+							<table class="table table-responsive table-hover table-striped">
+								<thead>
+								<tr class="active">
+									<th>Resource</th>
+									<th>Frequency</th>
+									<th>Onchange</th>
+									<th/>
+									<th/>
+								</tr>
+								</thead>
+								<tbody>
+								<th>
+									<input type="text"/>
+								</th>
+								<th>
+									<input type="text"/>
+									<select value="s">
+										<option value ="s">s</option>
+										<option value ="s">m</option>
+										<option value ="s">ms</option>
+										<option value ="s">h</option>
+									</select>
+								</th>
+								<th>
+									<label><input type="radio" name="onchange" value="true">true</label>
+									<label><input type="radio" name="onchange" value="false">false</label>
+								</th>
+								<th>
+									<div class="edgexIconBtn add-protocol" style="float:left;margin-top:7px;"/>
+								</th>
+								</tbody>
+								<tfoot>
+								</tfoot>
+							</table>
+						</fieldset>
+
+						<fieldset>
+							<legend>DeviceAddressable</legend>
+
+							<div class="edgexfoundry-device-protocols" style="width: 100%;overflow: auto;">
+								<div class="device-protocol" style="align:center;">
+									<div style="display:inline-block;float:left;margin-right:10px;">
+										<input type="text" class="form-control" name="deviceProtocolName">
+									</div>
+
+									<div class="protocol-body" style="display:inline-block;border-left:1px solid gray;">
+
+										<div class="edgexIconBtn add-protocol" style="float:left;margin-top:7px;" onclick="orgEdgexFoundry.deviceService.addProtocolField();">
+											<i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>
+										</div>
+
+										<div class="protocol-field-collection" style="clear:left;display:inline-block!important;">
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</fieldset>
+
+					</form>
+				</div>
+			</div>
+		</div>
+
+
 		<!-- device update or add end -->
 	</div>
 	<!-- device end -->

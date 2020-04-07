@@ -13,13 +13,13 @@ var getDeviceServiceListModule ={
                 getDeviceServiceListModule.deviceServiceDataCache = data;
                 getDeviceServiceListModule.renderDeviceServiceList(data);
                 if(data.length != 0){
-                    $("#deviceservice_list > table > tfoot").hide();
+                    $("#deviceservice_list> tfoot").hide();
                 }
             }
         })
     },
     renderDeviceServiceList:function(data){
-        $("#deviceservice_list > table > tbody").empty();
+        $("#deviceservice_list > tbody").empty();
         $.each(data,function(i,v){
             var rowData = "<tr>";
             rowData += "<td>" + (i + 1) +"</td>";
@@ -33,7 +33,7 @@ var getDeviceServiceListModule ={
             rowData += "<td>" +  dateToString(v.modified) + "</td>";
             rowData += "<td><input type='button' value='详细信息' onclick='manageProfileModule.listServiceDetail(this)' content='"+JSON.stringify(v.labels)+"'></td>";
             rowData += "</tr>";
-            $("#deviceservice_list > table > tbody").append(rowData);
+            $("#deviceservice_list > tbody").append(rowData);
         });
     }
 };
@@ -187,7 +187,6 @@ var manageProfileModule ={
         });
         var jsonPretty = JSON.stringify(jsonData,null,2);
         var yamlData = jsyaml.dump(jsonData);
-        //document.getElementById("profile_detail").innerHTML = yamlData;
         //下载
         var blob = new Blob([yamlData],{type:'yaml,charset=utf-8;'});
         const link = document.createElement("a");
@@ -275,6 +274,9 @@ var editProfileModel ={
     setCurrentService:function(Servicedata,OriginalProfile){//新建的时候传入{}，编辑的时候传入profile的json
         editProfileModel.OriginalProfile = JSON.parse(JSON.stringify(OriginalProfile));
         editProfileModel.ProfileToEdit = JSON.parse(JSON.stringify(OriginalProfile));//注意取一份副本，因为Json对象传值引用
+        delete editProfileModel.ProfileToEdit.created;
+        delete editProfileModel.ProfileToEdit.modified;
+        delete editProfileModel.ProfileToEdit.id;
         editProfileModel.CurrentService = Servicedata;
         editProfileModel.BasicInfo = null;
         editProfileModel.DeviceResourceDetailList = {};
@@ -1441,7 +1443,7 @@ var editProfileModel ={
             var NewCoreCommand = {"name":name, "get":{"responses":{}}, "put":{"responses":{}}};
             var CodeList = ["200", "500", "503"];
             if ($("#Edit-coreCommand-get-path").html() != ""){
-                NewCoreCommand.get = {"path":$("#Edit-coreCommand-get-path").html(), "responses":{"200":{"code":200,"expectedValues":{}}}};
+                NewCoreCommand.get = {"path":$("#Edit-coreCommand-get-path").html(), "responses":{"200":{"code":"200","expectedValues":{}}}};
                 $.each(CodeList,function (index,code) {
                     var ID = "#Edit-coreCommand-get-" + code;
                     if ($(ID).val() != ""){
@@ -1459,7 +1461,7 @@ var editProfileModel ={
                 NewCoreCommand["get"]["responses"]["200"]["expectedValues"] = ResourceList;
             }
             if ($("#Edit-coreCommand-put-path").html() != "") {
-                NewCoreCommand.put = {"path":$("#Edit-coreCommand-put-path").html(), "responses":{"200":{"code":200}}, "parameterNames":{}};
+                NewCoreCommand.put = {"path":$("#Edit-coreCommand-put-path").html(), "responses":{"200":{"code":"200"}}, "parameterNames":{}};
                 $.each(CodeList,function (index,code) {
                     var ID = "#Edit-coreCommand-put-" + code;
                     if ($(ID).val() != ""){
@@ -1478,7 +1480,6 @@ var editProfileModel ={
             }
             NewCoreCommand["check"] = 0;
             editProfileModel.CoreCommandDetailList[name] = NewCoreCommand;
-            console.log(JSON.stringify(editProfileModel.CoreCommandDetailList))
             editProfileModel.GetCoreCommandList();
         });
     },
@@ -1522,7 +1523,7 @@ var editProfileModel ={
     SubmitCoreCommand:function(){
         var CommandList = [];
         $.each(editProfileModel.CoreCommandDetailList,function (name,command) {
-            var get = {}, put = {};
+            var get = {}, put = {}, cmd = {"name":name};
             if (command.get.hasOwnProperty("path")){
                 get = {"path" : command.get.path, "responses": []};
                 $.each(command.get.responses,function (name,getresponse) {
@@ -1536,6 +1537,7 @@ var editProfileModel ={
                     }
                     get.responses.push(response);
                 })
+                cmd.get = get;
             }
             if (command.put.hasOwnProperty("path")){
                 put = {"path" : command.put.path, "responses":[], "parameterNames":[]};
@@ -1547,8 +1549,8 @@ var editProfileModel ={
                 $.each(command.put.parameterNames,function (name) {
                     put.parameterNames.push(name);
                 })
+                cmd.put = put;
             }
-            var cmd = {"name":name,"get":get, "put":put};
             CommandList.push(cmd);
         });
         editProfileModel.ProfileToEdit.coreCommands = CommandList;
@@ -1556,10 +1558,126 @@ var editProfileModel ={
 
     CreatProfile:function(){
         $("#Submit-Profile").show('fast');
+        deleteEmptyProperty(editProfileModel.ProfileToEdit)
+        $("#Submit-Profile-viewJson").off('click').on('click',function () {
+            editProfileModel.CreatProfile_ViewJson();
+        });
+        $("#Submit-Profile-viewYaml").off('click').on('click',function () {
+            editProfileModel.CreatProfile_ViewYaml();
+        });
+        $("#Submit-Profile-Submit").off('click').on('click',function () {
+            editProfileModel.UpLoadProfile();
+        });
         $("#back-Submit-Profile").off('click').on('click',function () {
             $("#Submit-Profile").hide();
             editProfileModel.DefineCoreCommands();
         });
+        $("#finish-Submit-Profile").off('click').on('click',function () {
+            manageProfileModule.getMatchedDeviceResourceList();
+            $("#Submit-Profile").hide();
+        });
     },
-
+    CreatProfile_ViewJson:function () {
+        $("#Submit-Profile-ViewDetail").show('fast');
+        $("#Submit-Profile-detail").html("");
+        $("#Submit-Profile-detail").html(JSON.stringify(editProfileModel.ProfileToEdit,null,2));
+        $("#Submit-Profile-detail-download").off('click').on('click',function() {
+            var blob = new Blob([$("#Submit-Profile-detail").html()],{type:'application/json,charset=utf-8;'});
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = JSON.stringify(editProfileModel.ProfileToEdit.name) + ".json";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+        $("#Submit-Profile-detail-back").off('click').on('click',function() {
+            $("#Submit-Profile-ViewDetail").hide();
+            $("#Submit-Profile-detail").html("");
+        });
+    },
+    CreatProfile_ViewYaml:function () {
+        $("#Submit-Profile-ViewDetail").show('fast');
+        $("#Submit-Profile-detail").html("");
+        $("#Submit-Profile-detail").html(jsyaml.dump(editProfileModel.ProfileToEdit));
+        $("#Submit-Profile-detail-download").off('click').on('click',function() {
+            var blob = new Blob([$("#Submit-Profile-detail").html()],{type:'yaml,charset=utf-8;'});
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = JSON.stringify(editProfileModel.ProfileToEdit.name) + ".yaml";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+        $("#Submit-Profile-detail-back").off('click').on('click',function() {
+            $("#Submit-Profile-ViewDetail").hide();
+            $("#Submit-Profile-detail").html("");
+        });
+    },
+    UpLoadProfile:function () {
+        $.ajax({
+            url: '/core-metadata/api/v1/deviceprofile',
+            type: "POST",
+            data:JSON.stringify(editProfileModel.ProfileToEdit),
+            success: function(){
+                manageProfileModule.getMatchedDeviceResourceList();
+                bootbox.alert({
+                    message: "commit success!",
+                    className: 'red-green-buttons'
+                });
+            },
+            statusCode: {
+                400: function(){
+                    bootbox.alert({
+                        title: "Error",
+                        message: "400错误!",
+                        className: 'red-green-buttons'
+                    });
+                },
+                409: function(){
+                    bootbox.alert({
+                        title: "Error",
+                        message: "409错误! 仔细检查，是否重复定义了一个已经存在的配置文件?",
+                        className: 'red-green-buttons'
+                    });
+                },
+                500: function(){
+                    bootbox.alert({
+                        title: "Error",
+                        message: "500错误!",
+                        className: 'red-green-buttons'
+                    });
+                }
+            }
+        });
+    }
 };
+
+
+function deleteEmptyProperty(object){
+    for (var i in object) {
+        var value = object[i];
+        if (typeof value === 'object') {
+            if (Array.isArray(value)) {
+                if (value.length == 0) {
+                    delete object[i];
+                    continue;
+                }
+            }
+            this.deleteEmptyProperty(value);
+            if (this.isEmpty(value)) {
+                delete object[i];
+            }
+        } else {
+            if (value === '' || value === null || value === undefined) {
+                delete object[i];
+            } else {
+                var reg=/^[0-9]+.?[0-9]*$/;
+                if(reg.test(value)) value = '"' + value + '"';
+            }
+        }
+    }
+}
+function isEmpty(object) {
+    for (var name in object) {
+        return false;
+    }
+    return true;
+}
