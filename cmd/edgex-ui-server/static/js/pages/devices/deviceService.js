@@ -26,9 +26,10 @@ orgEdgexFoundry.deviceService = (function(){
 	function DeviceService() {
 		this.deviceServiceListCache = [];
 		this.selectedRow = null;
-    this.deviceProtocols = null;
+    	this.deviceProtocols = null;
+    	this.deviceToEdit = null;
 
-    this.selectedDeviceServiceName = null;
+    	this.selectedDeviceServiceName = null;
 
 	}
 
@@ -165,7 +166,64 @@ orgEdgexFoundry.deviceService = (function(){
 
   }
 
-  DeviceService.prototype.addAutoEventField = function(){}
+  //初始化AutoEvent表格
+  DeviceService.prototype.initAutoevent = function(){
+	  $(".device-Detail").show('fast');
+	  $("#autoevent-body-form").empty();
+	  var resourceList = [];
+	  var obj = document.getElementById("device-autoevent-Resource");
+	  obj.options.length=0;
+	  $.each(deviceService.deviceToEdit.profile.deviceResources,function (index,resource) {
+		if (resource.properties.value.readWrite != "W"){
+			resourceList.push(resource.name);
+			obj.options.add(new Option(resource.name,resource.name));
+		}
+	  });
+	  $.each(deviceService.deviceToEdit.profile.coreCommands,function (index,command) {
+		  if (command.put != undefined && command.put != null && JSON.stringify(command.put) != "{}"){
+			  resourceList.push(command.name);
+			  obj.options.add(new Option(command.name,command.name));
+		  }
+	  });
+	  deviceService.addAutoEvent(resourceList);
+  }
+  //增加AutoEvent项目
+  DeviceService.prototype.addAutoEvent = function(resourceList){
+  	var autoeventList = {};
+  	$("#add-autoevent").off('click').on('click',function() {
+  		var autoeventElement = {}, resourceName = $("#device-autoevent-Resource").val();
+		autoeventElement["resource"] = $("#device-autoevent-Resource").val();
+		if ($("#device-autoevent-Frequency-value").val() != "") autoeventElement["frequency"] = $("#device-autoevent-Frequency-value").val()+$("#device-autoevent-Frequency-unit").val();
+		autoeventElement["onChange"] = $("#device-autoevent-Onchange").val() == "false" ? false : true;;
+		autoeventList[$("#device-autoevent-Resource").val()] = autoeventElement;
+		deviceService.getAutoEventForm(autoeventList);
+		$("#device-autoevent-Resource > option:selected").remove()
+	});
+
+
+  }
+  //刷新AutoEvent表格
+  DeviceService.prototype.getAutoEventForm = function(autoeventList){
+  	$("#autoevent-body-form").empty();
+  	deviceService.deviceToEdit.autoEvents = [];
+  	$.each(autoeventList,function (name,autoeventElement) {
+		deviceService.deviceToEdit.autoEvents.push(autoeventElement);
+		var autoeventFormElement = '<tr>';
+		autoeventFormElement += '<td>Resource</td>' + '<td>' + '<input class="form-control" style="background: white" readonly="readonly" value='+autoeventElement.resource+'>' + '</td>';
+		autoeventFormElement += '<td>Frequency</td>';
+		autoeventFormElement += '<td>' + '<input class="form-control" style="background: white" readonly="readonly" value='+autoeventElement.frequency+'>' + '</td>';
+		autoeventFormElement += '<td>onChange</td>' + '<td>' + '<input class="form-control" style="background: white" readonly="readonly" value='+autoeventElement.onChange+'>' + '</td>';
+		autoeventFormElement +=	'<td>' + '<div class="edgexIconBtn delAutoevent" content='+autoeventElement.resource+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true"></i>' + '</div>' + '</td>';
+		autoeventFormElement += '</tr>';
+		$("#autoevent-body-form").append(autoeventFormElement);
+	})
+	$(".delAutoevent").off('click').on('click',function() {
+		var name = $(this).attr("content");
+		delete autoeventList[name];
+		deviceService.getAutoEventForm(autoeventList);
+		document.getElementById("device-autoevent-Resource").options.add(new Option(name,name));
+	});
+  }
 
 	// =======device service start
 	DeviceService.prototype.loadDeviceService = function(){
@@ -324,39 +382,128 @@ orgEdgexFoundry.deviceService = (function(){
 		});
 	};
 
-	/*
+
   	DeviceService.prototype.editDevice = function(device){
     	deviceService.resetProtocol();
     	deviceService.setProtocol(device.protocols);
 
 		$(".edgexfoundry-device-update-or-add .add-device").hide();
 		$(".edgexfoundry-device-update-or-add .update-device").show();
+		deviceService.deviceToEdit = device;
 
-		$(".edgexfoundry-device-form input[name='deviceServiceName']").val(device.service.name);
+		$(".edgexfoundry-device-form input").removeAttr("disabled","disabled");
 		$(".edgexfoundry-device-form input[name='deviceID']").val(device.id);
 		$(".edgexfoundry-device-form input[name='deviceName']").val(device.name);
 		$(".edgexfoundry-device-form input[name='deviceDescription']").val(device.description);
-		$(".edgexfoundry-device-form input[name='deviceLabels']").val(device.service.labels.join(','));
+		$(".edgexfoundry-device-form input[name='deviceLabels']").val(device.labels.join(','));
 		$(".edgexfoundry-device-form input[name='deviceAdminState']").val(device.adminState);
 		$(".edgexfoundry-device-form input[name='deviceOperatingState']").val(device.operatingState);
-		$(".edgexfoundry-device-form input[name='deviceProfile']").val(device.profile.name);
+		$(".edgexfoundry-device-form input").attr("disabled","disabled");
 
 		$("#edgexfoundry-device-list").hide();
 		$("#edgexfoundry-device-main .edgexfoundry-device-update-or-add").show();
+		$("#DeviceService_and_Profile").hide();
+		$(".device-Detail").hide();
+		$("#device-Detail-basicInfo").show('fast');
 	}
-	 */
 
-	/*
+
 	DeviceService.prototype.addDevice = function(){
-    deviceService.resetProtocol();
-    deviceService.addProtocol();
+		$(".device-Detail").hide();
+		$("#DeviceService_and_Profile").show('fast');
+		deviceService.deviceToEdit ={};
+		deviceService.selectServiceForNewDevice();
+    	deviceService.resetProtocol();
+    	deviceService.addProtocol();
 		$("#edgexfoundry-device-list").hide();
 		$("#edgexfoundry-device-main .edgexfoundry-device-update-or-add").show();
 		$(".edgexfoundry-device-update-or-add .update-device").hide();
 		$(".edgexfoundry-device-update-or-add .add-device").show();
 		$(".edgexfoundry-device-form")[0].reset();
 	}
-	 */
+	DeviceService.prototype.selectServiceForNewDevice = function(){
+		var ServiceList = {};
+		var obj = document.getElementById("deviceServiceName");
+		obj.options.length=0;
+		obj.options.add(new Option("","",true,false));
+		obj.options[0].style='display: none';
+		$.ajax({
+			url: '/core-metadata/api/v1/deviceservice',
+			type: 'GET',
+			success: function(data){
+				$.each(data,function (index,service) {
+					ServiceList[service.name]=service;
+					obj.options.add(new Option(service.name,service.name))
+				})
+			},
+		});
+		obj.onchange = function () {
+			$(".device-Detail").hide();
+			deviceService.deviceToEdit["service"] = ServiceList[obj.value];
+			deviceService.SetProfileForNewDevice(deviceService.matchProfileForService(ServiceList[obj.value]))
+		}
+	}
+	DeviceService.prototype.matchProfileForService = function(selectedDeviceService){
+		var matchedProfileList = {}, CurrentdeviceResourceList = JSON.parse(selectedDeviceService.labels[0]).deviceResources;
+		$.ajax({
+			url: '/core-metadata/api/v1/deviceprofile',
+			type: 'GET',
+			cache : false,
+			async : false,
+			success: function (data) {
+				$.each(data,function (index,profile) {
+					var flag = false;
+					$.each(profile.deviceResources,function (index,deviceResource) {//遍历这个配置文件中的devicResource进行比对
+						flag = false;
+						$.each(CurrentdeviceResourceList, function (index,CurrentdeviceResource) {//和服务可以提供的每一个devicResource比对
+							if(deviceService.matchDeviceResource(deviceResource, CurrentdeviceResource)){
+								flag = true;
+								return false;
+							}
+						});
+						if(flag == false){
+							return false;
+						};
+					});
+					if(flag == false){
+						return true;
+					};
+					matchedProfileList[profile.name]=profile;
+				});
+			}
+		});
+		return matchedProfileList;
+	}
+	DeviceService.prototype.matchDeviceResource = function(profile,service){//判断DeviceResource是否匹配
+		if(profile.name != service.name) return false;//名称
+
+		else if(profile.properties.value.type != service.value.type) return false;//值类型
+
+		else if(profile.properties.units.type != service.units.type) return false;//单位类型
+
+		else if((profile.properties.value.readWrite == "R" && service.value.readWrite.indexOf("W") != -1) ||//值读写
+			(profile.properties.value.readWrite == "W" && service.value.readWrite.indexOf("R") != -1) ) return false;
+
+		else if((profile.properties.units.readWrite == "R" && service.units.readWrite.indexOf("W") != -1) ||//单位读写
+			(profile.properties.units.readWrite == "W" && service.units.readWrite.indexOf("R") != -1) ) return false;
+		return true;
+	}
+
+	DeviceService.prototype.SetProfileForNewDevice = function(profileList){
+		var obj = document.getElementById("deviceProfile");
+		obj.options.length=0;
+		obj.options.add(new Option("","",true,false));
+		obj.options[0].style='display: none';
+		$.each(profileList,function (name) {
+			obj.options.add(new Option(name,name))
+		})
+		obj.onchange = function () {
+			deviceService.deviceToEdit["profile"] = profileList[obj.value];
+			$(".edgexfoundry-device-form input").removeAttr("disabled","disabled");
+			deviceService.initAutoevent();
+		}
+	}
+
 
 	DeviceService.prototype.cancelAddOrUpdateDevice = function(){
 		$("#edgexfoundry-device-list").show();
@@ -370,57 +517,49 @@ orgEdgexFoundry.deviceService = (function(){
 		}else{
 			method = "PUT"
 		}
-		//debugger
-		var device = {
-			service: {
-				name: $(".edgexfoundry-device-form input[name='deviceServiceName']").val().trim(),
-			},
-			id: $(".edgexfoundry-device-form input[name='deviceID']").val(),
-			name: $(".edgexfoundry-device-form input[name='deviceName']").val().trim(),
-			description: $(".edgexfoundry-device-form input[name='deviceDescription']").val(),
-			labels: $(".edgexfoundry-device-form input[name='deviceLabels']").val().split(','),
-			adminState: $(".edgexfoundry-device-form select[name='deviceAdminState']").val(),
-			operatingState: $(".edgexfoundry-device-form select[name='deviceOperatingState']").val(),
-			profile: {
-				name: $(".edgexfoundry-device-form input[name='deviceProfile']").val().trim(),
-			}
-	}
-    device['protocols'] = deviceService.getProtocolFormValue();
-    $.ajax({
-      url: '/core-metadata/api/v1/device',
-      type: method,
-      data:JSON.stringify(device),
-      success: function(){
-        deviceService.refreshDevice();
-        bootbox.alert({
-          message: "commit success!",
-          className: 'red-green-buttons'
-        });
-      },
-      statusCode: {
-        400: function(){
-          bootbox.alert({
-            title: "Error",
-            message: "the request is malformed or unparsable or if an associated object (Addressable, Profile, Service) cannot be found with the id or name provided !",
-            className: 'red-green-buttons'
-          });
-        },
-        409: function(){
-          bootbox.alert({
-            title: "Error",
-            message: "the name is determined to not be unique with regard to others !",
-            className: 'red-green-buttons'
-          });
-        },
-        500: function(){
-          bootbox.alert({
-            title: "Error",
-            message: "unknown or unanticipated issues !",
-            className: 'red-green-buttons'
-          });
-        }
-      }
-    });
+		deviceService.deviceToEdit.id=$(".edgexfoundry-device-form input[name='deviceID']").val();
+		deviceService.deviceToEdit.name = $(".edgexfoundry-device-form input[name='deviceName']").val().trim();
+		deviceService.deviceToEdit.description = $(".edgexfoundry-device-form input[name='deviceDescription']").val();
+		deviceService.deviceToEdit.labels = $(".edgexfoundry-device-form input[name='deviceLabels']").val().split(',');
+		deviceService.deviceToEdit.adminState = $(".edgexfoundry-device-form select[name='deviceAdminState']").val();
+		deviceService.deviceToEdit.operatingState = $(".edgexfoundry-device-form select[name='deviceOperatingState']").val();
+		deviceService.deviceToEdit['protocols'] = deviceService.getProtocolFormValue();
+		console.log(deviceService.deviceToEdit);
+    	$.ajax({
+      		url: '/core-metadata/api/v1/device',
+      		type: method,
+      		data:JSON.stringify(deviceService.deviceToEdit),
+      		success: function(){
+      			deviceService.refreshDevice();
+        		bootbox.alert({
+          			message: "commit success!",
+          			className: 'red-green-buttons'
+        		});
+      		},
+      		statusCode: {
+        		400: function(){
+        			bootbox.alert({
+            			title: "Error",
+            			message: "the request is malformed or unparsable or if an associated object (Addressable, Profile, Service) cannot be found with the id or name provided !",
+            			className: 'red-green-buttons'
+          			});
+        		},
+        		409: function(){
+          			bootbox.alert({
+            			title: "Error",
+            			message: "the name is determined to not be unique with regard to others !",
+            			className: 'red-green-buttons'
+          			});
+          		},
+        		500: function(){
+          			bootbox.alert({
+            			title: "Error",
+            			message: "unknown or unanticipated issues !",
+            			className: 'red-green-buttons'
+          			});
+        		}
+      		}
+    	});
 	},
 
 	DeviceService.prototype.deleteDevice = function(device){

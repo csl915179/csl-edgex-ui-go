@@ -66,7 +66,7 @@ var manageProfileModule ={
     },
     getMatchedDeviceResourceList:function(){//找出可以匹配的配置文件列表
         var profilelist;
-        matchedProfileList = [];
+        var matchedProfileList = [];
         $.ajax({
             url: '/core-metadata/api/v1/deviceprofile',
             type: 'GET',
