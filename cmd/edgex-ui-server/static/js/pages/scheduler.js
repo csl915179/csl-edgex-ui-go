@@ -233,7 +233,7 @@ orgEdgexFoundry.supportScheduler = (function(){
             url: '/support-scheduler/api/v1/interval/' + schedulerId,
             type: 'DELETE',
             success: function(){
-              scheduler.loadSchedulerList();
+              application.loadSchedulerList();
               bootbox.alert({
                 message: "delete success.",
                 className: 'red-green-buttons'

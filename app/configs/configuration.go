@@ -52,6 +52,9 @@ type Scheme struct {
 	User    string
 	Gateway string
 	Device	string
+	Application string
+	Task string
+	Resource string
 }
 
 type Database struct {

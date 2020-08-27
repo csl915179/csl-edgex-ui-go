@@ -650,6 +650,7 @@ orgEdgexFoundry.deviceService = (function(){
 				var p = $('.edgexfoundry-device-command table tbody input[name="' + param + command.id + '"]').val();
 				paramBody[param] = p;
 			});
+			console.log(cmdUrl)
 			$.ajax({
 				url:cmdUrl,
 				type:'PUT',

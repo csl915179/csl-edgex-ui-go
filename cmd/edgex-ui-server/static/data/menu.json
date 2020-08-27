@@ -42,5 +42,10 @@
 		"url": "/pages/profile.html",
 		"icon":"",
 		"children":[]
+	},{
+		"title":"应用管理",
+		"url": "/pages/appmanage.html",
+		"icon":"",
+		"children":[]
 	}
 ]

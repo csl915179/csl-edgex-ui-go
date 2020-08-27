@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+        <link rel="stylesheet" href="/css/appmanage.css">
+        <script type="text/javascript" src="/js/pages/appmanage.js"></script>
+    </head>
+    <body>
+    <!--resource section start-->
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title">LocalResource</h3>
+        </div>
+        <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+            <div class="panel-heading" style="padding:5px 2px;">
+                <div class="edgexIconBtn">
+                    <i class="fa fa-plus fa-lg fa-fw" aria-hidden="true" onclick="orgEdgexFoundry.supportApplication.addResourceBtn()"></i>
+                </div>
+                <div class="edgexIconBtn">
+                    <i class="fa fa-refresh fa-lg fa-fw" aria-hidden="true" onclick="orgEdgexFoundry.supportApplication.refreshResourceListBtn()"></i>
+                </div>
+                <!-- <div class="edgexIconBtn">
+                  <input type="text" name="schedulerSearch" value=""><i class="fa fa-search fa-lg fa-fw" aria-hidden="true"></i>
+                </div> -->
+            </div>
+        </div>
+
+        <div class="panel-body" style="padding:0;">
+            <div id="edgex-support-resource-list">
+                <table class="table  table-responsive table-hover table-striped">
+                    <thead>
+                    <tr class="active">
+                        <th></th>
+                        <th>ID</th>
+                        <th>CPU资源(GHz)</th>
+                        <th>存储空间(MB)</th>
+                        <th>上行速率(Mbps)</th>
+                        <th>下行速率(Mbps)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot style="display:none;">
+                    <tr align="center">
+                        <td colspan=13>No Data.</td>
+                    </tr>
+                    </tfoot>
+                </table>
+                <button id="edgex-sc" class="btn btn-success " type="button" style="float: right", onclick="orgEdgexFoundry.supportApplication.scheduleBtn()">进行任务调度</button>
+            </div>
+        </div>
+        <div id="edgex-support-resource-add" style="display:none;" class="panel panel-success">
+            <div class="panel-heading">
+                <h3 class="panel-title">Add or Update Resource</h3>
+            </div>
+            <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                <div class="panel-heading" style="padding:5px 2px;">
+                    <div class="edgexIconBtn add-resource"  onclick="orgEdgexFoundry.supportApplication.commitResourceBtn('new');">
+                        <i class="fa fa-check fa-lg" aria-hidden="true"></i>
+                    </div>
+                    <div class="edgexIconBtn update-resource" style="display:none;" onclick="orgEdgexFoundry.supportApplication.commitResourceBtn();">
+                        <i class="fa fa-check fa-lg" aria-hidden="true"></i>
+                    </div>
+                    <div class="edgexIconBtn" onclick="orgEdgexFoundry.supportApplication.cancelAddResourceBtn()">
+                        <i class="fa fa-close fa-lg" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-body" style="padding:0;">
+                <form class="edgex-support-resource-form">
+                    <fieldset>
+                        <legend>Resource</legend>
+                        <div class="form-group">
+                            <input type="hidden" class="form-control" name="ResourceId">
+                        </div>
+                        <div class="form-group">
+                            <label for="CpuResource">CPU资源(GHz)</label>
+                            <input type="text" class="form-control" name="CpuResource" placeholder="CpuResource">
+                        </div>
+                        <div class="form-group">
+                            <label for="Storage">存储空间(MB)</label>
+                            <input type="text" class="form-control" name="Storage" placeholder="Storage">
+                        </div>
+                        <div class="form-group">
+                            <label for="UploadRate">上行速率(Mbps)</label>
+                            <input type="text" class="form-control" name="UploadRate" placeholder="UploadRate">
+                        </div>
+                        <div class="form-group">
+                            <label for="DownloadRate">下行速率(Mbps)</label>
+                            <input type="text" class="form-control" name="DownloadRate" placeholder="DownloadRate">
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!--application section start-->
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title">Application</h3>
+        </div>
+        <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+            <div class="panel-heading" style="padding:5px 2px;">
+                <div class="edgexIconBtn">
+                    <i class="fa fa-plus fa-lg fa-fw" aria-hidden="true" onclick="orgEdgexFoundry.supportApplication.addApplicationBtn()"></i>
+                </div>
+                <div class="edgexIconBtn">
+                    <i class="fa fa-refresh fa-lg fa-fw" aria-hidden="true" onclick="orgEdgexFoundry.supportApplication.refreshApplicationListBtn()"></i>
+                </div>
+                <!-- <div class="edgexIconBtn">
+                  <input type="text" name="schedulerSearch" value=""><i class="fa fa-search fa-lg fa-fw" aria-hidden="true"></i>
+                </div> -->
+            </div>
+        </div>
+
+        <div class="panel-body" style="padding:0;">
+            <div id="edgex-support-application-list">
+                <table class="table  table-responsive table-hover table-striped">
+                    <thead>
+                    <tr class="active">
+                        <th>删除</th>
+                        <th>编辑</th>
+                        <th>查看Task列表</th>
+                        <th>#</th>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>描述</th>
+                        <th>任务数</th>
+                        <th>能耗限制(J)</th>
+                        <th>时延限制(s)</th>
+                        <th>etc.</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot style="display:none;">
+                    <tr align="center">
+                        <td colspan=13>No Data.</td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <div id="edgex-support-application-add-or-update" >
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Add or Update Application</h3>
+                </div>
+                <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                    <div class="panel-heading" style="padding:5px 2px;">
+                        <div class="edgexIconBtn add-application"  onclick="orgEdgexFoundry.supportApplication.commitApplicationBtn('new');">
+                            <i class="fa fa-check fa-lg" aria-hidden="true"></i>
+                        </div>
+                        <div class="edgexIconBtn update-application" style="display:none;" onclick="orgEdgexFoundry.supportApplication.commitApplicationBtn();">
+                            <i class="fa fa-check fa-lg" aria-hidden="true"></i>
+                        </div>
+                        <div class="edgexIconBtn" onclick="orgEdgexFoundry.supportApplication.cancelAddApplicationBtn()">
+                            <i class="fa fa-close fa-lg" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-body" style="padding:0;">
+                    <form class="edgex-support-application-form">
+                        <fieldset>
+                            <legend>Application</legend>
+                            <div class="form-group">
+                                <input type="hidden" class="form-control" name="AppId">
+                            </div>
+                            <div class="form-group">
+                                <label for="AppName">应用名称</label>
+                                <input type="text" class="form-control" name="AppName" placeholder="AppName">
+                            </div>
+                            <div class="form-group">
+                                <label for="AppDesc">应用描述</label>
+                                <input type="text" class="form-control" name="AppDesc" placeholder="AppDesc">
+                            </div>
+                            <div class="form-group">
+                                <label for="EnergyLimit">能耗限制(J)</label>
+                                <input type="text" class="form-control" name="EnergyLimit" placeholder="EnergyLimit">
+                            </div>
+                            <div class="form-group">
+                                <label for="TimeLimit">时延限制(s)</label>
+                                <input type="text" class="form-control" name="TimeLimit" placeholder="TimeLimit">
+                            </div>
+                            <div class="form-group">
+                                <label for="etc">其他信息</label>
+                                <input type="text" class="form-control" name="etc" placeholder="etc">
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--application section end-->
+    <!--task section start-->
+    <div class="edgex-support-task-section">
+        <!--task list section start-->
+        <div id="edgex-support-task-list-main" style="display: none">
+            <div class="panel panel-success" style="position:relative;">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        Task
+                        <button onclick="orgEdgexFoundry.supportApplication.hideTaskList()" type="button" class="close pull-right" aria-label="Close"><span style="color:#333!important;" aria-hidden="true">&times;</span></button>
+                    </h3>
+                </div>
+                <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                    <div class="panel-heading" style="padding:5px 2px;">
+                        <div id="edgex-support-application-info" style="margin-bottom: 20px">
+                            <h><b>当前ApplicationID:</b></h>
+                            &nbsp
+                            <span id="edgex-support-pid"/>
+                        </div>
+                        <div class="edgexIconBtn" onclick="orgEdgexFoundry.supportApplication.addTaskBtn()">
+                            <i class="fa fa-plus fa-lg fa-fw" aria-hidden="true"></i>
+                        </div>
+
+                        <div class="edgexIconBtn" onclick="orgEdgexFoundry.supportApplication.refreshTaskListBtn()">
+                            <i class="fa fa-refresh fa-lg fa-fw" aria-hidden="true"></i>
+                        </div>
+                        <!-- <div class="edgexIconBtn">
+                          <i class="fa fa-search fa-lg fa-fw" aria-hidden="true"></i>
+                        </div> -->
+                    </div>
+                </div>
+                <div class="panel-body" style="padding:0;">
+                    <div id="edgex-support-task-list">
+                        <table class="table table-responsive table-hover table-striped">
+                            <thead>
+                            <tr class="active">
+                                <th></th>
+                                <th></th>
+                                <th>#</th>
+                                <th>ID</th>
+                                <th>名称</th>
+                                <th>描述</th>
+                                <th>CPU需求(G cycles)</th>
+                                <th>数据量(MB)</th>
+                                <th>输入数据量(MB)</th>
+                                <th>输出数据量(MB)</th>
+                                <th>执行限制</th>
+                                <th>当前状态</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot style="display:none;">
+                            <tr align="center">
+                                <td colspan=13>No Data.</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--task list section end-->
+
+        <!--add or update task section start-->
+        <div id="edgex-support-task-add" style="display:none;" class="panel panel-success">
+            <div class="panel-heading">
+                <h3 class="panel-title">Add or Update Task</h3>
+            </div>
+            <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                <div class="panel-heading" style="padding:5px 2px;">
+                    <div class="edgexIconBtn add-task"  onclick="orgEdgexFoundry.supportApplication.commitTaskBtn('new');">
+                        <i class="fa fa-check fa-lg" aria-hidden="true"></i>
+                    </div>
+                    <div class="edgexIconBtn update-task" style="display:none;" onclick="orgEdgexFoundry.supportApplication.commitTaskBtn();">
+                        <i class="fa fa-check fa-lg" aria-hidden="true"></i>
+                    </div>
+                    <div class="edgexIconBtn" onclick="orgEdgexFoundry.supportApplication.cancelAddTaskBtn()">
+                        <i class="fa fa-close fa-lg" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-body" style="padding:0;">
+                <form class="edgex-support-task-form">
+                    <fieldset>
+                        <legend>Application</legend>
+                        <div class="form-group">
+                            <label for="ApplicationId">ApplicationId</label>
+                            <input type="text" class="form-control" name="ApplicationId" disabled />
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Task</legend>
+                        <div class="form-group">
+                            <input type="hidden" class="form-control" name="TaskId">
+                        </div>
+                        <div class="form-group">
+                            <label for="TaskName">名称</label>
+                            <input type="text" class="form-control" name="TaskName" placeholder="TaskName">
+                        </div>
+                        <div class="form-group">
+                            <label for="TaskDesc">描述</label>
+                            <input type="text" class="form-control" name="TaskDesc" placeholder="TaskDesc">
+                        </div>
+                        <div class="form-group">
+                            <label for="CpuRequire">CPU需求(G cycles)</label>
+                            <input type="text" class="form-control" name="CpuRequire" placeholder="CpuRequire">
+                        </div>
+                        <div class="form-group">
+                            <label for="DataSize">数据量(MB)</label>
+                            <input type="text" class="form-control" name="DataSize" placeholder="DataSize">
+                        </div>
+                        <div class="form-group">
+                            <label for="DataIn">输入数据量(MB)</label>
+                            <input type="text" class="form-control" name="DataIn" placeholder="DataIn">
+                        </div>
+                        <div class="form-group">
+                            <label for="DataOut">输出数据量(MB)</label>
+                            <input type="text" class="form-control" name="DataOut" placeholder="DataOut">
+                        </div>
+                        <div class="form-group">
+                            <label for="ExecLimit">执行限制</label>
+                            <select  name="ExecLimit" class="form-control">
+                                <option value="Local">本地执行</option>
+                                <option value="Remote">远端执行</option>
+                                <option value="Local/Remote">本地/远端执行</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="State">当前状态</label>
+                            <input type="text" class="form-control" name="State" placeholder="等待执行" disabled>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+        <!--add or update task section end-->
+
+        <!--schedule section start-->
+        <!--
+        <div class="edgex-support-task-section">
+            <div id="edgex-support-schedule">
+                <div class="panel panel-success" style="position:relative;">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Schedule</h3>
+                    </div>
+                    <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                        <div class="form-group" style="margin-bottom: 20px">
+                            <br>
+                            <label for="DeviceId">DeviceId:</label>
+                            <input id="edgex-support-device-id" class="form-control"  style="width: 30%;display: inline" name="DeviceId" placeholder="请从deviceService中选择接受数据的device，将id复制到此处！">
+                            <button id="edgex-gd" class="btn btn-success " type="button" style="display: inline" onclick="orgEdgexFoundry.supportApplication.getDeviceBtn()">获取设备信息</button>
+                        </div>
+                        <div id="edgex-support-device-info" class="form-group" style="margin-bottom: 20px">
+                            <br>
+                            <label for="TaskUrl">Cmd_url:</label>
+                            <input id="edgex-support-device-url" class="form-control"  style="width: 30%;display: inline" name="TaskUrl" disabled>
+                            <button id="edgex-sc" class="btn btn-success " type="button" style="display: inline" onclick="orgEdgexFoundry.supportApplication.scheduleBtn()">进行任务调度</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+         -->
+    </body>
+</html>
+

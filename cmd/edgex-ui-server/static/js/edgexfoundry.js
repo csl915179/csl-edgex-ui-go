@@ -25,6 +25,8 @@ function EdgexFoundry(){
   this.supportRuleEngine = null;
   this.deviceService = null;
   this.utils = null;
+  //应用管理
+    this.supportApplication = null;
 }
 
 EdgexFoundry.prototype = {

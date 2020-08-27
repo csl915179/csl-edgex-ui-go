@@ -30,6 +30,7 @@ import (
 	"github.com/edgexfoundry/edgex-ui-go/internal/pkg/usage"
 )
 
+
 func main() {
 
 	var confFilePath string
@@ -58,6 +59,7 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
+
 	log.Println("EdgeX UI Server Listen At " + server.Addr)
 	log.Fatal(server.ListenAndServe())
 

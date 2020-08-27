@@ -42,6 +42,24 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/profile/download", controller.DowloadProfile).Methods(http.MethodGet)
 	//s.HandleFunc("/profile/ls", controller.FindProfileList_by_Service).Methods(http.MethodGet)
 
+	//application manage
+	s.HandleFunc("/application", controller.QueryAllApplication).Methods(http.MethodGet)
+	s.HandleFunc("/application", controller.AddApplication).Methods(http.MethodPost)
+	s.HandleFunc("/application", controller.UpdateApplication).Methods(http.MethodPut)
+	s.HandleFunc("/application/{id}", controller.RemoveApplication).Methods(http.MethodDelete)
+
+	// task manage
+	s.HandleFunc("/task/{app_id}", controller.QueryAllTask).Methods(http.MethodGet)
+	s.HandleFunc("/task", controller.AddTask).Methods(http.MethodPost)
+	s.HandleFunc("/task", controller.UpdateTask).Methods(http.MethodPut)
+	s.HandleFunc("/task/{id},{pid}", controller.RemoveTask).Methods(http.MethodDelete)
+
+	s.HandleFunc("/schedule", controller.Schedule).Methods(http.MethodGet)
+	s.HandleFunc("/schedule", controller.ScheduleConfirm).Methods(http.MethodPut)
+
+	s.HandleFunc("/resource",controller.QueryAllResource).Methods(http.MethodGet)
+	s.HandleFunc("/resource",controller.UpdateResource).Methods(http.MethodPut)
+	s.HandleFunc("/resource",controller.AddResource).Methods(http.MethodPost)
 
 	s1 := r.PathPrefix("").Subrouter()
 	s1.HandleFunc("/ws", component.WebSocketHandler)

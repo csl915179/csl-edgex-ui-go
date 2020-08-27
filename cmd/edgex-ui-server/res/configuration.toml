@@ -1,6 +1,6 @@
 [Service]
 Host = "localhost"
-Port = 4000
+Port = 4001
 Labels = []
 OpenMsg = "edgeX ui started"
 #StaticResourcesPath = "./static"
@@ -11,12 +11,15 @@ StaticResourcesPath = "./static"
 Host = "localhost"
 Name = "edgex-ui-go"
 Port = 27017
-Username = "edgex-ui-go"
-Password = "edgex-ui-go"
+Username = "su"
+Password = "su"
   [Database.Scheme]
   User = "user"
   Gateway = "gateway"
   Device = "device"
+  Application = "application"
+  Task = "task"
+  Resource = "resource"
 [DynamicProxy]
 CoreDataPath     = "/core-data"
 CoreDataPort     = "48080"
