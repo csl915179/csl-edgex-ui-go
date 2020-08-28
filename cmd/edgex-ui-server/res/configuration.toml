@@ -16,7 +16,6 @@ Password = "su"
   [Database.Scheme]
   User = "user"
   Gateway = "gateway"
-  Device = "device"
   Application = "application"
   Task = "task"
   Resource = "resource"
