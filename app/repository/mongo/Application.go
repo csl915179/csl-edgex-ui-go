@@ -30,7 +30,7 @@ func (ar *ApplicationMongoRepository) Delete(id string) error {
 
 	//级联删除  将任务先删除
 	coll := ds.S.DB(database).C(taskScheme)
-	_, err := coll.RemoveAll(bson.M{"_pid": id})
+	_, err := coll.RemoveAll(bson.M{"appid": id})
 	if err != nil {
 		log.Println("Delete application failed!" + err.Error())
 		return err
@@ -66,7 +66,7 @@ func (ar *ApplicationMongoRepository) Select(id string) (domain.Application, err
 	coll := ds.S.DB(database).C(applicationScheme)
 
 	result := domain.Application{}
-	err := coll.Find(nil).One(&result)
+	err := coll.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&result)
 	if err != nil {
 		log.Println("Select failed!")
 		return result, err

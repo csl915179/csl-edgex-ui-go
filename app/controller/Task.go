@@ -19,16 +19,22 @@ func AddTask(w http.ResponseWriter, r *http.Request) {
 		log.Print("err")
 		return
 	}
-
 	repository.GetTaskRepos().Insert(&t)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		log.Print("err")
+		return
+	}
+	return
 }
 
 func QueryAllTask(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	vars := mux.Vars(r)
-	pid := vars["app_id"]
+	appid := vars["appid"]
+
 	w.Header().Set(common.ContentTypeKey, common.JsonContentType)
-	taskList, err := repository.GetTaskRepos().SelectAll(pid)
+	taskList, err := repository.GetTaskRepos().SelectAll(appid)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return
@@ -42,8 +48,7 @@ func RemoveTask(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	vars := mux.Vars(r)
 	id := vars["id"]
-	pid := vars["pid"]
-	err := repository.GetTaskRepos().Delete(pid,id)
+	err := repository.GetTaskRepos().Delete(id)
 	if err != nil {
 		http.Error(w, "", http.StatusServiceUnavailable)
 		return
@@ -60,3 +65,16 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	repository.GetTaskRepos().Update(t)
 }
 
+func FindTaskApp(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	vars := mux.Vars(r)
+	id := vars["id"]
+	app,err := repository.GetTaskRepos().FindApp(id)
+	if err != nil {
+		http.Error(w, "", http.StatusServiceUnavailable)
+		return
+	}
+	result, _ := json.Marshal(&app)
+	w.Header().Set(common.ContentTypeKey, common.JsonContentType)
+	w.Write(result)
+}

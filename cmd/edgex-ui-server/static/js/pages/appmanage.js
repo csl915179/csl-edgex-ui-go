@@ -272,17 +272,16 @@ orgEdgexFoundry.supportApplication = (function(){
         $("#edgex-support-task-list-main").hide();
     }
 
-    SupportApplication.prototype.loadTaskList = function (pid) {
+    SupportApplication.prototype.loadTaskList = function (appid) {
+        $("#edgex-support-appid").html(appid);
         $("#edgex-support-task-list-main").show('fast');
         $.ajax({
-            url:'/api/v1/task/'+pid,
+            url:'/api/v1/task/'+appid,
             type:'GET',
             success:function(data){
                 if(!data || data.length == 0){
-                    $("#edgex-support-pid").html("");
                     $("#edgex-support-task-list table tbody").empty();
                     $("#edgex-support-task-list table tfoot").show();
-
                     return
                 }else{
                     $("#edgex-support-task-list table tfoot").hide();
@@ -300,7 +299,7 @@ orgEdgexFoundry.supportApplication = (function(){
     SupportApplication.prototype.renderTaskList = function(data){
         $("#edgex-support-task-list table tbody").empty();
         $.each(data,function(i,v){
-            console.log(v)
+            
             var rowData = "<tr>";
             rowData += '<td class="task-delete-icon"><input type="hidden" value="'+v.id+'"><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
             rowData += '<td class="task-edit-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
@@ -317,9 +316,7 @@ orgEdgexFoundry.supportApplication = (function(){
             rowData += "<td>" +  v.state + "</td>";
             rowData += "</tr>";
             $("#edgex-support-task-list table tbody").append(rowData);
-            $("#edgex-support-pid").html(v.pid);
-
-
+            $("#edgex-support-appid").html(v.appid);
         });
         //delete
         $(".task-delete-icon").on('click',function(){
@@ -332,7 +329,7 @@ orgEdgexFoundry.supportApplication = (function(){
     }
     SupportApplication.prototype.deleteTaskBtn = function(taskId){
 
-        var pid = $("#edgex-support-pid").html();
+        var appid = $("#edgex-support-appid").html();
         bootbox.confirm({
             title: "confirm",
             message: "Are you sure to delete ? ",
@@ -340,10 +337,10 @@ orgEdgexFoundry.supportApplication = (function(){
             callback: function (result) {
                 if(result){
                     $.ajax({
-                        url: '/api/v1/task/' + taskId +','+pid,
+                        url: '/api/v1/task/' + taskId,
                         type: 'DELETE',
                         success: function(){
-                            application.loadTaskList(pid);
+                            application.loadTaskList(appid);
                             bootbox.alert({
                                 message: "delete success.",
                                 className: 'red-green-buttons'
@@ -377,7 +374,7 @@ orgEdgexFoundry.supportApplication = (function(){
         }
 
         //application
-        $("input[name='ApplicationId']").val(task.pid);
+        $("input[name='ApplicationId']").val(task.appid);
 
         //task
         $("#edgex-support-task-add input[name='TaskId']").val(task.id);
@@ -403,7 +400,7 @@ orgEdgexFoundry.supportApplication = (function(){
         $("#edgex-support-task-add").show();
         $("#edgex-support-task-add div.add-task").show();
         $("#edgex-support-task-add div.update-task").hide();
-        $(".edgex-support-task-form input[name='ApplicationId']").val($("#edgex-support-pid").html())
+        $(".edgex-support-task-form input[name='ApplicationId']").val($("#edgex-support-appid").html())
     }
     SupportApplication.prototype.cancelAddTaskBtn = function(){
         $("#edgex-support-task-list-main").show();
@@ -412,11 +409,10 @@ orgEdgexFoundry.supportApplication = (function(){
 
     SupportApplication.prototype.commitTaskBtn = function(type){
         //application
-        var pid = $(".edgex-support-task-form input[name='ApplicationId']").val().trim();
-
+        var appid = $(".edgex-support-task-form input[name='ApplicationId']").val().trim();
         //task
         var task = {
-            pid: pid,
+            appid: appid,
             id: $("input[name='TaskId']").val().trim(),
             name: $("input[name='TaskName']").val().trim(),
             desc: $("input[name='TaskDesc']").val().trim(),
@@ -445,15 +441,13 @@ orgEdgexFoundry.supportApplication = (function(){
         }else{
             method = "PUT"
         }
-        //debugger
-        console.log(method)
         $.ajax({
             url:'/api/v1/task',
             type: method,
             data:JSON.stringify(task),
             success:function(){
-                var pid = $(".edgex-support-task-form input[name='ApplicationId']").val().trim();
-                application.loadTaskList(pid);
+                var appid = task.appid;
+                application.loadTaskList(appid);
                 application.loadResource();
                 bootbox.alert({
                     message: "Commit Task Success!",
@@ -495,8 +489,8 @@ orgEdgexFoundry.supportApplication = (function(){
     }
 
     SupportApplication.prototype.refreshTaskListBtn = function(){
-        var pid = $("#edgex-support-pid").html();
-        application.loadTaskList(pid);
+        var appid = $("#edgex-support-appid").html();
+        application.loadTaskList(appid);
     }
 
 

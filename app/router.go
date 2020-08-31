@@ -49,10 +49,11 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/application/{id}", controller.RemoveApplication).Methods(http.MethodDelete)
 
 	// task manage
-	s.HandleFunc("/task/{app_id}", controller.QueryAllTask).Methods(http.MethodGet)
+	s.HandleFunc("/task/{appid}", controller.QueryAllTask).Methods(http.MethodGet)
 	s.HandleFunc("/task", controller.AddTask).Methods(http.MethodPost)
 	s.HandleFunc("/task", controller.UpdateTask).Methods(http.MethodPut)
-	s.HandleFunc("/task/{id},{pid}", controller.RemoveTask).Methods(http.MethodDelete)
+	s.HandleFunc("/task/{id}", controller.RemoveTask).Methods(http.MethodDelete)
+	s.HandleFunc("/task/findapp/{id}", controller.FindTaskApp).Methods(http.MethodGet)
 
 	s.HandleFunc("/schedule", controller.Schedule).Methods(http.MethodGet)
 	s.HandleFunc("/schedule", controller.ScheduleConfirm).Methods(http.MethodPut)

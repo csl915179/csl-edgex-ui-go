@@ -4,7 +4,6 @@ import (
 	"github.com/edgexfoundry/edgex-ui-go/app/domain"
 	"gopkg.in/mgo.v2/bson"
 	"log"
-	"strconv"
 )
 
 type TaskMongoRepository struct {
@@ -14,56 +13,55 @@ func (ar *TaskMongoRepository) Insert(t *domain.Task) (string, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 
-
+	t.Id = bson.NewObjectId()
 	coll := ds.S.DB(database).C(taskScheme)
 	err := coll.Insert(t)
 	if err != nil {
 		log.Println("Insert task failed !")
 		return "", err
 	}
-	//修改相关任务数
-	pid := t.Pid
+	//修改Application中信息
+	appid := t.AppID
 	coll = ds.S.DB(database).C(applicationScheme)
-
 	result := domain.Application{}
-	err = coll.Find(bson.M{"_id": bson.ObjectIdHex(pid)}).One(&result)
+	err = coll.Find(bson.M{"_id": bson.ObjectIdHex(appid)}).One(&result)
 	if err != nil{
 		log.Println("Select application failed!(2)" + err.Error())
 	}
-	TaskNum,err := strconv.Atoi(result.TaskNum)
-	TaskNum += 1
-	result.TaskNum = strconv.Itoa(TaskNum)
-	log.Print(result)
+	result.TaskList[t.Id.Hex()] = t.Name
 	err = coll.UpdateId(result.Id, &result)
 	if err != nil{
 		log.Println("Update application failed!(2)" + err.Error())
 	}
-
 	return t.Id.Hex(), nil
 }
 
-func (ar *TaskMongoRepository) Delete(pid, id string) error {
+func (ar *TaskMongoRepository) Delete(id string) error {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 
 	coll := ds.S.DB(database).C(taskScheme)
-	err := coll.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
+	task := domain.Task{}
+	err := coll.Find(nil).One(&task)
 	if err != nil {
 		log.Println("Delete task failed!" + err.Error())
 		return err
 	}
-	//修改相关任务数
+	//先删除Task本身
+	err = coll.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
+	if err != nil {
+		log.Println("Delete task failed!" + err.Error())
+		return err
+	}
+	//修改Application中信息
+	appid := task.AppID
 	coll = ds.S.DB(database).C(applicationScheme)
-
-	log.Print(pid)
 	result := domain.Application{}
-	err = coll.Find(bson.M{"_id": bson.ObjectIdHex(pid)}).One(&result)
+	err = coll.Find(bson.M{"_id": bson.ObjectIdHex(appid)}).One(&result)
 	if err != nil{
 		log.Println("Select application failed!(2)" + err.Error())
 	}
-	TaskNum,err := strconv.Atoi(result.TaskNum)
-	TaskNum -= 1
-	result.TaskNum = strconv.Itoa(TaskNum)
+	delete(result.TaskList, task.Id.Hex())
 	err = coll.UpdateId(result.Id, &result)
 	if err != nil{
 		log.Println("Update application failed!(2)" + err.Error())
@@ -71,19 +69,19 @@ func (ar *TaskMongoRepository) Delete(pid, id string) error {
 	return nil
 }
 
-func (ar *TaskMongoRepository) SelectAll(pid string) ([]domain.Task, error) {
-	// 根据pid 查询相关的task
+func (ar *TaskMongoRepository) SelectAll(appid string) ([]domain.Task, error) {
+	// 根据appid 查询相关的task
 	ds := DS.DataStore()
 	defer ds.S.Close()
-
 	coll := ds.S.DB(database).C(taskScheme)
 
 	result := make([]domain.Task, 0)
-	err := coll.Find(bson.M{"_pid": pid}).All(&result)
+	err := coll.Find(bson.M{"appid": appid}).All(&result)
 	if err != nil {
 		log.Println("SelectAll failed!")
 		return nil, err
 	}
+	//log.Println(result)
 	return result, nil
 }
 
@@ -149,4 +147,25 @@ func (ar *TaskMongoRepository) Update(task domain.Task) error {
 	return nil
 }
 
+func (ar *TaskMongoRepository) FindApp(id string) (domain.Application,error){
+	ds := DS.DataStore()
+	defer ds.S.Close()
+	resultApp := domain.Application{}
+	//先查出Task的appid
+	coll := ds.S.DB(database).C(taskScheme)
+	task := domain.Task{}
+	err := coll.Find(nil).One(&task)
+	if err != nil {
+		log.Println("Delete task failed!" + err.Error())
+		return resultApp,err
+	}
+	appid := task.AppID
+	//再去查Application
+	coll = ds.S.DB(database).C(applicationScheme)
+	err = coll.Find(bson.M{"_id": bson.ObjectIdHex(appid)}).One(&resultApp)
+	if err != nil{
+		log.Println("Select application failed!(2)" + err.Error())
+	}
 
+	return resultApp,err
+}

@@ -6,19 +6,19 @@ import (
 
 //应用
 type Application struct {
-	Id          	bson.ObjectId `bson:"_id,omitempty" json:"id"`
-	Name        	string        `json:"name"`
-	Description 	string        `json:"desc"`
-	TaskNum			string        `json:"task_num"`
-	EnergyLimit     string        `json:"energy_limit"`
-	TimeLimit     	string        `json:"time_limit"`
-	Etc				string		  `json:"etc"`
+	Id          	bson.ObjectId 		`bson:"_id,omitempty" json:"id"`
+	Name        	string        		`json:"name"`
+	Description 	string        		`json:"desc"`
+	TaskList		map[string]string	`json:"task_list"`
+	EnergyLimit     string        		`json:"energy_limit"`
+	TimeLimit     	string        		`json:"time_limit"`
+	Etc				string		  		`json:"etc"`
 }
 
 //任务
 type Task struct {
 	Id          bson.ObjectId `bson:"_id,omitempty" json:"id"`
-	Pid         string        `bson:"_pid,omitempty" json:"pid"`
+	AppID		string		  `json:"appid"`
 	Name        string        `json:"name"`
 	Description string        `json:"desc"`
 	CpuRequire  string        `json:"cpu_require"`

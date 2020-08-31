@@ -7,12 +7,13 @@ import (
 
 type TaskRepos interface {
 	Select(id string) (domain.Task, error)
-	SelectAll(pid string) ([]domain.Task, error)
+	SelectAll(appid string) ([]domain.Task, error)
 	SelectAllWait()([]domain.Task, error)
 	Exists(id string) (bool, error)
 	Insert(task *domain.Task) (string, error)
 	Update(task domain.Task) error
-	Delete(pid, id string) error
+	Delete(id string) error
+	FindApp(id string) (domain.Application,error)
 }
 
 func GetTaskRepos() TaskRepos {
