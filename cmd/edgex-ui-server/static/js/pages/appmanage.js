@@ -299,7 +299,7 @@ orgEdgexFoundry.supportApplication = (function(){
     SupportApplication.prototype.renderTaskList = function(data){
         $("#edgex-support-task-list table tbody").empty();
         $.each(data,function(i,v){
-            
+
             var rowData = "<tr>";
             rowData += '<td class="task-delete-icon"><input type="hidden" value="'+v.id+'"><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
             rowData += '<td class="task-edit-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';

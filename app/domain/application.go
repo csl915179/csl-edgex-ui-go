@@ -9,7 +9,7 @@ type Application struct {
 	Id          	bson.ObjectId 		`bson:"_id,omitempty" json:"id"`
 	Name        	string        		`json:"name"`
 	Description 	string        		`json:"desc"`
-	TaskList		map[string]string	`json:"task_list"`
+	TaskNum			int        			`json:"task_num"`
 	EnergyLimit     string        		`json:"energy_limit"`
 	TimeLimit     	string        		`json:"time_limit"`
 	Etc				string		  		`json:"etc"`

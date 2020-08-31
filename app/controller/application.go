@@ -13,6 +13,7 @@ import (
 func AddApplication(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var a domain.Application
+	a.TaskNum = 0
 	err := json.NewDecoder(r.Body).Decode(&a)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
@@ -32,6 +33,7 @@ func UpdateApplication(w http.ResponseWriter, r *http.Request) {
 	}
 	repository.GetApplicationRepos().Update(a)
 }
+
 func QueryAllApplication(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set(common.ContentTypeKey, common.JsonContentType)

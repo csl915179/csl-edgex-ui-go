@@ -13,7 +13,6 @@ func (ar *TaskMongoRepository) Insert(t *domain.Task) (string, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 
-	t.Id = bson.NewObjectId()
 	coll := ds.S.DB(database).C(taskScheme)
 	err := coll.Insert(t)
 	if err != nil {
@@ -28,7 +27,7 @@ func (ar *TaskMongoRepository) Insert(t *domain.Task) (string, error) {
 	if err != nil{
 		log.Println("Select application failed!(2)" + err.Error())
 	}
-	result.TaskList[t.Id.Hex()] = t.Name
+	result.TaskNum += 1
 	err = coll.UpdateId(result.Id, &result)
 	if err != nil{
 		log.Println("Update application failed!(2)" + err.Error())
@@ -41,8 +40,8 @@ func (ar *TaskMongoRepository) Delete(id string) error {
 	defer ds.S.Close()
 
 	coll := ds.S.DB(database).C(taskScheme)
-	task := domain.Task{}
-	err := coll.Find(nil).One(&task)
+	t := domain.Task{}
+	err := coll.Find(nil).One(&t)
 	if err != nil {
 		log.Println("Delete task failed!" + err.Error())
 		return err
@@ -54,14 +53,14 @@ func (ar *TaskMongoRepository) Delete(id string) error {
 		return err
 	}
 	//修改Application中信息
-	appid := task.AppID
+	appid := t.AppID
 	coll = ds.S.DB(database).C(applicationScheme)
 	result := domain.Application{}
 	err = coll.Find(bson.M{"_id": bson.ObjectIdHex(appid)}).One(&result)
 	if err != nil{
 		log.Println("Select application failed!(2)" + err.Error())
 	}
-	delete(result.TaskList, task.Id.Hex())
+	result.TaskNum -= 1
 	err = coll.UpdateId(result.Id, &result)
 	if err != nil{
 		log.Println("Update application failed!(2)" + err.Error())
