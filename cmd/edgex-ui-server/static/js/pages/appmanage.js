@@ -41,6 +41,8 @@ orgEdgexFoundry.supportApplication = (function(){
         sendCommand: null,
         confirmSend: null,
 
+        deleteResourceBtn: null,
+        showDetailResourceBtn: null,
         addResourceBtn: null,
         refreshResourceListBtn: null,
         commitResourceBtn: null,
@@ -120,8 +122,8 @@ orgEdgexFoundry.supportApplication = (function(){
                 id: $("#edgex-support-application-add-or-update form input[name= 'AppId']").val(),
                 name: $("#edgex-support-application-add-or-update form input[name= 'AppName']").val(),
                 desc: $("#edgex-support-application-add-or-update form input[name= 'AppDesc']").val(),
-                energy_limit: $("#edgex-support-application-add-or-update form input[name= 'EnergyLimit']").val(),
-                time_limit: $("#edgex-support-application-add-or-update form input[name= 'TimeLimit']").val(),
+                energy_limit: Number($("#edgex-support-application-add-or-update form input[name= 'EnergyLimit']").val()),
+                time_limit: Number($("#edgex-support-application-add-or-update form input[name= 'TimeLimit']").val()),
                 etc: $("#edgex-support-application-add-or-update form input[name= 'etc']").val(),
             }
             //debugger
@@ -299,7 +301,6 @@ orgEdgexFoundry.supportApplication = (function(){
     SupportApplication.prototype.renderTaskList = function(data){
         $("#edgex-support-task-list table tbody").empty();
         $.each(data,function(i,v){
-
             var rowData = "<tr>";
             rowData += '<td class="task-delete-icon"><input type="hidden" value="'+v.id+'"><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
             rowData += '<td class="task-edit-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
@@ -416,11 +417,11 @@ orgEdgexFoundry.supportApplication = (function(){
             id: $("input[name='TaskId']").val().trim(),
             name: $("input[name='TaskName']").val().trim(),
             desc: $("input[name='TaskDesc']").val().trim(),
-            cpu_require: $("input[name='CpuRequire']").val().trim(),
-            data_size: $("input[name='DataSize']").val().trim(),
-            data_in: $("input[name='DataIn']").val().trim(),
-            data_out: $("input[name='DataOut']").val().trim(),
-            exec_limit: $("select[name='ExecLimit']").val(),
+            cpu_require: Number($("input[name='CpuRequire']").val().trim()),
+            data_size: Number($("input[name='DataSize']").val().trim()),
+            data_in: Number($("input[name='DataIn']").val().trim()),
+            data_out: Number($("input[name='DataOut']").val().trim()),
+            exec_limit: Number($("select[name='ExecLimit']").val()),
             state: $("input[name='State']").val(),
         }
 
@@ -584,7 +585,9 @@ orgEdgexFoundry.supportApplication = (function(){
             $("#edgex-support-resource-list table tbody").empty();
             $.each(data,function(i,v){
                 var rowData = "<tr>";
+                rowData += '<td class="scheduler-del-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
                 rowData += '<td class="scheduler-edit-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
+                rowData += '<td class="scheduler-detail-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
                 rowData += "<td>" +  v.id + "</td>";
                 rowData += "<td>" +  v.cpu_resource + "</td>";
                 rowData += "<td>" +  v.storage + "</td>";
@@ -594,10 +597,49 @@ orgEdgexFoundry.supportApplication = (function(){
                 $("#edgex-support-resource-list table tbody").append(rowData);
             });
 
+            $(".scheduler-del-icon").on('click',function(){
+                application.deleteResourceBtn($(this).children("input[type='hidden']").val());
+            });
             $(".scheduler-edit-icon").on('click',function(){
                 application.editResourceBtn($(this).children("input[type='hidden']").val());
             });
-
+            $(".scheduler-detail-icon").on('click',function(){
+                application.showDetailResourceBtn($(this).children("input[type='hidden']").val());
+            });
+    }
+    SupportApplication.prototype.deleteResourceBtn = function(Resource){
+        bootbox.confirm({
+            title: "confirm",
+            message: "Are you sure to delete ? ",
+            className: 'green-red-buttons',
+            callback: function (result) {
+                if(result){
+                    $.ajax({
+                        url: '/api/v1/resource/' + JSON.parse(Resource).id,
+                        type: 'DELETE',
+                        success: function(){
+                            application.loadResource();
+                            bootbox.alert({
+                                message: "delete success.",
+                                className: 'red-green-buttons'
+                            });
+                        },
+                        statusCode: {
+                            409: function(){
+                                bootbox.alert({
+                                    title:'Error',
+                                    message: "attempt to delete a task still being referenced by device reports",
+                                    className: 'red-green-buttons'
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+    SupportApplication.prototype.showDetailResourceBtn = function(ResourceId){
+        alert("Work in process")
     }
     SupportApplication.prototype.addResourceBtn = function () {
         $("#edgex-support-resource-list").hide();
@@ -609,10 +651,10 @@ orgEdgexFoundry.supportApplication = (function(){
         console.log(type)
         var resourceData = {
             id: $("#edgex-support-resource-add form input[name= 'ResourceId']").val(),
-            cpu_resource: $("#edgex-support-resource-add form input[name= 'CpuResource']").val(),
-            storage: $("#edgex-support-resource-add form input[name= 'Storage']").val(),
-            upload_rate: $("#edgex-support-resource-add form input[name= 'UploadRate']").val(),
-            download_rate: $("#edgex-support-resource-add form input[name= 'DownloadRate']").val(),
+            cpu_resource: Number($("#edgex-support-resource-add form input[name= 'CpuResource']").val()),
+            storage: Number($("#edgex-support-resource-add form input[name= 'Storage']").val()),
+            upload_rate: Number($("#edgex-support-resource-add form input[name= 'UploadRate']").val()),
+            download_rate: Number($("#edgex-support-resource-add form input[name= 'DownloadRate']").val()),
 
         }
         //debugger

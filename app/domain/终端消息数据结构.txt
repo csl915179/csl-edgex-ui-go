@@ -1,0 +1,141 @@
+---------------------------------------预定义的属性和属性规则条件---------------------------------------
+
+//一个Attribute是一组键值对，它描述的是一个Pod或Node的某个属性及其取值
+//一个Attribute_Rule描述的一个Pod或Node的某个属性的取值，应该满足的条件，而不是这个属性本身
+
+Attribute:{				//用于描述某个属性
+	key:	string		//属性名
+	value:	string		//属性取值
+}
+Attribute_Rule:{		//用于描述某个属性需要满足的条件
+	Key:		string	//某个key
+	Operator:	string	//某个operator，取值范围:{In, NotIn, Exist, NotExist, GT, LT}
+	Value_Num:	int64	//key的取值数目
+	Value_List:	string[]//key的取值列表
+}
+
+//对于一个实体（Node或Pod），它可能在某些时候需要罗列自己所有的Attribute或Attribute_Rule
+Entity_Attribute:{
+	Name:			string			//实体名称
+	Attribute：		Attribute：		//实体属性
+}
+Entity_Attribute_Rule:{
+	Name:			string			        //实体名称
+	Attribute_Rule：	Attribute_Rule：	//实体属性规则
+}
+
+------------------------------------------------------------------------------------------------------
+
+--------------------------------------Node和Pod上传的消息数据结构---------------------------------------
+
+//设备端上传的本地Node资源的情况
+Node_Message{					//需要获取的Node的情况	
+	NodeName:		String		//节点名称
+	MemoryPressure:	Bool		//节点是否有内存压力
+	DiskPressure:	Bool		//节点是否有磁盘压力
+	PIDPressure:	Bool		//节点是否有进程ID压力
+	Ready:			Bool		//节点是否已经准备好做任务调度
+	CPUUsage:		int64		//节点CPU占用百分比
+	MemoryUsage:	int64		//节点内存占用百分比
+	Taint:			String		//节点污点
+	NodeLabels		Attribute[]	//节点的标签
+	TaskLabels		Attribute[]	//节点中运行的所有Task(Pod)的标签
+}
+
+
+//设备端上传某个Task资源情况
+Task_Message{
+	HostName:		String		//任务要占用的主机名
+	HostPort:		String		//任务要占用的端口号，范围5001-655535
+	Kind:			String		//任务要建立的Pod类型，取值{"ReplicationController","ReplicaSet","Pod","Service","DaemonSet","Deployment"}，Pod为主
+	Tolerations:	String[]	//任务的容忍列表
+	ImageNeed:		String[]	//任务需要的镜像
+	CPURequest:		int64		//任务需要的CPU资源
+	MemoryRequest:	int64		//任务需要的内存资源
+	SVC:			String		//任务对应的Application
+	TaskLabels		Attribute[]	//Task(Pod)的标签
+}
+
+------------------------------------------------------------------------------------------------------
+
+--------------------------------------------Node亲和性规则---------------------------------------------
+
+Node_PE_Affinity:{	//Node软亲和性规则
+	Weight:			int64				//满足Attribute_Rule后可以增加的权重比
+	Attribute_Rule:	Attribute_Rule		//描述这个Node应满足的某个属性的属性条件（Key，Operator，Value元组）
+}
+
+
+Node_RE_Affinity:{	//Node硬亲和性规则
+	Attribute:_Rule	Attribute_Rule		//描述这个Node应满足的某个属性的属性条件（Key，Operator，Value元组）
+}
+
+---------------------------------------------Pod亲和性规则---------------------------------------------
+
+Pod_PE_Affinity:{	//Pod软亲和性规则
+	Weight:			int64			//满足TopologyKey后可增加的权重比
+	TopologyKey:	Attribute_Rule	//描述Node应满足的某个属性（Key，Operator，Value元组）
+	Pod_Attribute:	Attribute_Rule	//描述Node中应该具有的某个Pod，它满足某个属性（Key，Operator，Value元组）
+}
+
+
+Pod_RE_Affinity:{	//Pod硬亲和性规则
+	TopologyKey:	Attribute_Rule	//描述Node应满足的某个属性（Key，Operator，Value元组）
+	Pod_Attribute:	Attribute_Rule	//描述Node中应该具有的某个Pod，它满足某个属性（Key，Operator，Value元组）
+}
+
+-------------------------------------------Pod反亲和性规则----------------------------------------------
+
+Pod_PE_Anti_Affinity:{	//Pod反软亲和性规则
+	Weight:			int64				//不满足Anti_TopologyKey后可增加的权重比
+	Anti_TopologyKey:	Attribute_Rule	//描述Node应不满足的某个属性（Key，Operator，Value元组）
+	Pod_Anti_Attribute:	Attribute_Rule	//描述Node中应该具有的某个Pod，它满足某个属性（Key，Operator，Value元组）
+}
+
+
+Pod_RE_Anti_Affinity:{	//Pod反硬亲和性规则
+	Anti_TopologyKey:	Attribute_Rule	//描述Node应不满足的某个属性（Key，Operator，Value元组）
+	Pod_Anti_Attribute:	Attribute_Rule	//描述Node中应该具有的某个Pod，它满足某个属性（Key，Operator，Value元组）
+}
+
+------------------------------------------------------------------------------------------------------
+
+-------------------------------------------亲和性描述消息规则-------------------------------------------
+
+Node_PE_Affinity_Message{	//Node软亲和性消息
+	Node_PE_Affinity_Num:	int64			//Noder软亲和性规则数量
+	Node_PE_Affinity_List:	Node_PE_Affinity[]		//Noder软亲和性规则数组
+}
+
+
+Node_RE_Affinity_Message{	//Node硬亲和性消息
+	Node_RE_Affinity_Num:	int64			//Noder硬亲和性规则数量
+	Node_RE_Affinity_List:	Node_RE_Affinity[]		//Noder硬亲和性规则数组
+}
+
+
+Pod_PE_Affinity_Message{	//Pod软亲和性消息
+	Pod_PE_Affinity_Num:	int64		//Pod软亲和性规则数量
+	Pod_PE_Affinity_List:	Pod_PE_Affinity[]		//Pod软亲和性规则数组
+}
+
+
+Pod_RE_Affinity_Message{	//Pod硬亲和性消息
+	Pod_RE_Affinity_Num:	int64		//Pod硬亲和性规则数量
+	Pod_RE_Affinity_List:	Pod_RE_Affinity[]		//Pod硬亲和性规则数组
+}
+
+
+
+Pod_PE_Anti_Affinity_Message{	//Pod反软亲和性消息
+	Pod_Anti_PE_Affinity_Num:	int64				//Pod反软亲和性规则数量
+	Pod_Anti_PE_Affinity_List:	Pod_Anti_PE_Affinity[]		//Pod反软亲和性规则数组
+}
+
+
+Pod_RE_Anti_Affinity_Message{	//Pod反硬亲和性消息
+	Pod_Anti_RE_Affinity_Num:	int64				//Pod反硬亲和性规则数量
+	Pod_Anti_RE_Affinity_List:	Pod_Anti_RE_Affinity[]		//Pod反硬亲和性规则数组
+}
+
+------------------------------------------------------------------------------------------------------

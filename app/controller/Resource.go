@@ -5,6 +5,7 @@ import (
 	"github.com/edgexfoundry/edgex-ui-go/app/common"
 	"github.com/edgexfoundry/edgex-ui-go/app/domain"
 	"github.com/edgexfoundry/edgex-ui-go/app/repository"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -29,6 +30,7 @@ func UpdateResource(w http.ResponseWriter, r *http.Request) {
 	}
 	repository.GetResourceRepos().Update(a)
 }
+
 func QueryAllResource(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set(common.ContentTypeKey, common.JsonContentType)
@@ -40,4 +42,15 @@ func QueryAllResource(w http.ResponseWriter, r *http.Request) {
 	result, _ := json.Marshal(&resourceList)
 	w.Header().Set(common.ContentTypeKey, common.JsonContentType)
 	w.Write(result)
+}
+
+func RemoveResource(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	vars := mux.Vars(r)
+	id := vars["id"]
+	err := repository.GetResourceRepos().Delete(id)
+	if err != nil {
+		http.Error(w, "", http.StatusServiceUnavailable)
+		return
+	}
 }

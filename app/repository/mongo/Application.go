@@ -12,10 +12,8 @@ type ApplicationMongoRepository struct {
 func (ar *ApplicationMongoRepository) Insert(a *domain.Application) (string, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
-
 	coll := ds.S.DB(database).C(applicationScheme)
 	err := coll.Insert(a)
-
 	if err != nil {
 		log.Println("Insert application failed !")
 		return "", err
@@ -35,6 +33,7 @@ func (ar *ApplicationMongoRepository) Delete(id string) error {
 		log.Println("Delete application failed!" + err.Error())
 		return err
 	}
+	//正片开始，删除Application
 	coll = ds.S.DB(database).C(applicationScheme)
 	err = coll.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
 	if err != nil {

@@ -58,9 +58,11 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/schedule", controller.Schedule).Methods(http.MethodGet)
 	s.HandleFunc("/schedule", controller.ScheduleConfirm).Methods(http.MethodPut)
 
+	//resource manage
 	s.HandleFunc("/resource",controller.QueryAllResource).Methods(http.MethodGet)
 	s.HandleFunc("/resource",controller.UpdateResource).Methods(http.MethodPut)
 	s.HandleFunc("/resource",controller.AddResource).Methods(http.MethodPost)
+	s.HandleFunc("/resource/{id}",controller.RemoveResource).Methods(http.MethodDelete)
 
 	s1 := r.PathPrefix("").Subrouter()
 	s1.HandleFunc("/ws", component.WebSocketHandler)

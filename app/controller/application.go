@@ -7,15 +7,12 @@ import (
 	"github.com/edgexfoundry/edgex-ui-go/app/repository"
 	"github.com/gorilla/mux"
 	"net/http"
-
 )
 
 func AddApplication(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var a domain.Application
-	a.TaskNum = 0
-	err := json.NewDecoder(r.Body).Decode(&a)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&a); err != nil {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}

@@ -88,7 +88,6 @@ func (ar *TaskMongoRepository) SelectAllWait() ([]domain.Task, error) {
 	//  查询所有等待执行的task
 	ds := DS.DataStore()
 	defer ds.S.Close()
-
 	coll := ds.S.DB(database).C(taskScheme)
 	state := "等待执行"
 	result := make([]domain.Task, 0)

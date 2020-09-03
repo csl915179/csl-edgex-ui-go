@@ -15,61 +15,62 @@ import (
 	"time"
 )
 var mutex sync.Mutex
-var localOrAwayList []domain.Task
+var localOrRemoteList []domain.Task
 var localList []domain.Task
 
 func Schedule(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set(common.ContentTypeKey, common.JsonContentType)
-	taskList, err := repository.GetTaskRepos().SelectAllWait()
+	taskList, err := repository.GetTaskRepos().SelectAllWait()//找出所有的等待执行的Task
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return
 	}
 	localList = nil
-	localOrAwayList = nil
+	localOrRemoteList = nil
 	w.Header().Set(common.ContentTypeKey, common.JsonContentType)
 	var waitList []domain.Task
+	//按执行限制分类
 	for _,v:= range taskList{
 		if v.ExecLimit == "Remote"{
 			waitList = append(waitList,v)
 		} else if v.ExecLimit == "Local" {
 			localList = append(localList,v)
 		} else {
-			localOrAwayList = append(localOrAwayList,v)
+			localOrRemoteList = append(localOrRemoteList,v)
 		}
 	}
 	remainList := SelectLocalList()
 	waitList = append(waitList,remainList...)
 	result, _ := json.Marshal(&waitList)
-	log.Print(localList)
-	log.Print(waitList)
 	w.Write(result)
 	go ScheduleRun()
 
 }
 
+//进行分配
 func SelectLocalList() []domain.Task{
+	//获取所有Resource信息
 	resource,_ := repository.GetResourceRepos().SelectAll()
-	resourceCpu, _ := strconv.Atoi(resource[0].CpuResource)
-	resourceStorage, _ := strconv.Atoi(resource[0].Storage)
+	resourceCpu := resource[0].CpuResource
+	resourceStorage := resource[0].Storage
 	for _,v := range localList{
-		taskCpu,_ := strconv.Atoi(v.CpuRequire)
-		taskStorage,_ := strconv.Atoi(v.DataSize)
+		taskCpu := v.CpuRequire
+		taskStorage := v.DataSize
 		resourceCpu -= taskCpu
 		resourceStorage -= taskStorage
 		if resourceCpu < 0 || resourceStorage < 0 {
-			return localOrAwayList
+			return localOrRemoteList
 		}
 	}
-	for i,v := range localOrAwayList{
-		taskCpu,_ := strconv.Atoi(v.CpuRequire)
-		taskStorage,_ := strconv.Atoi(v.DataSize)
+	for i,v := range localOrRemoteList{
+		taskCpu := v.CpuRequire
+		taskStorage := v.DataSize
 		resourceCpu -= taskCpu
 		resourceStorage -= taskStorage
 
 		if resourceCpu < 0 || resourceStorage < 0 {
-			var remainList = localOrAwayList[i:]
+			var remainList = localOrRemoteList[i:]
 			return remainList
 		}else{
 			localList = append(localList,v)
@@ -106,16 +107,16 @@ func ScheduleRun(){
 				mutex.Lock()
 				resource, _ := repository.GetResourceRepos().SelectAll()
 				mutex.Unlock()
-				resourceCpu, _ := strconv.Atoi(resource[0].CpuResource)
-				resourceStorage, _ := strconv.Atoi(resource[0].Storage)
-				taskCpu, _ := strconv.Atoi(v.CpuRequire)
-				taskStorage, _ := strconv.Atoi(v.DataSize)
+				resourceCpu := resource[0].CpuResource
+				resourceStorage := resource[0].Storage
+				taskCpu := v.CpuRequire
+				taskStorage := v.DataSize
 				if resourceCpu >= taskCpu && resourceStorage >= taskStorage {
 					//把资源占用
 					resourceStorage -= taskStorage
 					resourceCpu -= taskCpu
-					resource[0].CpuResource = strconv.Itoa(resourceCpu)
-					resource[0].Storage = strconv.Itoa(resourceStorage)
+					resource[0].CpuResource = resourceCpu
+					resource[0].Storage = resourceStorage
 
 					mutex.Lock()
 					repository.GetResourceRepos().Update(resource[0])
@@ -141,14 +142,14 @@ func TaskRun(task domain.Task){
 	//资源释放
 	mutex.Lock()
 	resource,_ := repository.GetResourceRepos().SelectAll()
-	resourceCpu, _ := strconv.Atoi(resource[0].CpuResource)
-	resourceStorage, _ := strconv.Atoi(resource[0].Storage)
-	taskCpu, _ := strconv.Atoi(task.CpuRequire)
-	taskStorage, _ := strconv.Atoi(task.DataSize)
+	resourceCpu := resource[0].CpuResource
+	resourceStorage := resource[0].Storage
+	taskCpu := task.CpuRequire
+	taskStorage := task.DataSize
 	resourceStorage += taskStorage
 	resourceCpu += taskCpu
-	resource[0].CpuResource = strconv.Itoa(resourceCpu)
-	resource[0].Storage = strconv.Itoa(resourceStorage)
+	resource[0].CpuResource = resourceCpu
+	resource[0].Storage = resourceStorage
 	repository.GetResourceRepos().Update(resource[0])
 	log.Print(resource[0])
 	mutex.Unlock()

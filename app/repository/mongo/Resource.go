@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"github.com/edgexfoundry/edgex-ui-go/app/domain"
+	"gopkg.in/mgo.v2/bson"
 	"log"
 )
 
@@ -22,6 +23,7 @@ func (rr *ResourceMongoRepository) SelectAll() ([]domain.Resource, error) {
 	}
 	return result, nil
 }
+
 func (rr *ResourceMongoRepository) Insert(r *domain.Resource) (string, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
@@ -36,6 +38,7 @@ func (rr *ResourceMongoRepository) Insert(r *domain.Resource) (string, error) {
 
 	return r.Id.Hex(), nil
 }
+
 func (rr *ResourceMongoRepository) Update(resource domain.Resource) error {
 	ds := DS.DataStore()
 	defer ds.S.Close()
@@ -50,5 +53,18 @@ func (rr *ResourceMongoRepository) Update(resource domain.Resource) error {
 		return err
 	}
 
+	return nil
+}
+
+func (rr *ResourceMongoRepository) Delete(id string) error{
+	ds := DS.DataStore()
+	defer ds.S.Close()
+
+	coll := ds.S.DB(database).C(resourceScheme)
+	err := coll.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
+	if err != nil {
+		log.Println("Delete application failed!" + err.Error())
+		return err
+	}
 	return nil
 }

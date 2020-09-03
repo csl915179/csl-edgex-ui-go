@@ -8,6 +8,7 @@ import (
 type ResourceRepos interface {
 	SelectAll() ([]domain.Resource,error)
 	Insert(resource *domain.Resource) (string, error)
+	Delete(id string) error
 	Update(resource domain.Resource) error
 }
 func GetResourceRepos() ResourceRepos {
