@@ -34,10 +34,9 @@ var (
 	dbPassword    string
 	gatewayScheme string
 	userScheme    string
-	deviceScheme    string
 	applicationScheme string
 	taskScheme string
-	resourceScheme string
+	nodeScheme string
 )
 
 type DataStore struct {
@@ -58,12 +57,11 @@ func loadConf() {
 	dbPassword = configs.DBConf.Password//su
 	gatewayScheme = configs.DBConf.Scheme.Gateway
 	userScheme = configs.DBConf.Scheme.User
-	deviceScheme = configs.DBConf.Scheme.Device
 	applicationScheme = configs.DBConf.Scheme.Application
 	taskScheme = configs.DBConf.Scheme.Task
-	resourceScheme = configs.DBConf.Scheme.Resource
+	nodeScheme = configs.DBConf.Scheme.Node
 	log.Println(fmt.Sprintf("mongoDB connection info %s in %s:%d with credential (%s / %x), with scheme: %s, %s, %s, %s,%s,%s.",
-		database, dbHost, dbPort, dbUserName, md5.Sum([]byte(dbPassword)), gatewayScheme, userScheme, deviceScheme,applicationScheme,taskScheme,resourceScheme))
+		database, dbHost, dbPort, dbUserName, md5.Sum([]byte(dbPassword)), gatewayScheme, userScheme, applicationScheme,taskScheme,nodeScheme))
 }
 
 func DBConnect() bool {

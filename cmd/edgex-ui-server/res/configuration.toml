@@ -18,7 +18,7 @@ Password = "su"
   Gateway = "gateway"
   Application = "application"
   Task = "task"
-  Resource = "resource"
+  Node = "node"
 [DynamicProxy]
 CoreDataPath     = "/core-data"
 CoreDataPort     = "48080"

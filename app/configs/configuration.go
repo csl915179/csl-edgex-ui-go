@@ -54,7 +54,7 @@ type Scheme struct {
 	Device	string
 	Application string
 	Task string
-	Resource string
+	Node string
 }
 
 type Database struct {

@@ -1,7 +1,5 @@
 $(document).ready(function(){
-
-    orgEdgexFoundry.supportApplication.loadApplicationList();
-    orgEdgexFoundry.supportApplication.loadResource();
+    orgEdgexFoundry.supportApplication.loadNode();
 
 });
 //init application object
@@ -13,19 +11,34 @@ orgEdgexFoundry.supportApplication = (function(){
         this.selectedApplicationRow = null;
         this.taskListCache = [];
         this.selectedTaskRow = null;
-        this.resourceCache = [];
+        this.nodeCache = [];
     }
     SupportApplication.prototype = {
         constructor: SupportApplication,
+
+        getAttributeVars: null,
+
+        deleteNodeBtn: null,
+        showDetailNodeBtn: null,
+        addNodeBtn: null,
+        refreshNodeListBtn: null,
+        commitNodeBtn: null,
+        makeAttributeTable: null,
+        cancelAddNodeBtn: null,
+        editNodeBtn: null,
+        loadNode: null,
+        rendernode: null,
+        showAPPList:null,
+
         loadApplicationList: null,
         renderApplicationList: null,
-
         hideTaskList: null,
         loadTaskList: null,
         renderTaskList: null,
-
         deleteApplicationBtn: null,
         addApplicationBtn: null,
+        detailTaskBtn: null,
+        cancelTaskDetailBtn: null,
         cancelAddApplicationBtn: null,
         commitApplicationBtn: null,
         editApplicationBtn: null,
@@ -41,22 +54,420 @@ orgEdgexFoundry.supportApplication = (function(){
         sendCommand: null,
         confirmSend: null,
 
-        deleteResourceBtn: null,
-        showDetailResourceBtn: null,
-        addResourceBtn: null,
-        refreshResourceListBtn: null,
-        commitResourceBtn: null,
-        cancelAddResourceBtn: null,
-        editResourceBtn: null,
-        loadResource: null,
-        renderResource: null,
     }
     var application = new SupportApplication();
 
+    //=====================Public Functions=====================================
+    //按规定数目渲染表格
+    SupportApplication.prototype.makeAttributeTable = function(TableName, ElementList, ColumnNumber){
+        var table = $(TableName);
+        table.empty();
+        var element_num = 0;
+        $.each(ElementList,function(index,Element) {
+            if(element_num%ColumnNumber == 0) {
+                table.append('<tr>')
+            }
+            $.each(Element,function (index,element) {
+                element = '<td>' + element + '</td>';
+                table.append(element);
+                element_num ++;
+            });
+            if(element_num%ColumnNumber == ColumnNumber-1) {
+                table.append('</tr>')
+            }
+        })
+        table.append('</tr>')
+    }
+    //读取动态生成的Attribute类型的表
+    SupportApplication.prototype.getAttributeVars = function(table){
+        var list = []
+        $(table).each(function (tindex,titem){
+            var attribute = {};
+            $(titem).find("input").each(function(newattributeindex,newattribute){
+                if (newattribute.getAttribute("detail") == "key"){
+                    attribute.key = newattribute.value
+                }else if (newattribute.getAttribute("detail") == "value"){
+                    attribute.value= newattribute.value;
+                    list.push(JSON.parse(JSON.stringify(attribute)))
+                }
+            });
+        });
+        return list
+    }
+    //在详情页面布置属性表
+    SupportApplication.prototype.showAttributeDetailList = function(table, AttributeList){
+        AttributeList = JSON.parse(AttributeList)
+        var attributeelement = new Array();
+        $.each(AttributeList, function (index,attribute) {
+            var AttributeInputElementList = new Array();
+            var attr = 'key: ' + attribute.key + ' value: ' + attribute.value;
+            var AttributeInputElement = '<input type="text" class="form-control" disabled style="width: 80%" value="'+attr+'"/>';
+            AttributeInputElementList.push(AttributeInputElement)
+            attributeelement.push(AttributeInputElementList)
+        });
+        application.makeAttributeTable(table,attributeelement,8);
+    }
+
+    //===================Node section begin===================================
+    //加载Node列表和查询Node信息
+    SupportApplication.prototype.loadNode = function () {
+        $.ajax({
+            url:'/api/v1/node',
+            type:'GET',
+            success:function (data) {
+                if(!data || data.length == 0){
+                    $("#edgex-support-node-list table tbody").empty();
+                    $("#edgex-support-node-list table tfoot").show();
+
+                    return
+                }else{
+                    $("#edgex-support-node-list table tfoot").hide();
+                }
+                application.nodeCache = data;
+                application.rendernode(data);
+                application.cancelAddNodeBtn();
+            },
+            error:function(){
+
+            }
+        });
+    }
+    //列出Node列表
+    SupportApplication.prototype.rendernode = function (data) {
+        console.log(data)
+        $("#edgex-support-node-list table tbody").empty();
+        $.each(data,function(i,v){
+            var rowData = "<tr>";
+            rowData += "<td>" +  (i+1) + "</td>";
+            rowData += "<td>" +  v.id + "</td>";
+            rowData += "<td>" +  v.name + "</td>";
+            rowData += "<td>" +  v.cpu + "</td>";
+            rowData += "<td>" +  v.memory + "</td>";
+            rowData += "<td>" +  v.disk + "</td>";
+            rowData += '<td class="scheduler-del-icon del_node"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
+            rowData += '<td class="scheduler-edit-icon edit_node"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
+            rowData += '<td class="scheduler-detail-icon node_detail"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
+            rowData += '<td class="scheduler-apps-icon show_node_app"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-search-plus fa-lg"/></div></td>';
+            rowData += "</tr>";
+            $("#edgex-support-node-list table tbody").append(rowData);
+        });
+
+        $(".del_node").on('click',function(){
+            application.deleteNodeBtn($(this).children("input[type='hidden']").val());
+        });
+        $(".edit_node").on('click',function(){
+            application.editNodeBtn($(this).children("input[type='hidden']").val());
+        });
+        $(".node_detail").on('click',function(){
+            application.showDetailNodeBtn($(this).children("input[type='hidden']").val());
+        });
+        $(".show_node_app").off('click').on('click',function(){
+            application.showAPPList($(this).children("input[type='hidden']").val());
+        });
+    }
+    //刷新Node列表按钮的功能
+    SupportApplication.prototype.refreshNodeListBtn = function () {
+        application.loadNode();
+    }
+    //删除Node按钮的作用
+    SupportApplication.prototype.deleteNodeBtn = function(Node){
+        bootbox.confirm({
+            title: "confirm",
+            message: "Are you sure to delete ? ",
+            className: 'green-red-buttons',
+            callback: function (result) {
+                if(result){
+                    $.ajax({
+                        url: '/api/v1/node/' + JSON.parse(Node).id,
+                        type: 'DELETE',
+                        success: function(){
+                            application.loadNode();
+                            bootbox.alert({
+                                message: "delete success.",
+                                className: 'red-green-buttons'
+                            });
+                        },
+                        statusCode: {
+                            409: function(){
+                                bootbox.alert({
+                                    title:'Error',
+                                    message: "attempt to delete a task still being referenced by device reports",
+                                    className: 'red-green-buttons'
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+    //查看Node详细信息按钮的作用
+    SupportApplication.prototype.showDetailNodeBtn = function(Node){
+        InitDetailPage()
+        Node = JSON.parse(Node);
+        $(".edgex-support-node-detail-name").html(Node.name);
+        $(".edgex-support-node-detail-ID").html(Node.id);
+        $("#edgex-support-node-detail-hardware-resource span[name= CPU]").html(Node.cpu);
+        $("#edgex-support-node-detail-hardware-resource span[name= memory]").html(Node.memory);
+        $("#edgex-support-node-detail-hardware-resource span[name= disk]").html(Node.disk);
+
+        application.showAttributeDetailList("#edgex-support-node-detail-taint-list table[name=Taint_List]", JSON.stringify(Node.taint));
+        application.showAttributeDetailList("#edgex-support-node-detail-label-node table[name=Node_Label_List]", JSON.stringify(Node.node_labels));
+        application.showAttributeDetailList("#edgex-support-node-detail-label-task table[name=Task_Label_List]", JSON.stringify(Node.task_labels));
+    }
+    function InitDetailPage(){
+        $("#edgex-support-node-list").hide();
+        $("#edgex-support-Node-detail").show('fast');
+        $(".panel-title button").on('click',function(){
+            $("#edgex-support-node-list").show('fast');
+            $("#edgex-support-Node-detail").hide();
+            $(".edgex-support-node-detail-name").html("");
+            $(".edgex-support-node-detail-ID").html("");
+            $("#edgex-support-node-detail-hardware-resource span").html("");
+            $("#edgex-support-node-detail-hardware-occupy span").html("");
+            $("#edgex-support-node-detail-hardware-pressure span").html("");
+        });
+    }
+    //新建Node页面渲染
+    SupportApplication.prototype.addNodeBtn = function () {
+        $("#edgex-support-node-list").hide();
+        $("#edgex-support-node-add").show();
+        $("#edgex-support-node-add div.update-node").hide();
+        $("#edgex-support-node-add div.add-node").show();
+        var taint_list = {};
+        var label_list = {};
+        InitTaintAndLabelBtn(taint_list, label_list);
+    };
+    function InitTaintAndLabelBtn(taint_list, label_list){
+        $("#edgex-support-node-add-taint table[name= AddNewTaint] i[name= AddNewTaint]").off('click').on('click',function(){
+            var taint = {};
+            taint.key = $("#edgex-support-node-add-taint table[name= AddNewTaint] input[name= NewTaint_Key]").val();
+            taint.value = $("#edgex-support-node-add-taint table[name= AddNewTaint] input[name= NewTaint_Value]").val();
+            if (taint != ""){
+                $("#edgex-support-node-add-taint table[name= AddNewTaint] input").val("");
+                $("#edgex-support-node-add-taint table[name= AddNewTaint] input[name= NewTaint_Key]").focus();
+                var random = Math.random();
+                var taint_key = '<input type="text" class="form-control" name="NewTaint" disabled detail="key" value='+taint.key+' >';
+                var taint_value = '<input type="text" class="form-control" name="NewTaint" disabled detail="value" value='+taint.value+' >';
+                var taint_del_bth = '<div class="edgexIconBtn delTaint" random='+random+'>' + '<i name="delTaint" class="fa fa-minus-circle fa-lg" aria-hidden="true" />' + '</div>';
+                var taint_form_element = new Array()
+                taint_form_element.push(taint_key,taint_value);
+                taint_form_element.push(taint_del_bth);
+                taint_list[random] = taint_form_element;
+                var TableName = "#edgex-support-node-add-taint table[name=TaintList]";
+                application.makeAttributeTable(TableName, taint_list, 12);
+            }
+        });
+        $("#edgex-support-node-add-taint table[name=TaintList]").off('click').on('click', ".delTaint", function () {
+            var random = $(this).attr("random");
+            delete taint_list[random];
+            var TableName = "#edgex-support-node-add-taint table[name=TaintList]";
+            application.makeAttributeTable(TableName, taint_list, 12);
+            $("#edgex-support-node-add-taint table[name= AddNewTaint] input").focus();
+        });
+        $("#edgex-support-node-add-node_label table[name= AddNewNodeLabel] i[name= AddNewNodeLabel]").off('click').on('click',function(){
+            var label = {};
+            label.key = $("#edgex-support-node-add-node_label table[name= AddNewNodeLabel] input[name= NewNodeLabel_Key]").val();
+            label.value = $("#edgex-support-node-add-node_label table[name= AddNewNodeLabel] input[name= NewNodeLabel_Value]").val();
+            if (label.key != "" && label.value != ""){
+                $("#edgex-support-node-add-node_label table[name= AddNewNodeLabel] input").val("");
+                $("#edgex-support-node-add-node_label table[name= AddNewNodeLabel] input[name= NewNodeLabel_Key]").focus();
+                var random = Math.random()
+                var label_key = '<input type="text" class="form-control" disabled detail="key" value='+label.key+' >';
+                var label_value = '<input type="text" class="form-control" disabled detail="value" value='+label.value+' >';
+                var label_del_bth = '<div class="edgexIconBtn delNodeLabel" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true" />' + '</div>';
+                var label_form_element = new Array()
+                label_form_element.push(label_key);
+                label_form_element.push(label_value);
+                label_form_element.push(label_del_bth);
+                label_list[random] = label_form_element;
+                var TableName = "#edgex-support-node-add-node_label table[name=NodeLabelList]";
+                application.makeAttributeTable(TableName, label_list, 12);
+            }
+        });
+        $("#edgex-support-node-add-node_label table[name=NodeLabelList]").off('click').on('click', ".delNodeLabel", function () {
+            var random = $(this).attr("random");
+            delete label_list[random];
+            var TableName = "#edgex-support-node-add-node_label table[name=NodeLabelList]";
+            application.makeAttributeTable(TableName, label_list, 12);
+            $("#edgex-support-node-add-node_label table[name= AddNewNodeLabel] input[name= NewNodeLabel_Key]").focus();
+        });
+    };
+    //新建Node页面提交按钮的功能
+    SupportApplication.prototype.commitNodeBtn = function (type) {
+        var nodeData = {
+            id: $("#edgex-support-node-add-nodeID").val(),
+            name: $("#edgex-support-node-add-nodename").val(),
+            cpu: Number($("#edgex-support-node-add-hardware table input[name= 'CpuResource']").val()),
+            memory: Number($("#edgex-support-node-add-hardware table input[name= 'Memory']").val()),
+            disk: Number($("#edgex-support-node-add-hardware table input[name= 'Disk']").val()),
+            taint: [],
+            node_labels: []
+        };
+        nodeData.taint = application.getAttributeVars("#edgex-support-node-add-taint table[name=TaintList]");
+        nodeData.node_labels = application.getAttributeVars("#edgex-support-node-add-node_label table[name=NodeLabelList]");
+        //debugger
+        if(type=="new"){
+            commitNode(nodeData);
+        }else{
+            updateNode(nodeData);
+        }
+    }
+    //新建或修改Node的ajax
+    function commitNode(nodeData) {
+        console.log(JSON.stringify(nodeData))
+        $.ajax({
+            url: '/api/v1/node',
+            type: 'POST',
+            data: JSON.stringify(nodeData),
+            success: function(){
+                application.loadNode();
+                bootbox.alert({
+                    message: "Add Node Success!",
+                    className: 'red-green-buttons'
+                });
+            },
+            statusCode: {
+                400: function(err){
+                    bootbox.alert({
+                        title:'Error',
+                        message: "malformed or unparsable requests ! " + err.responseText,
+                        className: 'red-green-buttons'
+                    });
+                },
+                409: function(){
+                    bootbox.alert({
+                        title:'Error',
+                        message: "the start, end, or frequency strings are not properly formatted !",
+                        className: 'red-green-buttons'
+                    });
+                },
+                500: function(){
+                    bootbox.alert({
+                        message: "unknown or unanticipated issues !",
+                        className: 'red-green-buttons'
+                    });
+                }
+            }
+        });
+    }
+    function updateNode(nodeData) {
+        $.ajax({
+            url: '/api/v1/node',
+            type: 'PUT',
+            data: JSON.stringify(nodeData),
+            success: function(){
+                application.loadNode();
+                bootbox.alert({
+                    message: "Update Node Success!",
+                    className: 'red-green-buttons'
+                });
+            },
+            statusCode: {
+                400: function(){
+                    bootbox.alert({
+                        title:'Error',
+                        message: "malformed or unparsable requests !",
+                        className: 'red-green-buttons'
+                    });
+                },
+                404: function(){
+                    bootbox.alert({
+                        title:'Error',
+                        message: "no application is found for the id !",
+                        className: 'red-green-buttons'
+                    });
+                },
+                409: function(){
+                    bootbox.alert({
+                        title:'Error',
+                        message: "the start, end, or frequency strings are not properly formatted !",
+                        className: 'red-green-buttons'
+                    });
+                },
+                500: function(){
+                    bootbox.alert({
+                        message: "unknown or unanticipated issues !",
+                        className: 'red-green-buttons'
+                    });
+                }
+            }
+        });
+    }
+    //新建Node页面关闭的动作
+    SupportApplication.prototype.cancelAddNodeBtn = function () {
+        $("#edgex-support-node-list").show();
+        $("#edgex-support-node-add").hide();
+        $("#edgex-support-node-add form input").val("");
+        $("#edgex-support-node-add-taint table[name=TaintList] tbody").empty();
+        $("#edgex-support-node-add-node_label table[name=NodeLabelList] tbody").empty();
+    }
+    //修改Node按钮的功能
+    SupportApplication.prototype.editNodeBtn = function (node) {
+        var NodeItem = JSON.parse(node);
+        //debugger
+        $("#edgex-support-node-add-nodeID").val(NodeItem.id);
+        $("#edgex-support-node-add-nodename").val(NodeItem.name);
+        $("#edgex-support-node-add-hardware table input[name= 'CpuResource']").val(NodeItem.cpu);
+        $("#edgex-support-node-add-hardware table input[name= 'Memory']").val(NodeItem.memory);
+        $("#edgex-support-node-add-hardware table input[name= 'Disk']").val(NodeItem.disk);
+
+        var taint_list = {}, label_list = {};
+        $.each(NodeItem.taint, function (index,taint) {
+            var random = Math.random();
+            var taint_key = '<input type="text" class="form-control" detail="key" disabled value='+taint.key+' >';
+            var taint_value = '<input type="text" class="form-control" detail="value" disabled value='+taint.value+' >';
+            var taint_del_bth = '<div class="edgexIconBtn delTaint" random='+random+'>' + '<i name="delTaint" class="fa fa-minus-circle fa-lg" aria-hidden="true" />' + '</div>';
+            var taint_form_element = new Array()
+            taint_form_element.push(taint_key);
+            taint_form_element.push(taint_value);
+            taint_form_element.push(taint_del_bth);
+            taint_list[random] = taint_form_element;
+        });
+        console.log(taint_list)
+        var TableName = "#edgex-support-node-add-taint table[name=TaintList]";
+        application.makeAttributeTable(TableName, taint_list, 12);
+
+        $.each(NodeItem.node_labels, function (index,label) {
+            var random = Math.random()
+            var label_key = '<input type="text" class="form-control" disabled detail="key" value='+label.key+' >';
+            var label_value = '<input type="text" class="form-control" disabled detail="value" value='+label.value+' >';
+            var label_del_bth = '<div class="edgexIconBtn delNodeLabel" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true" />' + '</div>';
+            var label_form_element = new Array()
+            label_form_element.push(label_key);
+            label_form_element.push(label_value);
+            label_form_element.push(label_del_bth);
+            label_list[random] = label_form_element;
+        });
+        var TableName = "#edgex-support-node-add-node_label table[name=NodeLabelList]";
+        application.makeAttributeTable(TableName, label_list, 12);
+        InitTaintAndLabelBtn(taint_list, label_list);
+
+
+        $("#edgex-support-node-list").hide();
+        $("#edgex-support-node-add").show();
+        $("#edgex-support-node-add div.update-node").show();
+        $("#edgex-support-node-add div.add-node").hide();
+
+    }
+    //根据NodeID查看上面的APP功能
+    SupportApplication.prototype.showAPPList = function (node){
+        var NodeData = JSON.parse(node);
+        application.loadApplicationList(NodeData.id);
+        $("#edgex-support-application").show('fast');
+        $("#edgex-support-application-Node_Name").html(NodeData.name);
+        $("#edgex-support-application-exit").off('click').on('click',function(){
+            $("#edgex-support-application").hide();
+        });
+    };
+    //===================Node section end===================================
+
     //===================App section begin===================================
-    SupportApplication.prototype.loadApplicationList = function () {
+    //初始化应用列表
+    SupportApplication.prototype.loadApplicationList = function (nodeID) {
+        var addr = "/api/v1/application/findnode/" + nodeID;
             $.ajax({
-                url:'/api/v1/application',
+                url:addr,
                 type:'GET',
                 success:function(data){
                     if(!data || data.length == 0){
@@ -72,76 +483,77 @@ orgEdgexFoundry.supportApplication = (function(){
                     application.renderApplicationList(data);
                 },
                 error:function(){
-
+                    alert("ERROR!")
                 }
             });
-
-        }
+        $("#edgex-support-application div[name= add_application]").off('click').on('click',function () {
+            application.addApplicationBtn(nodeID)
+        })
+        $("#edgex-support-application div[name= refresh_application]").off('click').on('click',function () {
+            application.loadApplicationList(nodeID)
+        })
+    }
+    //刷新应用列表
     SupportApplication.prototype.renderApplicationList = function(data){
         console.log(data);
             $("#edgex-support-application-list table tbody").empty();
             $.each(data,function(i,v){
                 var rowData = "<tr>";
-                rowData += '<td class="scheduler-delete-icon"><input type="hidden" value="'+v.id+'"><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
-                rowData += '<td class="scheduler-edit-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
-                // rowData += '<td><input type="radio" name="schedulerRadio" value="'+v.id+'"></td>';
-                rowData += '<td class="scheduler-detail-icon"><input type="hidden" value="'+v.id+'"><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
-
                 rowData += "<td>" + (i + 1) +"</td>";
                 rowData += "<td>" +  v.id + "</td>";
                 rowData += "<td>" +  v.name + "</td>";
                 rowData += "<td>" +  v.desc + "</td>";
                 rowData += "<td>" +  v.task_num + "</td>";
-                rowData += "<td>" +  v.energy_limit + "</td>";
-                rowData += "<td>" +  v.time_limit + "</td>";
-                rowData += "<td>" +  v.etc + "</td>";
+                rowData += '<td class="scheduler-edit-icon edit_app"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
+                rowData += '<td class="scheduler-delete-icon del_app"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
+                rowData += '<td class="scheduler-task-icon list_task"><input type="hidden" value="'+v.id+'"><div class="edgexIconBtn"><i class="fa fa-search-plus fa-lg" aria-hidden="true"></i> </div></td>';
                 rowData += "</tr>";
                 $("#edgex-support-application-list table tbody").append(rowData);
             });
-            $(".scheduler-delete-icon").on('click',function(){
-                application.deleteApplicationBtn($(this).children("input[type='hidden']").val());
-
-            });
-            $(".scheduler-edit-icon").on('click',function(){
+            $(".edit_app").on('click',function(){
                 application.editApplicationBtn($(this).children("input[type='hidden']").val());
             });
-            $(".scheduler-detail-icon").on('click',function(){
+            $(".del_app").on('click',function(){
+                application.deleteApplicationBtn($(this).children("input[type='hidden']").val());
+            });
+            $(".list_task").on('click',function(){
             application.loadTaskList($(this).children("input[type='hidden']").val());
             });
 
         }
-    SupportApplication.prototype.addApplicationBtn =function () {
-            $("#edgex-support-application-add-or-update .update-application").hide();
-            $("#edgex-support-application-add-or-update .add-application").show();
-            $("#edgex-support-application-add-or-update").show();
+    //新建应用相关页面显示控制
+    SupportApplication.prototype.addApplicationBtn =function (nodeid) {
+        $("#edgex-support-application-add-or-update .update-application").hide();
+        $("#edgex-support-application-add-or-update .add-application").show();
+        $("#edgex-support-application-add-or-update").show();
+        $("#edgex-support-application-add-or-update form input[name= 'NodeId']").val(nodeid);
         }
-
+    //提交新建功能
     SupportApplication.prototype.commitApplicationBtn = function (type) {
-            console.log(type)
-            var applicationData = {
-                id: $("#edgex-support-application-add-or-update form input[name= 'AppId']").val(),
-                name: $("#edgex-support-application-add-or-update form input[name= 'AppName']").val(),
-                desc: $("#edgex-support-application-add-or-update form input[name= 'AppDesc']").val(),
-                energy_limit: Number($("#edgex-support-application-add-or-update form input[name= 'EnergyLimit']").val()),
-                time_limit: Number($("#edgex-support-application-add-or-update form input[name= 'TimeLimit']").val()),
-                etc: $("#edgex-support-application-add-or-update form input[name= 'etc']").val(),
-            }
-            //debugger
-            if(type=="new"){
-                delete applicationData["id"];
-                commitApplication(applicationData);
-            }else{
-                console.log(applicationData);
-                updateApplication(applicationData);
-            }
+        var applicationData = {
+            id: $("#edgex-support-application-add-or-update form input[name='AppId']").val(),
+            nodeid: $("#edgex-support-application-add-or-update form input[name= 'NodeId']").val(),
+            name: $("#edgex-support-application-add-or-update form input[name= 'AppName']").val(),
+            desc: $("#edgex-support-application-add-or-update form input[name= 'AppDesc']").val(),
+        };
+        //debugger
+        commitApplication(applicationData,type);
+        application.cancelAddApplicationBtn()
+    }
+    //上传新建或更新的Application功能
+    function commitApplication(applicationData, type) {
+        var methond
+        if(type=="new"){
+            methond = 'POST'
+        }else{
+            methond = "PUT"
         }
-    function commitApplication(applicationData) {
             $.ajax({
                 url: '/api/v1/application',
-                type: 'POST',
+                type: methond,
                 data: JSON.stringify(applicationData),
                 success: function(){
-                    application.loadApplicationList();
+                    application.loadApplicationList(applicationData.nodeid);
                     bootbox.alert({
                         message: "Add Application Success!",
                         className: 'red-green-buttons'
@@ -171,109 +583,70 @@ orgEdgexFoundry.supportApplication = (function(){
                 }
             });
         }
-    function updateApplication(applicationData) {
-            $.ajax({
-                url: '/api/v1/application',
-                type: 'PUT',
-                data: JSON.stringify(applicationData),
-                success: function(){
-                    application.loadApplicationList();
-                    bootbox.alert({
-                        message: "Update Application Success!",
-                        className: 'red-green-buttons'
-                    });
-                },
-                statusCode: {
-                    400: function(){
-                        bootbox.alert({
-                            title:'Error',
-                            message: "malformed or unparsable requests !",
-                            className: 'red-green-buttons'
-                        });
-                    },
-                    404: function(){
-                        bootbox.alert({
-                            title:'Error',
-                            message: "no application is found for the id !",
-                            className: 'red-green-buttons'
-                        });
-                    },
-                    409: function(){
-                        bootbox.alert({
-                            title:'Error',
-                            message: "the start, end, or frequency strings are not properly formatted !",
-                            className: 'red-green-buttons'
-                        });
-                    },
-                    500: function(){
-                        bootbox.alert({
-                            message: "unknown or unanticipated issues !",
-                            className: 'red-green-buttons'
-                        });
-                    }
-                }
-            });
-        }
+    //关闭新建Application页面
     SupportApplication.prototype.cancelAddApplicationBtn = function () {
-            $("#edgex-support-application-add-or-update").hide();
-        }
-    SupportApplication.prototype.refreshApplicationListBtn = function () {
-            application.loadApplicationList();
-        }
+        $("#edgex-support-application-add-or-update").hide();
+        var nodeid = $("#edgex-support-application-add-or-update form input[name= 'NodeId']").val();
+        $("#edgex-support-application-add-or-update input").val("");
+        application.loadApplicationList(nodeid)
+    }
+    //初始化编辑Application页面
     SupportApplication.prototype.editApplicationBtn = function (application) {
-            var applicationItem = JSON.parse(application);
-            //debugger
-            $("#edgex-support-application-add-or-update form input[name='AppId']").val(applicationItem.id);
-            $("#edgex-support-application-add-or-update form input[name='AppName']").val(applicationItem.name);
-            $("#edgex-support-application-add-or-update form input[name='AppDesc']").val(applicationItem.desc);
-            $("#edgex-support-application-add-or-update form input[name='EnergyLimit']").val(applicationItem.energy_limit);
-            $("#edgex-support-application-add-or-update form input[name='TimeLimit']").val(applicationItem.time_limit);
-            $("#edgex-support-application-add-or-update form input[name='etc']").val(applicationItem.etc);
+        var applicationItem = JSON.parse(application);
+        //debugger
+        $("#edgex-support-application-add-or-update form input[name='AppId']").val(applicationItem.id);
+        $("#edgex-support-application-add-or-update form input[name='NodeId']").val(applicationItem.nodeid);
+        $("#edgex-support-application-add-or-update form input[name='AppName']").val(applicationItem.name);
+        $("#edgex-support-application-add-or-update form input[name='AppDesc']").val(applicationItem.desc);
 
-            $("#edgex-support-application-add-or-update .update-application").show();
-            $("#edgex-support-application-add-or-update .add-application").hide();
-            $("#edgex-support-application-add-or-update").show();
+        $("#edgex-support-application-add-or-update .update-application").show();
+        $("#edgex-support-application-add-or-update .add-application").hide();
+        $("#edgex-support-application-add-or-update").show();
         }
-
-    SupportApplication.prototype.deleteApplicationBtn = function (applicationId) {
-            bootbox.confirm({
-                title: "confirm",
-                message: "Are you sure to delete ? ",
-                className: 'green-red-buttons',
-                callback: function (result) {
-                    if (result){
-                        $.ajax({
-                            url: '/api/v1/application/' + applicationId,
-                            type: 'DELETE',
-                            success: function(){
-                                application.loadApplicationList();
+    //删除application
+    SupportApplication.prototype.deleteApplicationBtn = function (application) {
+        var app = JSON.parse(application)
+        bootbox.confirm({
+            title: "confirm",
+            message: "Are you sure to delete ? ",
+            className: 'green-red-buttons',
+            callback: function (result) {
+                if (result){
+                    $.ajax({
+                        url: '/api/v1/application/' + app.id,
+                        type: 'DELETE',
+                        success: function(){
+                            refresh(app.nodeid);
+                            bootbox.alert({
+                                message: "delete success.",
+                                className: 'red-green-buttons'
+                            });
+                         },
+                        statusCode: {
+                            503: function(){
                                 bootbox.alert({
-                                    message: "delete success.",
+                                    title:'Error',
+                                    message: "unknown or unanticipated issues",
                                     className: 'red-green-buttons'
                                 });
-                            },
-                            statusCode: {
-                                503: function(){
-                                    bootbox.alert({
-                                        title:'Error',
-                                        message: "unknown or unanticipated issues",
-                                        className: 'red-green-buttons'
-                                    });
-                                }
                             }
-                        });
-                    }
+                        }
+                    });
                 }
-            });
-        }
+            }
+        });
+    }
+    function refresh(nodeid){
+        application.loadApplicationList(nodeid)
+    }
     //===================App section end===================================
 
     //===================Task section begin============================
-
+    //隐藏Task列表
     SupportApplication.prototype.hideTaskList = function(){
         $("#edgex-support-task-list-main").hide();
     }
-
+    //初始化Task列表
     SupportApplication.prototype.loadTaskList = function (appid) {
         $("#edgex-support-appid").html(appid);
         $("#edgex-support-task-list-main").show('fast');
@@ -298,36 +671,41 @@ orgEdgexFoundry.supportApplication = (function(){
         });
 
     }
+    //刷新Task列表
     SupportApplication.prototype.renderTaskList = function(data){
         $("#edgex-support-task-list table tbody").empty();
         $.each(data,function(i,v){
             var rowData = "<tr>";
-            rowData += '<td class="task-delete-icon"><input type="hidden" value="'+v.id+'"><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
-            rowData += '<td class="task-edit-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
-            // rowData += '<td><input type="radio" name="scheduleEventRadio" value="'+v.id+'"></td>';
             rowData += "<td>" + (i + 1) +"</td>";
             rowData += "<td>" +  v.id + "</td>";
-            rowData += "<td><input value="+v.name+" disabled style='outline:none;border-style:none;text-align:center;background-color:transparent;'>" + "</td>";
+            rowData += "<td>" +  v.name + "</td>";
             rowData += "<td>" +  v.desc + "</td>";
-            rowData += "<td>" +  v.cpu_require + "</td>";
-            rowData += "<td>" +  v.data_size + "</td>";
-            rowData += "<td>" +  v.data_in + "</td>";
-            rowData += "<td>" +  v.data_out + "</td>";
+            rowData += "<td>" +  v.cpu_request + "</td>";
+            rowData += "<td>" +  v.memory_request + "</td>";
+            rowData += "<td>" +  v.disk_request + "</td>";
             rowData += "<td>" +  v.exec_limit + "</td>";
-            rowData += "<td>" +  v.state + "</td>";
+            rowData += "<td>" +  v.exec_state + "</td>";
+            rowData += '<td class="task-delete-icon del_task"><input type="hidden" value="'+v.id+'"><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
+            rowData += '<td class="task-edit-icon edit_task"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
+            rowData += '<td class="task-detail-icon task_detail"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
             rowData += "</tr>";
             $("#edgex-support-task-list table tbody").append(rowData);
             $("#edgex-support-appid").html(v.appid);
         });
         //delete
-        $(".task-delete-icon").on('click',function(){
+        $(".del_task").on('click',function(){
             application.deleteTaskBtn($(this).children("input[type='hidden']").val());
         });
         //edit
-        $(".task-edit-icon").on('click',function(){
+        $(".edit_task").on('click',function(){
             application.editTaskBtn($(this).children("input[type='hidden']").val());
         });
+        //show detail
+        $(".task_detail").on('click',function(){
+            application.detailTaskBtn($(this).children("input[type='hidden']").val());
+        });
     }
+    //删除某个Task的按钮功能
     SupportApplication.prototype.deleteTaskBtn = function(taskId){
 
         var appid = $("#edgex-support-appid").html();
@@ -361,11 +739,10 @@ orgEdgexFoundry.supportApplication = (function(){
             }
         });
     }
+    //编辑Task按钮的功能
     SupportApplication.prototype.editTaskBtn = function(taskStr){
-
         var task = JSON.parse(taskStr);
-
-        if(task.state!="等待执行"&&task.state!=""){
+        if(task.exec_state!="NOT EXECUTED"){
             bootbox.alert({
                 title:'Error',
                 message: "该状态下不可编辑！",
@@ -373,67 +750,237 @@ orgEdgexFoundry.supportApplication = (function(){
             });
             return
         }
+        //填空
+        $("#edgex-support-task-add-basicinfo-appid").val(task.appid);
+        $("#edgex-support-task-add-basicinfo-taskid").val(task.id);
+        $("#edgex-support-task-add-basicinfo-exec_state").val(task.exec_state);
+        $("#edgex-support-task-add-basicinfo-name").val(task.name);
+        $("#edgex-support-task-add-basicinfo-desc").val(task.desc);
+        $("#edgex-support-task-add-basicinfo-time_limit_num").val(task.time_limit.split(/([0-9]*)/)[1]);
+        $("#edgex-support-task-add-basicinfo-time_limit_unit").val(task.time_limit.split(/([0-9]*)/)[2]);
+        $("#edgex-support-task-add-basicinfo-host_name").val(task.host_name);
+        $("#edgex-support-task-add-basicinfo-host_port").val(task.host_port);
+        $("#edgex-support-task-add-basicinfo-cpu_request").val(task.cpu_request);
+        $("#edgex-support-task-add-basicinfo-memory_request").val(task.memory_request);
+        $("#edgex-support-task-add-basicinfo-disk_request").val(task.disk_request);
+        $("#edgex-support-task-add-basicinfo-kind").val(task.kind);
+        $("#edgex-support-task-add-basicinfo-exec_limit").val(task.exec_limit);
+        var task_label_list = {}, toleration_list={}, image_need_list={};
+        $.each(task.task_labels, function (index,TaskLabel) {
+            var random = Math.random();
+            var TaskLabel_key = '<input type="text" class="form-control" detail="key" disabled value='+TaskLabel.key+' >';
+            var TaskLabel_value = '<input type="text" class="form-control" detail="value" disabled value='+TaskLabel.value+' >';
+            var TaskLabel_del_bth = '<div class="edgexIconBtn delTaskLabel" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true"/>' + '</div>';
+            var TaskLabel_form_element = new Array()
+            TaskLabel_form_element.push(TaskLabel_key);
+            TaskLabel_form_element.push(TaskLabel_value);
+            TaskLabel_form_element.push(TaskLabel_del_bth);
+            task_label_list[random] = TaskLabel_form_element;
+        });
+        application.makeAttributeTable("#edgex-support-task-add-task_labels table[name= Task_Labels_List]", task_label_list, 12);
+        $.each(task.tolerations, function (index,Toleration) {
+            var random = Math.random();
+            var Toleration_key = '<input type="text" class="form-control" detail="key" disabled value='+Toleration.key+' >';
+            var Toleration_value = '<input type="text" class="form-control" detail="value" disabled value='+Toleration.value+' >';
+            var Toleration_del_bth = '<div class="edgexIconBtn delToleration" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true"/>' + '</div>';
+            var Toleration_form_element = new Array()
+            Toleration_form_element.push(Toleration_key);
+            Toleration_form_element.push(Toleration_value);
+            Toleration_form_element.push(Toleration_del_bth);
+            toleration_list[random] = Toleration_form_element;
+        });
+        application.makeAttributeTable("#edgex-support-task-add-tolerations table[name= Toleration_List]", toleration_list, 12);
+        $.each(task.image_need, function (index,Image) {
+            var random = Math.random();
+            var Image = '<input type="text" class="form-control" disabled value='+Image+' >';
+            var Image_del_bth = '<div class="edgexIconBtn delImage" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true"/>' + '</div>';
+            var Image_need_form_element = new Array()
+            Image_need_form_element.push(Image);
+            Image_need_form_element.push(Image_del_bth);
+            image_need_list[random] = Image_need_form_element;
+        });
+        application.makeAttributeTable("#edgex-support-task-add-image_need table[name= Image_Need_List]", image_need_list, 12);
 
-        //application
-        $("input[name='ApplicationId']").val(task.appid);
+        Init_Task_Label_Add_Btn(task_label_list);
+        Init_Task_Tolerations_Add_Btn(toleration_list);
+        Init_Task_ImageNeed_Add_Btn(image_need_list);
 
-        //task
-        $("#edgex-support-task-add input[name='TaskId']").val(task.id);
-        $("#edgex-support-task-add input[name='TaskName']").val(task.name);
-        $("#edgex-support-task-add input[name='TaskDesc']").val(task.desc);
-        $("#edgex-support-task-add input[name='CpuRequire']").val(task.cpu_require);
-        $("#edgex-support-task-add input[name='DataSize']").val(task.data_size);
-        $("#edgex-support-task-add input[name='DataIn']").val(task.data_in);
-        $("#edgex-support-task-add input[name='DataOut']").val(task.data_out);
-        $("#edgex-support-task-add select[name='ExecLimit']").val(task.exec_limit);
-        $("#edgex-support-task-add input[name='State']").val(task.state);
-
+        //页面控制
         $("#edgex-support-task-list-main").hide();
-
         $("#edgex-support-task-add").show();
         $("#edgex-support-task-add div.add-task").hide();
         $("#edgex-support-task-add div.update-task").show();
-
-
     }
+    //查看Task详细信息按钮的功能
+    SupportApplication.prototype.detailTaskBtn = function(taskStr){
+        $("#edgex-support-task-list-main").hide();
+        $("#edgex-support-task-detail").show();
+        var task = JSON.parse(taskStr);
+        var task_keys = Object.keys(task);
+        $.each(task_keys,function (index,key) {
+            if (key != "tolerations" && key != "image_need" && key != "task_labels"){
+                var span = "#edgex-support-task-detail-taskInfo span[name=" + key + "]"
+                $(span).html(task[key])
+            }
+        });
+        application.showAttributeDetailList("#edgex-support-node-detail-task-labels table", JSON.stringify(task.task_labels));
+        application.showAttributeDetailList("#edgex-support-node-detail-tolerations table", JSON.stringify(task.tolerations));
+        var image_need_element = new Array();
+        $.each(task.image_need, function (index,image_need) {
+            var Image_need_InputElementList = new Array();
+            var Image_need_InputElement = '<input type="text" class="form-control" disabled style="width: 80%" value="'+image_need+'"/>';
+            Image_need_InputElementList.push(Image_need_InputElement)
+            image_need_element.push(Image_need_InputElementList)
+        });
+        application.makeAttributeTable("#edgex-support-node-detail-image_need table", image_need_element,8);
+        $("#cancel_task_detail").off('click').on('click', function () {
+            application.cancelTaskDetailBtn();
+        });
+    }
+    //关闭Task详细信息页面功能
+    SupportApplication.prototype.cancelTaskDetailBtn = function(){
+        $("#edgex-support-task-list-main").show('fast');
+        $("#edgex-support-task-detail").hide();
+        $("#edgex-support-task-detail-taskInfo span").html("");
+        $("#edgex-support-task-detail-taskInfo table").clear();
+    }
+    //添加Task按钮的功能
     SupportApplication.prototype.addTaskBtn = function(){
         $("#edgex-support-task-list-main").hide();
         $("#edgex-support-task-add").show();
         $("#edgex-support-task-add div.add-task").show();
         $("#edgex-support-task-add div.update-task").hide();
-        $(".edgex-support-task-form input[name='ApplicationId']").val($("#edgex-support-appid").html())
+        $("#edgex-support-task-add-basicinfo-appid").val($("#edgex-support-appid").html())
+        var task_label_list = {}, toleration_list = {}, image_need_list = {};
+        Init_Task_Label_Add_Btn(task_label_list);
+        Init_Task_Tolerations_Add_Btn(toleration_list);
+        Init_Task_ImageNeed_Add_Btn(image_need_list)
     }
+    function Init_Task_Label_Add_Btn(task_label_list){
+        $("#edgex-support-task-add-task_labels table[name= New_Task_Labels] i[name= Add_Task_Label]").off('click').on('click',function () {
+            var label = {};
+            label.key = $("#edgex-support-task-add-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_key]").val();
+            label.value = $("#edgex-support-task-add-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_value]").val();
+            if (label.key != "" && label.value != ""){
+                $("#edgex-support-task-add-task_labels table[name= New_Task_Labels] input").val("");
+                $("#edgex-support-task-add-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_key]").focus();
+                var random = Math.random();
+                var label_key = '<input type="text" class="form-control" disabled detail="key" value='+label.key+' >';
+                var label_value = '<input type="text" class="form-control" disabled detail="value" value='+label.value+' >';
+                var label_del_bth = '<div class="edgexIconBtn delTaskLabel" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true" />' + '</div>';
+                var label_form_element = new Array()
+                label_form_element.push(label_key);
+                label_form_element.push(label_value);
+                label_form_element.push(label_del_bth);
+                task_label_list[random] = label_form_element;
+                var TableName = "#edgex-support-task-add-task_labels table[name= Task_Labels_List]";
+                application.makeAttributeTable(TableName, task_label_list, 12);
+            }
+        });
+        $("#edgex-support-task-add-task_labels table[name= Task_Labels_List]").off('click').on('click', ".delTaskLabel", function () {
+            var random = $(this).attr("random");
+            delete task_label_list[random];
+            var TableName = "#edgex-support-task-add-task_labels table[name= Task_Labels_List]";
+            application.makeAttributeTable(TableName, task_label_list, 12);
+            $("#edgex-support-task-add-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_key]").focus();
+        });
+    }
+    function Init_Task_Tolerations_Add_Btn(toleration_list){
+        $("#edgex-support-task-add-tolerations table[name= New_Tolerations] i[name= Add_Toleration]").off('click').on('click',function () {
+            var toleration = {};
+            toleration.key = $("#edgex-support-task-add-tolerations table[name= New_Tolerations] input[name= New_Toleration_key]").val();
+            toleration.value = $("#edgex-support-task-add-tolerations table[name= New_Tolerations] input[name= New_Toleration_value]").val();
+            if (toleration.key != "" && toleration.value != ""){
+                $("#edgex-support-task-add-tolerations table[name= New_Tolerations] input").val("");
+                $("#edgex-support-task-add-tolerations table[name= New_Tolerations] input[name= New_Toleration_key]").focus();
+                var random = Math.random();
+                var toleration_key = '<input type="text" class="form-control" disabled detail="key" value='+toleration.key+' >';
+                var toleration_value = '<input type="text" class="form-control" disabled detail="value" value='+toleration.value+' >';
+                var toleration_del_bth = '<div class="edgexIconBtn delToleration" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true" />' + '</div>';
+                var toleration_form_element = new Array()
+                toleration_form_element.push(toleration_key);
+                toleration_form_element.push(toleration_value);
+                toleration_form_element.push(toleration_del_bth);
+                toleration_list[random] = toleration_form_element;
+                var TableName = "#edgex-support-task-add-tolerations table[name= Toleration_List]";
+                application.makeAttributeTable(TableName, toleration_list, 12);
+            }
+        });
+        $("#edgex-support-task-add-tolerations table[name= Toleration_List]").off('click').on('click', ".delToleration", function () {
+            var random = $(this).attr("random");
+            delete toleration_list[random];
+            var TableName = "#edgex-support-task-add-tolerations table[name= Toleration_List]";
+            application.makeAttributeTable(TableName, toleration_list, 12);
+            $("#edgex-support-task-add-tolerations table[name= New_Tolerations] input[name= New_Toleration_key]").focus();
+        });
+    }
+    function Init_Task_ImageNeed_Add_Btn(image_need_list){
+        $("#edgex-support-task-add-image_need table[name= New_Image_Need] i[name= Add_Image_Need]").off('click').on('click',function () {
+            var image_need = $("#edgex-support-task-add-image_need table[name= New_Image_Need] input[name= New_Image_Need]").val();
+            if (image_need != ""){
+                $("#edgex-support-task-add-image_need table[name= New_Image_Need] input").val("");
+                $("#edgex-support-task-add-image_need table[name= New_Image_Need] input[name= New_Image_Need]").focus();
+                var random = Math.random();
+                var image_need_element = '<input type="text" class="form-control" disabled value='+image_need+' >';
+                var image_need_del_bth = '<div class="edgexIconBtn delImage" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true" />' + '</div>';
+                var image_need_form_element = new Array()
+                image_need_form_element.push(image_need_element);
+                image_need_form_element.push(image_need_del_bth);
+                image_need_list[random] = image_need_form_element;
+                var TableName = "#edgex-support-task-add-image_need table[name= Image_Need_List]";
+                application.makeAttributeTable(TableName, image_need_list, 12);
+            }
+        });
+        $("#edgex-support-task-add-image_need table[name= Image_Need_List]").off('click').on('click', ".delImage", function () {
+            var random = $(this).attr("random");
+            delete image_need_list[random];
+            var TableName = "#edgex-support-task-add-image_need table[name= Image_Need_List]";
+            application.makeAttributeTable(TableName, image_need_list, 12);
+            $("#edgex-support-task-add-image_need table[name= New_Image_Need] input[name= New_Image_Need]").focus();
+        });
+    }
+    //关闭添加Task页面按钮的功能
     SupportApplication.prototype.cancelAddTaskBtn = function(){
         $("#edgex-support-task-list-main").show();
         $("#edgex-support-task-add").hide();
-    }
+        $("#edgex-support-task-add input").val("");
+        $("#edgex-support-task-add select").val("");
+        $("#edgex-support-task-add-task_labels table[name= Task_Labels_List]").empty();
+        $("#edgex-support-task-add-tolerations table[name= Toleration_List]").empty();
+        $("#edgex-support-task-add-image_need table[name= Image_Need_List]").empty();
 
+    }
+    //提交Task
     SupportApplication.prototype.commitTaskBtn = function(type){
-        //application
-        var appid = $(".edgex-support-task-form input[name='ApplicationId']").val().trim();
         //task
         var task = {
-            appid: appid,
-            id: $("input[name='TaskId']").val().trim(),
-            name: $("input[name='TaskName']").val().trim(),
-            desc: $("input[name='TaskDesc']").val().trim(),
-            cpu_require: Number($("input[name='CpuRequire']").val().trim()),
-            data_size: Number($("input[name='DataSize']").val().trim()),
-            data_in: Number($("input[name='DataIn']").val().trim()),
-            data_out: Number($("input[name='DataOut']").val().trim()),
-            exec_limit: Number($("select[name='ExecLimit']").val()),
-            state: $("input[name='State']").val(),
-        }
-
-        if (task.state == ""){
-            task.state = "等待执行"
-        }
-
-        if(type == "new") {
-            delete task["id"];
-        }
+            appid: $("#edgex-support-task-add-basicinfo-appid").val().trim(),
+            id: $("#edgex-support-task-add-basicinfo-taskid").val().trim(),
+            exec_state: "NOT EXECUTED",
+            name: $("#edgex-support-task-add-basicinfo-name").val(),
+            desc: $("#edgex-support-task-add-basicinfo-desc").val(),
+            time_limit: $("#edgex-support-task-add-basicinfo-time_limit_num").val() + $("#edgex-support-task-add-basicinfo-time_limit_unit").val(),
+            host_name: $("#edgex-support-task-add-basicinfo-host_name").val(),
+            host_port: $("#edgex-support-task-add-basicinfo-host_port").val(),
+            cpu_request: Number($("#edgex-support-task-add-basicinfo-cpu_request").val()),
+            memory_request: Number($("#edgex-support-task-add-basicinfo-memory_request").val()),
+            disk_request: Number($("#edgex-support-task-add-basicinfo-disk_request").val()),
+            kind: $("#edgex-support-task-add-basicinfo-kind").val(),
+            exec_limit: $("#edgex-support-task-add-basicinfo-exec_limit").val(),
+            task_labels: [],
+            tolerations: [],
+            image_need: [],
+        };
+        task.tolerations = application.getAttributeVars("#edgex-support-task-add-tolerations table[name= Toleration_List]");
+        task.task_labels = application.getAttributeVars("#edgex-support-task-add-task_labels table[name= Task_Labels_List]");
+        $("#edgex-support-task-add-image_need table[name= Image_Need_List]").each(function (tindex,titem){
+            var image = {};
+            $(titem).find("input").each(function(newimageindex,newimage){
+                task.image_need.push(newimage.value);
+            });
+        });
         commitTask(task,type)
-        $("#edgex-support-task-add").hide();
+        application.cancelAddTaskBtn()
     }
     function commitTask(task,type){
         var method ;
@@ -449,7 +996,7 @@ orgEdgexFoundry.supportApplication = (function(){
             success:function(){
                 var appid = task.appid;
                 application.loadTaskList(appid);
-                application.loadResource();
+                application.loadNode();
                 bootbox.alert({
                     message: "Commit Task Success!",
                     className: 'red-green-buttons'
@@ -489,10 +1036,18 @@ orgEdgexFoundry.supportApplication = (function(){
         });
     }
 
+    //刷新Task列表
     SupportApplication.prototype.refreshTaskListBtn = function(){
         var appid = $("#edgex-support-appid").html();
         application.loadTaskList(appid);
     }
+
+
+
+
+
+
+
 
 
 
@@ -515,6 +1070,7 @@ orgEdgexFoundry.supportApplication = (function(){
             },
         });
     }
+
     SupportApplication.prototype.confirmSend = function (data) {
         $.ajax({
             url:'/api/v1/schedule',
@@ -528,6 +1084,7 @@ orgEdgexFoundry.supportApplication = (function(){
             },
         });
     }
+
     SupportApplication.prototype.sendCommand = function (data) {
         var paramBody={};
         data = JSON.stringify(data);
@@ -557,216 +1114,8 @@ orgEdgexFoundry.supportApplication = (function(){
         })
         return code;
     }
+
     //===================Task section end===================================
-    //===================Resource section begin===================================
-    SupportApplication.prototype.loadResource = function () {
-            $.ajax({
-                url:'/api/v1/resource',
-                type:'GET',
-                success:function (data) {
-                    if(!data || data.length == 0){
-                        $("#edgex-support-resource-list table tbody").empty();
-                        $("#edgex-support-resource-list table tfoot").show();
-
-                        return
-                    }else{
-                        $("#edgex-support-resource-list table tfoot").hide();
-                    }
-                    application.resourceCache = data;
-                    application.renderResource(data);
-                },
-                error:function(){
-
-                }
-            });
-    }
-    SupportApplication.prototype.renderResource = function (data) {
-            console.log(data)
-            $("#edgex-support-resource-list table tbody").empty();
-            $.each(data,function(i,v){
-                var rowData = "<tr>";
-                rowData += '<td class="scheduler-del-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
-                rowData += '<td class="scheduler-edit-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
-                rowData += '<td class="scheduler-detail-icon"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
-                rowData += "<td>" +  v.id + "</td>";
-                rowData += "<td>" +  v.cpu_resource + "</td>";
-                rowData += "<td>" +  v.storage + "</td>";
-                rowData += "<td>" +  v.upload_rate + "</td>";
-                rowData += "<td>" +  v.download_rate + "</td>";
-                rowData += "</tr>";
-                $("#edgex-support-resource-list table tbody").append(rowData);
-            });
-
-            $(".scheduler-del-icon").on('click',function(){
-                application.deleteResourceBtn($(this).children("input[type='hidden']").val());
-            });
-            $(".scheduler-edit-icon").on('click',function(){
-                application.editResourceBtn($(this).children("input[type='hidden']").val());
-            });
-            $(".scheduler-detail-icon").on('click',function(){
-                application.showDetailResourceBtn($(this).children("input[type='hidden']").val());
-            });
-    }
-    SupportApplication.prototype.deleteResourceBtn = function(Resource){
-        bootbox.confirm({
-            title: "confirm",
-            message: "Are you sure to delete ? ",
-            className: 'green-red-buttons',
-            callback: function (result) {
-                if(result){
-                    $.ajax({
-                        url: '/api/v1/resource/' + JSON.parse(Resource).id,
-                        type: 'DELETE',
-                        success: function(){
-                            application.loadResource();
-                            bootbox.alert({
-                                message: "delete success.",
-                                className: 'red-green-buttons'
-                            });
-                        },
-                        statusCode: {
-                            409: function(){
-                                bootbox.alert({
-                                    title:'Error',
-                                    message: "attempt to delete a task still being referenced by device reports",
-                                    className: 'red-green-buttons'
-                                });
-                            }
-                        }
-                    });
-                }
-            }
-        });
-    }
-    SupportApplication.prototype.showDetailResourceBtn = function(ResourceId){
-        alert("Work in process")
-    }
-    SupportApplication.prototype.addResourceBtn = function () {
-        $("#edgex-support-resource-list").hide();
-        $("#edgex-support-resource-add").show();
-        $("#edgex-support-resource-add div.update-resource").hide();
-        $("#edgex-support-resource-add div.add-resource").show();
-    }
-    SupportApplication.prototype.commitResourceBtn = function (type) {
-        console.log(type)
-        var resourceData = {
-            id: $("#edgex-support-resource-add form input[name= 'ResourceId']").val(),
-            cpu_resource: Number($("#edgex-support-resource-add form input[name= 'CpuResource']").val()),
-            storage: Number($("#edgex-support-resource-add form input[name= 'Storage']").val()),
-            upload_rate: Number($("#edgex-support-resource-add form input[name= 'UploadRate']").val()),
-            download_rate: Number($("#edgex-support-resource-add form input[name= 'DownloadRate']").val()),
-
-        }
-        //debugger
-        if(type=="new"){
-            delete resourceData["id"];
-            commitResource(resourceData);
-        }else{
-            console.log(resourceData);
-            updateResource(resourceData);
-        }
-    }
-    function commitResource(resourceData) {
-            $.ajax({
-            url: '/api/v1/resource',
-            type: 'POST',
-            data: JSON.stringify(resourceData),
-            success: function(){
-                application.loadResource();
-                bootbox.alert({
-                    message: "Add Resource Success!",
-                    className: 'red-green-buttons'
-                });
-            },
-            statusCode: {
-                400: function(err){
-                    bootbox.alert({
-                        title:'Error',
-                        message: "malformed or unparsable requests ! " + err.responseText,
-                        className: 'red-green-buttons'
-                    });
-                },
-                409: function(){
-                    bootbox.alert({
-                        title:'Error',
-                        message: "the start, end, or frequency strings are not properly formatted !",
-                        className: 'red-green-buttons'
-                    });
-                },
-                500: function(){
-                    bootbox.alert({
-                        message: "unknown or unanticipated issues !",
-                        className: 'red-green-buttons'
-                    });
-                }
-            }
-        });
-    }
-    function updateResource(resourceData) {
-            $.ajax({
-            url: '/api/v1/resource',
-            type: 'PUT',
-            data: JSON.stringify(resourceData),
-            success: function(){
-                application.loadResource();
-                bootbox.alert({
-                    message: "Update Resource Success!",
-                    className: 'red-green-buttons'
-                });
-            },
-            statusCode: {
-                400: function(){
-                    bootbox.alert({
-                        title:'Error',
-                        message: "malformed or unparsable requests !",
-                        className: 'red-green-buttons'
-                    });
-                },
-                404: function(){
-                    bootbox.alert({
-                        title:'Error',
-                        message: "no application is found for the id !",
-                        className: 'red-green-buttons'
-                    });
-                },
-                409: function(){
-                    bootbox.alert({
-                        title:'Error',
-                        message: "the start, end, or frequency strings are not properly formatted !",
-                        className: 'red-green-buttons'
-                    });
-                },
-                500: function(){
-                    bootbox.alert({
-                        message: "unknown or unanticipated issues !",
-                        className: 'red-green-buttons'
-                    });
-                }
-            }
-        });
-    }
-    SupportApplication.prototype.cancelAddResourceBtn = function () {
-        $("#edgex-support-resource-list").show();
-        $("#edgex-support-resource-add").hide();
-    }
-    SupportApplication.prototype.refreshResourceListBtn = function () {
-        application.loadResource();
-    }
-    SupportApplication.prototype.editResourceBtn = function (resource) {
-        var ResourceItem = JSON.parse(resource);
-        //debugger
-        $("#edgex-support-resource-add form input[name='ResourceId']").val(ResourceItem.id);
-        $("#edgex-support-resource-add form input[name='CpuResource']").val(ResourceItem.cpu_resource);
-        $("#edgex-support-resource-add form input[name='Storage']").val(ResourceItem.storage);
-        $("#edgex-support-resource-add form input[name='UploadRate']").val(ResourceItem.upload_rate);
-        $("#edgex-support-resource-add form input[name='DownloadRate']").val(ResourceItem.download_rate);
-
-        $("#edgex-support-resource-list").hide();
-        $("#edgex-support-resource-add").show();
-        $("#edgex-support-resource-add div.update-resource").show();
-        $("#edgex-support-resource-add div.add-resource").hide();
-
-    }
 
     return application;
 })();

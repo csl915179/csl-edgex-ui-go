@@ -54,3 +54,19 @@ func RemoveApplication(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func FindApplicationByNode(w http.ResponseWriter, r *http.Request)  {
+	defer r.Body.Close()
+	vars := mux.Vars(r)
+	nodeid := vars["nodeid"]
+
+	w.Header().Set(common.ContentTypeKey, common.JsonContentType)
+	appList, err := repository.GetApplicationRepos().FindNode(nodeid)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+	result, _ := json.Marshal(&appList)
+	w.Header().Set(common.ContentTypeKey, common.JsonContentType)
+	w.Write(result)
+}

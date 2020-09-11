@@ -47,6 +47,7 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/application", controller.AddApplication).Methods(http.MethodPost)
 	s.HandleFunc("/application", controller.UpdateApplication).Methods(http.MethodPut)
 	s.HandleFunc("/application/{id}", controller.RemoveApplication).Methods(http.MethodDelete)
+	s.HandleFunc("/application/findnode/{nodeid}", controller.FindApplicationByNode).Methods(http.MethodGet)
 
 	// task manage
 	s.HandleFunc("/task/{appid}", controller.QueryAllTask).Methods(http.MethodGet)
@@ -58,11 +59,11 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/schedule", controller.Schedule).Methods(http.MethodGet)
 	s.HandleFunc("/schedule", controller.ScheduleConfirm).Methods(http.MethodPut)
 
-	//resource manage
-	s.HandleFunc("/resource",controller.QueryAllResource).Methods(http.MethodGet)
-	s.HandleFunc("/resource",controller.UpdateResource).Methods(http.MethodPut)
-	s.HandleFunc("/resource",controller.AddResource).Methods(http.MethodPost)
-	s.HandleFunc("/resource/{id}",controller.RemoveResource).Methods(http.MethodDelete)
+	//node manage
+	s.HandleFunc("/node",controller.QueryAllNode).Methods(http.MethodGet)
+	s.HandleFunc("/node",controller.UpdateNode).Methods(http.MethodPut)
+	s.HandleFunc("/node",controller.AddNode).Methods(http.MethodPost)
+	s.HandleFunc("/node/{id}",controller.RemoveNode).Methods(http.MethodDelete)
 
 	s1 := r.PathPrefix("").Subrouter()
 	s1.HandleFunc("/ws", component.WebSocketHandler)

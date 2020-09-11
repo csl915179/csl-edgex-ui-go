@@ -89,7 +89,7 @@ func (ar *TaskMongoRepository) SelectAllWait() ([]domain.Task, error) {
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	coll := ds.S.DB(database).C(taskScheme)
-	state := "等待执行"
+	state := "Waiting"
 	result := make([]domain.Task, 0)
 	err := coll.Find(bson.M{"_state": state}).All(&result)
 	if err != nil {

@@ -6,49 +6,53 @@ import (
 	"github.com/edgexfoundry/edgex-ui-go/app/domain"
 	"github.com/edgexfoundry/edgex-ui-go/app/repository"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 )
 
-func AddResource(w http.ResponseWriter, r *http.Request) {
+func AddNode(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	var a domain.Resource
+	var a domain.Node
 	err := json.NewDecoder(r.Body).Decode(&a)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	repository.GetResourceRepos().Insert(&a)
+	repository.GetNodeRepos().Insert(&a)
+
 }
 
-func UpdateResource(w http.ResponseWriter, r *http.Request) {
+func UpdateNode(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	var a domain.Resource
+	var a domain.Node
 	err := json.NewDecoder(r.Body).Decode(&a)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 		return
 	}
-	repository.GetResourceRepos().Update(a)
+	repository.GetNodeRepos().Update(a)
 }
 
-func QueryAllResource(w http.ResponseWriter, r *http.Request) {
+func QueryAllNode(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set(common.ContentTypeKey, common.JsonContentType)
-	resourceList, err := repository.GetResourceRepos().SelectAll()
+	nodeList, err := repository.GetNodeRepos().SelectAll()
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	result, _ := json.Marshal(&resourceList)
+	result, _ := json.Marshal(&nodeList)
 	w.Header().Set(common.ContentTypeKey, common.JsonContentType)
 	w.Write(result)
 }
 
-func RemoveResource(w http.ResponseWriter, r *http.Request) {
+func RemoveNode(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	vars := mux.Vars(r)
 	id := vars["id"]
-	err := repository.GetResourceRepos().Delete(id)
+	err := repository.GetNodeRepos().Delete(id)
 	if err != nil {
 		http.Error(w, "", http.StatusServiceUnavailable)
 		return

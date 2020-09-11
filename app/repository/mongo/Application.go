@@ -92,16 +92,26 @@ func (ar *ApplicationMongoRepository) Update(application domain.Application) err
 	ds := DS.DataStore()
 	defer ds.S.Close()
 	log.Print("app update")
-	log.Print(application)
 	coll := ds.S.DB(database).C(applicationScheme)
-
 	err := coll.UpdateId(application.Id, &application)
-
 	if err != nil {
-		log.Println("Update application failed !")
+		log.Println("Update application failed !", err)
 		return err
 	}
 
 	return nil
+}
+
+func (ar *ApplicationMongoRepository)  FindNode(NodeID string) ([]domain.Application,error){
+	ds := DS.DataStore()
+	defer ds.S.Close()
+	result := make([]domain.Application, 0)
+	coll := ds.S.DB(database).C(applicationScheme)
+	err := coll.Find(bson.M{"nodeid": NodeID}).All(&result)
+	if err != nil {
+		log.Println("SelectAll failed!", err)
+		return nil, err
+	}
+	return result, nil
 }
 

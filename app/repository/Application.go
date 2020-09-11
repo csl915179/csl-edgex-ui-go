@@ -12,6 +12,7 @@ type ApplicationRepos interface {
 	Insert(application *domain.Application) (string, error)
 	Update(application domain.Application) error
 	Delete(id string) error
+	FindNode(NodeID string) ([]domain.Application,error)
 }
 
 func GetApplicationRepos() ApplicationRepos {
