@@ -43,6 +43,7 @@ orgEdgexFoundry.supportApplication = (function(){
         commitApplicationBtn: null,
         editApplicationBtn: null,
         refreshApplicationListBtn: null,
+        execApp:null,
 
         deleteTaskBtn: null,
         addTaskBtn: null,
@@ -507,6 +508,7 @@ orgEdgexFoundry.supportApplication = (function(){
                 rowData += '<td class="scheduler-edit-icon edit_app"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
                 rowData += '<td class="scheduler-delete-icon del_app"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
                 rowData += '<td class="scheduler-task-icon list_task"><input type="hidden" value="'+v.id+'"><div class="edgexIconBtn"><i class="fa fa-search-plus fa-lg" aria-hidden="true"></i> </div></td>';
+                rowData += '<td class="scheduler-task-icon exec_app"><input type="hidden" value=\''+JSON.stringify(v)+'\'><div class="edgexIconBtn"><i class="fa fa-play-circle-o fa-lg" aria-hidden="true"></i> </div></td>';
                 rowData += "</tr>";
                 $("#edgex-support-application-list table tbody").append(rowData);
             });
@@ -518,6 +520,9 @@ orgEdgexFoundry.supportApplication = (function(){
             });
             $(".list_task").on('click',function(){
             application.loadTaskList($(this).children("input[type='hidden']").val());
+            });
+            $(".exec_app").on('click',function(){
+                application.execApp($(this).children("input[type='hidden']").val());
             });
 
         }
@@ -638,6 +643,17 @@ orgEdgexFoundry.supportApplication = (function(){
     }
     function refresh(nodeid){
         application.loadApplicationList(nodeid)
+    }
+    //执行APP
+    SupportApplication.prototype.execApp = function(AppInfo){
+        var app = JSON.parse(AppInfo);
+        $.ajax({
+            url: '/api/v1/application/exec/' + app.id,
+            type: 'GET',
+            success: function () {
+                application.loadApplicationList(app.nodeid);
+            },
+        });
     }
     //===================App section end===================================
 

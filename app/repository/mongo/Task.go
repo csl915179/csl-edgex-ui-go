@@ -167,3 +167,18 @@ func (ar *TaskMongoRepository) FindApp(id string) (domain.Application,error){
 
 	return resultApp,err
 }
+
+func  (ar *TaskMongoRepository) FindByAppId(appid string) ([]domain.Task,error){
+	ds := DS.DataStore()
+	defer ds.S.Close()
+	coll := ds.S.DB(database).C(taskScheme)
+	//记录结果
+	result := make([]domain.Task, 0)
+	//按Appid查找Task
+	err := coll.Find(bson.M{"appid": appid}).All(&result)
+	if err != nil{
+		log.Println("Select task failed!(2)" + err.Error())
+		return result, err
+	}
+	return result, nil
+}

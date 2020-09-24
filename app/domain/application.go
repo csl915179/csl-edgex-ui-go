@@ -29,26 +29,28 @@ type Entity_Attribute_Rule struct {
 
 //本地节点
 type Node struct {
-	Id          	bson.ObjectId		`bson:"_id,omitempty" json:"id"`
-	NodeName		string				`json:"name"`					//节点名称
-	CPU				int64				`json:"cpu"`					//节点CPU
-	Memory			int64				`json:"memory"`					//节点内存
-	Disk			int64				`json:"disk"`					//节点磁盘
-	MemoryPressure	bool				`json:"memory_pressure"`		//节点是否有内存压力
-	DiskPressure	bool				`json:"disk_pressure"`			//节点是否有磁盘压力
-	PIDPressure		bool				`json:"pid_pressure"`			//节点是否有进程ID压力
-	Ready			bool				`json:"ready"`					//节点是否已经准备好做任务调度
-	CPUUsage		int64				`json:"cpu_usage"`				//节点CPU占用百分比
-	MemoryUsage		int64				`json:"memory_usage"`			//节点内存占用百分比
-	Taint			[]Attribute			`json:"taint"`					//节点污点
-	NodeLabels		[]Attribute			`json:"node_labels"`			//节点的标签
-	TaskLabels		[]Attribute			`json:"task_labels"`			//节点中运行的所有Task(Pod)的标签
+	Id          	bson.ObjectId					`bson:"_id,omitempty" json:"id"`
+	NodeName		string							`json:"name"`						//节点名称
+	CPU				int64							`json:"cpu"`						//节点CPU频率
+	Memory			int64							`json:"memory"`						//节点内存
+	Disk			int64							`json:"disk"`						//节点磁盘
+	CPUPressure		bool							`json:"cpu_pressure"`				//节点是否有CPU压力
+	MemoryPressure	bool							`json:"memory_pressure"`			//节点是否有内存压力
+	DiskPressure	bool							`json:"disk_pressure"`				//节点是否有磁盘压力
+	PIDPressure		bool							`json:"pid_pressure"`				//节点是否有进程ID压力
+	Ready			bool							`json:"ready"`						//节点是否已经准备好做任务调度
+	CPUUsage		int64							`json:"cpu_usage"`					//节点CPU占用百分比
+	MemoryUsage		int64							`json:"memory_usage"`				//节点内存占用百分比
+	DiskUsage		int64							`json:"disk_usage"`
+	Taint64			[]Attribute						`json:"taint64"`					//节点污点
+	NodeLabels		[]Attribute						`json:"node_labels"`				//节点的标签
+	TaskLabels		map[string][]Attribute			`json:"task_labels"`				//节点中运行的所有Task(Pod)的标签，格式为 Task.Id:Task.TaskLabels
 }
 
 //应用
 type Application struct {
 	Id          	bson.ObjectId 		`bson:"_id,omitempty" json:"id"`
-	NodeID			string				`json:"nodeid"`					//因为应用必须在适配的Node（手机，电脑，平板等）上执行，所以需要绑定一下具体哪一个本地Node
+	NodeID			string				`json:"nodeid"`										//因为应用必须在适配的Node（手机，电脑，平板等）上执行，所以需要绑定一下具体哪一个本地Node
 	Name        	string        		`json:"name"`
 	Description 	string        		`json:"desc"`
 	TaskNum			int64				`json:"task_num"`
@@ -70,7 +72,7 @@ type Task struct {
 	MemoryRequest	int64				`json:"memory_request"`								//任务需要的内存资源
 	DiskRequest		int64				`json:"disk_request"`								//任务需要的磁盘资源
 	TaskLabels		[]Attribute			`json:"task_labels"`								//Task(Pod)的标签
-	ExecLimit   	string       		`json:"exec_limit"`									//执行地点限制
+	ExecLimit   	string       		`json:"exec_limit"`									//执行地点限制 Local/Remote/LocalOrRemote
 	TimeLimit		string				`json:"time_limit"`									//完成时间限制，格式为数字+ms/s/min/h/d
-	State       	string       		`json:"exec_state"`									//执行状态
+	State       	string       		`json:"exec_state"`									//执行状态 NOT EXECUTED/EXECTUTING/EXECUTED
 }

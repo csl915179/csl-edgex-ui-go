@@ -47,6 +47,7 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/application", controller.AddApplication).Methods(http.MethodPost)
 	s.HandleFunc("/application", controller.UpdateApplication).Methods(http.MethodPut)
 	s.HandleFunc("/application/{id}", controller.RemoveApplication).Methods(http.MethodDelete)
+	s.HandleFunc("/application/exec/{appid}", controller.ExecAppTask).Methods(http.MethodGet)
 	s.HandleFunc("/application/findnode/{nodeid}", controller.FindApplicationByNode).Methods(http.MethodGet)
 
 	// task manage
@@ -56,8 +57,7 @@ func InitRestRoutes() http.Handler {
 	s.HandleFunc("/task/{id}", controller.RemoveTask).Methods(http.MethodDelete)
 	s.HandleFunc("/task/findapp/{id}", controller.FindTaskApp).Methods(http.MethodGet)
 
-	s.HandleFunc("/schedule", controller.Schedule).Methods(http.MethodGet)
-	s.HandleFunc("/schedule", controller.ScheduleConfirm).Methods(http.MethodPut)
+
 
 	//node manage
 	s.HandleFunc("/node",controller.QueryAllNode).Methods(http.MethodGet)

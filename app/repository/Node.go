@@ -6,6 +6,7 @@ import (
 )
 
 type NodeRepos interface {
+	Select(id string) (domain.Node, error)
 	SelectAll() ([]domain.Node,error)
 	Insert(node *domain.Node) (string, error)
 	Delete(id string) error

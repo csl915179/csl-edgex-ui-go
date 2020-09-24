@@ -14,6 +14,7 @@ type TaskRepos interface {
 	Update(task domain.Task) error
 	Delete(id string) error
 	FindApp(id string) (domain.Application,error)
+	FindByAppId(appid string) ([]domain.Task,error)
 }
 
 func GetTaskRepos() TaskRepos {
