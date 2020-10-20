@@ -93,6 +93,9 @@ type DynamicProxy struct {
 	SupportSchedulerPath string
 	SupportSchedulerPort string
 
+	ExportReceiverPath string
+	ExportReceiverPort string
+
 }
 
 func LoadConfig(confFilePath string) error {
@@ -132,4 +135,5 @@ func initProxyMapping() {
 	ProxyMapping[ProxyConf.SupportLoggingPath] = ProxyConf.SupportLoggingPort
 	ProxyMapping[ProxyConf.SupportNotificationPath] = ProxyConf.SupportNotificationPort
 	ProxyMapping[ProxyConf.SupportSchedulerPath] = ProxyConf.SupportSchedulerPort
+	ProxyMapping[ProxyConf.ExportReceiverPath] = ProxyConf.ExportReceiverPort
 }

@@ -60,7 +60,7 @@ func loadConf() {
 	applicationScheme = configs.DBConf.Scheme.Application
 	taskScheme = configs.DBConf.Scheme.Task
 	nodeScheme = configs.DBConf.Scheme.Node
-	log.Println(fmt.Sprintf("mongoDB connection info %s in %s:%d with credential (%s / %x), with scheme: %s, %s, %s, %s,%s,%s.",
+	log.Println(fmt.Sprintf("mongoDB connection info %s in %s:%d with credential (%s / %x), with scheme: %s, %s, %s, %s,%s.",
 		database, dbHost, dbPort, dbUserName, md5.Sum([]byte(dbPassword)), gatewayScheme, userScheme, applicationScheme,taskScheme,nodeScheme))
 }
 

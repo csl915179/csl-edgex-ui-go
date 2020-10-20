@@ -82,7 +82,7 @@ func (rr *NodeMongoRepository) Delete(id string) error{
 		log.Println("Find node application failed!" + err.Error())
 		return err
 	}
-	err = coll.Remove(bson.M{"nodeid":id})
+	_,err = coll.RemoveAll(bson.M{"nodeid":id})
 	if err != nil {
 		log.Println("Delete node application failed!" + err.Error())
 		return err
@@ -90,7 +90,7 @@ func (rr *NodeMongoRepository) Delete(id string) error{
 	coll = ds.S.DB(database).C(taskScheme)
 	for i:=0; i<len(app_list); i++ {
 		app_id := app_list[i].Id
-		err = coll.Remove(bson.M{"appid":app_id.Hex()})
+		_,err = coll.RemoveAll(bson.M{"appid":app_id.Hex()})
 		if err != nil {
 			log.Println("Remove node application task failed!" + err.Error())
 			return err

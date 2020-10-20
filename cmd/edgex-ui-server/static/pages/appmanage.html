@@ -51,7 +51,6 @@
                     </tr>
                     </tfoot>
                 </table>
-                <button id="edgex-sc" class="btn btn-success " type="button" style="float: right", onclick="orgEdgexFoundry.supportApplication.scheduleBtn()">进行任务调度</button>
             </div>
         </div>
 
@@ -131,7 +130,7 @@
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         LocalNode&nbsp<span class="edgex-support-node-detail-name"></span>&nbsp的详细信息
-                        <button onclick="" type="button" class="close pull-right" aria-label="Close"><span style="color:#333!important;" aria-hidden="true">&times;</span></button>
+                        <button type="button" class="close pull-right" aria-label="Close"><span style="color:#333!important;" aria-hidden="true">&times;</span></button>
                     </h3>
                 </div>
                 <div class="panel-body" style="padding:0;margin-bottom:0!important;overflow:auto;">
@@ -199,6 +198,266 @@
 
         <!--Node上面运行的任务列表-->
     </div>
+    <!--Node section end-->
+
+    <!--设备列表页 开始-->
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title">设备列表</h3>
+        </div>
+        <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+            <div class="panel-heading">
+                <div class="edgexIconBtn">
+                    <i class="fa fa-refresh fa-lg fa-fw" aria-hidden="true" onclick="orgEdgexFoundry.supportApplication.renderDeviceList()"></i>
+                </div>
+            </div>
+        </div>
+        <!--设备列表-->
+        <div class="panel-body" style="padding:0;">
+            <div id="edgex-support-device-devicelist">
+                <table class="table  table-responsive table-hover table-striped">
+                    <thead>
+                    <tr class="active">
+                        <th>#</th>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>查看命令列表</th>
+                        <th>修改/新建在Export-Receiver中定义命令信息</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot style="display:none;">
+                    <tr align="center">
+                        <td colspan=13>No Data.</td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <!--设备列表 结束-->
+
+        <!--设备详情页-->
+        <div id="edgex-support-device-command" class="panel panel-success">
+            <!--硬件信息-->
+            <div class="panel panel-success" id="edgex-support-device-resource-detail">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        设备资源情况
+                    </h3>
+                </div>
+            </div>
+            <!--硬件信息 结束-->
+
+            <!--命令列表-->
+            <div class="panel panel-success" style="display: none" id="edgex-support-device-command-detail">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        设备<span id="edgex-support-device-command-name"></span>命令列表
+                        <button type="button" class="close pull-right" aria-label="Close" id="edgex-support-device-command-close"><span style="color:#333!important;" aria-hidden="true">&times;</span></button>
+                    </h3>
+                </div>
+                <div class="panel-body" style="padding:0;">
+                    <form class="edgex-support-application-form">
+                        <div id="edgex-support-device-command-not_registed" style="display: none">
+                            <h3 style="text-align:center">当前设备还没有在Edgex-Export-Receiver里注册</h3>
+                            <div align="center"><button type="button" class="btn btn-success" id="edgex-support-device-command-regist">注册</button></div>
+                        </div>
+                        <div id="edgex-support-device-command-registed" style="display: none">
+                            <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                                <div class="panel-heading" style="padding:5px 2px;">
+                                    <div class="edgexIconBtn">
+                                        <i class="fa fa-refresh fa-lg fa-fw" aria-hidden="true" name="refreshDeviceCommandList"></i>
+                                    </div>
+                                    <div class="edgexIconBtn">
+                                        <i class="fa fa-trash-o fa-lg" aria-hidden="true" name="delDevice"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <table class="table  table-responsive table-hover table-striped" id="edgex-support-device-commandlist">
+                                    <thead>
+                                        <tr class="active">
+                                            <th>#</th>
+                                            <th>名称</th>
+                                            <th>方法</th>
+                                            <th>查看注册详细信息</th>
+                                            <th>新建/编辑定义信息</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                    <tfoot style="display:none;">
+                                        <tr align="center">
+                                            <td colspan=13>No Data.</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!--命令列表 结束-->
+
+            <!--新建/编辑命令定义信息-->
+            <div id="edgex-support-device-command-add" style="display: none" class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">新建/编辑定义信息</h3>
+                </div>
+                <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                    <div class="panel-heading" style="padding:5px 2px;">
+                        <div class="edgexIconBtn add-command"  onclick="orgEdgexFoundry.supportApplication.commitCommandBtn('new');">
+                            <i class="fa fa-check fa-lg" aria-hidden="true"></i>
+                        </div>
+                        <div class="edgexIconBtn update-command" style="display:none;" onclick="orgEdgexFoundry.supportApplication.commitCommandBtn();">
+                            <i class="fa fa-check fa-lg" aria-hidden="true"></i>
+                        </div>
+                        <div class="edgexIconBtn" onclick="orgEdgexFoundry.supportApplication.cancelAddCommandBtn()">
+                            <i class="fa fa-close fa-lg" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body" style="padding:0;">
+                    <div id="edgex-support-device-command-add-basicinfo" style="margin-bottom: 20px">
+                        <fieldset>
+                            <legend>Command基本信息</legend>
+                            <table>
+                                <td><b>名称:</b></td>
+                                <td><input type="text" class="form-control" disabled id="edgex-support-device-command-add-basicinfo-name"/></td>
+                                <td><b>对应设备ID:</b></td>
+                                <td><input type="text" class="form-control" disabled id="edgex-support-device-command-add-basicinfo-edgexid"/></td>
+                                <td><b>方法:</b></td>
+                                <td><input type="text" class="form-control" disabled id="edgex-support-device-command-add-basicinfo-type"/></td>
+                                <td><b>URL:</b></td>
+                                <td><input type="text" class="form-control" disabled id="edgex-support-device-command-add-basicinfo-url"/></td>
+                                <tr/>
+                            </table>
+                            <HR/>
+                            <table>
+                                <td><b>Description:</b></td>
+                                <td><input type="text" class="form-control" id="edgex-support-device-command-add-basicinfo-desc"/></td>
+                                <td><b>执行时间限制:</b></td>
+                                <td><input type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-time_limit_num"/></td>
+                                <td>
+                                    <select class="form-control" id="edgex-support-device-command-add-basicinfo-time_limit_unit">
+                                        <option value="ms">ms</option>
+                                        <option value="s">s</option>
+                                        <option value="min">min</option>
+                                        <option value="h">h</option>
+                                        <option value="d">d</option>
+                                    </select>
+                                </td>
+                            </table>
+                        </fieldset>
+                    </div>
+                    <div id="edgex-support-device-command-add-detail">
+                        <table>
+                            <td style="width: 50%">
+                                <fieldset id="edgex-support-device-command-detail-hardware-resource">
+                                    <legend>硬件资源需求信息</legend>
+                                    <table>
+                                        <td style="width: 16%; text-align: right"><b>CPU(G cycles): </b></td>
+                                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-cpu_request"/></td>
+                                        <td style="width: 16%; text-align: right"><b>内存(MB): </b></td>
+                                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-memory_request"/></td>
+                                        <td style="width: 16%; text-align: right"><b>磁盘(MB): </b></td>
+                                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-disk_request"/></td>
+                                    </table>
+                                </fieldset>
+                            </td>
+                            <td style="width: 25%">
+                                <fieldset id="edgex-support-device-command-detail-hardware-kind_and_exec_limt">
+                                    <legend>类型和执行限制信息</legend>
+                                    <table>
+                                        <td style="text-align: right"><b>类型: </b></td>
+                                        <td style="text-align: left">
+                                            <select type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-kind">
+                                                <option value="Pod">Pod</option>
+                                                <option value="ReplicationController">ReplicationController</option>
+                                                <option value="ReplicaSet">ReplicaSet</option>
+                                                <option value="Service">Service</option>
+                                                <option value="DaemonSet">DaemonSet</option>
+                                                <option value="Deployment">Deployment</option>
+                                            </select>
+                                        </td>
+                                        <td style="text-align: right"><b>执行限制: </b></td>
+                                        <td style="text-align: left">
+                                            <select type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-exec_limit">
+                                                <option value="LocalOrRemote">本地/远端</option>
+                                                <option value="Local">本地</option>
+                                                <option value="Remote">远端</option>
+                                            </select>
+                                        </td>
+                                    </table>
+                                </fieldset>
+                            </td>
+                            <td style="width: 25%">
+                                <fieldset id="edgex-support-device-command-detail-host">
+                                    <legend>Host信息</legend>
+                                    <table>
+                                        <td style="text-align: right"><b>HostName: </b></td>
+                                        <td style="text-align: left"><input type="text" class="form-control" id="edgex-support-device-command-add-basicinfo-host_name"/></td>
+                                        <td style="text-align: right"><b>HostPort: </b></td>
+                                        <td style="text-align: left"><input type="number" min="5001" max="65535" class="form-control" id="edgex-support-device-command-add-basicinfo-host_port"/></td>
+                                    </table>
+                                </fieldset>
+                            </td>
+                        </table>
+                        <fieldset id="edgex-support-device-command-add-task_labels">
+                            <legend>Command Task Label信息</legend>
+                            <table name="Task_Labels_List"/>
+                            <HR/>
+                            <table name="New_Task_Labels">
+                                <td>
+                                    <input type="text"class="form-control" name="New_Task_Label_key" placeholder="key"/>
+                                </td>
+                                <td>
+                                    <input type="text"class="form-control" name="New_Task_Label_value" placeholder="value"/>
+                                </td>
+                                <td>
+                                    <div class="edgexIconBtn add-protocol" style="float:left;margin-top:7px;"><i class="fa fa-plus-circle fa-lg" name="Add_Task_Label" aria-hidden="true"/></div>
+                                </td>
+                            </table>
+                        </fieldset>
+                        <fieldset id="edgex-support-device-command-add-tolerations">
+                            <legend>Toleration信息</legend>
+                            <table name="Toleration_List"/>
+                            <HR/>
+                            <table name="New_Tolerations">
+                                <td>
+                                    <input type="text"class="form-control" name="New_Toleration_key" placeholder="key"/>
+                                </td>
+                                <td>
+                                    <input type="text"class="form-control" name="New_Toleration_value" placeholder="value"/>
+                                </td>
+                                <td>
+                                    <div class="edgexIconBtn add-protocol" style="float:left;margin-top:7px;"><i class="fa fa-plus-circle fa-lg" name="Add_Toleration" aria-hidden="true"/></div>
+                                </td>
+                            </table>
+                        </fieldset>
+                        <fieldset id="edgex-support-device-command-add-image_need">
+                            <legend>Image需求信息</legend>
+                            <table name="Image_Need_List"/>
+                            <HR/>
+                            <table name="New_Image_Need">
+                                <td>
+                                    <input type="text"class="form-control" name="New_Image_Need" placeholder="需要的Image"/>
+                                </td>
+                                <td>
+                                    <div class="edgexIconBtn add-protocol" style="float:left;margin-top:7px;"><i class="fa fa-plus-circle fa-lg" name="Add_Image_Need" aria-hidden="true"/></div>
+                                </td>
+                            </table>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <!--新建/编辑命令定义信息 结束-->
+
+        </div>
+        <!--设备详情页 结束-->
+    </div>
+    <!--设备列表页 结束-->
 
     <!--application section start-->
     <div class="panel panel-success" id="edgex-support-application" style="display: none">

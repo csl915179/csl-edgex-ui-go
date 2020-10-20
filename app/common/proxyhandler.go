@@ -56,6 +56,8 @@ func ProxyHandler(w http.ResponseWriter, r *http.Request, path string, prefix st
 		targetAddr += configs.ProxyConf.SupportNotificationPort
 	case configs.ProxyConf.SupportSchedulerPath:
 		targetAddr += configs.ProxyConf.SupportSchedulerPort
+	case configs.ProxyConf.ExportReceiverPath:
+		targetAddr += configs.ProxyConf.ExportReceiverPort
 	}
 	origin, _ := url.Parse(targetAddr)
 

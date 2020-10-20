@@ -55,6 +55,7 @@ func SchedulePartation(id string) error{
 		}else if  TaskList[i].State == "NOT EXECUTED" && TaskList[i].ExecLimit == "LocalOrRemote"{
 
 		}else if  TaskList[i].State == "NOT EXECUTED" && TaskList[i].ExecLimit == "Remote"{
+
 		}
 	}
 	execLock.Unlock()

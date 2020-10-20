@@ -3,7 +3,6 @@ Host = "localhost"
 Port = 4001
 Labels = []
 OpenMsg = "edgeX ui started"
-#StaticResourcesPath = "./static"
 StaticResourcesPath = "./static"
 
 #Using an default memory db automatically if not configed here.
@@ -36,3 +35,5 @@ SupportNotificationPath   = "/support-notification"
 SupportNotificationPort   = "48060"
 SupportSchedulerPath   = "/support-scheduler"
 SupportSchedulerPort   = "48085"
+ExportReceiverPath  =   "/export-receiver"
+ExportReceiverPort  =   "1210"
