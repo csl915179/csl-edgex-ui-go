@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    orgEdgexFoundry.supportApplication.loadNode();
+    //orgEdgexFoundry.supportApplication.loadNode();
     orgEdgexFoundry.supportApplication.renderDeviceList();
 });
 //init application object
@@ -33,14 +33,19 @@ orgEdgexFoundry.supportApplication = (function(){
         loadDeviceList:null,
         renderDeviceList:null,
         showDeviceDetail:null,
-        registDevice:null,
+        showDeviceInExportReceiver:null,
+        FillDeviceDetailPage:null,
+        FillCommandDetailPage:null,
         deleteDevice:null,
-        showCommand:null,
+        editDeviceBtn: null,
+        addDeviceBtn: null,
+        FillEditDevicePage: null,
+        registDevice:null,
+        editDevice: null,
+        showCommandDetailBtn:null,
         RenderCommandList: null,
-        MergeCommmandList: null,
-        addCommandBtn: null,
         editCommandBtn: null,
-        cancelAddCommandBtn: null,
+        readEditCommandPage: null,
 
         loadApplicationList: null,
         renderApplicationList: null,
@@ -475,7 +480,7 @@ orgEdgexFoundry.supportApplication = (function(){
     //===================Node section end===================================
 
     //===================Device Section Begin================================
-    //获取Edgex里面的设备列表以及Edgex-Export-Receiver里的设备列表
+    //通过ajax获取Edgex里面的设备列表以及Edgex-Export-Receiver里的设备列表
     SupportApplication.prototype.loadDeviceList = function() {
         var devicelist = [], Exporterdevicelist = [];
         //获取Edgex里面的设备信息
@@ -509,6 +514,7 @@ orgEdgexFoundry.supportApplication = (function(){
     }
     //刷新前端显示的列表
     SupportApplication.prototype.renderDeviceList = function() {
+        $("#edgex-support-device-devicelist").show('fast');
         var devicelist = application.loadDeviceList()[0], Exporterdevicelist = application.loadDeviceList()[1];
         var deviceExistInExporter = {};
         $.each(Exporterdevicelist, function (index, element) {
@@ -521,8 +527,9 @@ orgEdgexFoundry.supportApplication = (function(){
             rowData += "<td>" + (i + 1) +"</td>";
             rowData += "<td>" +  v.id + "</td>";
             rowData += "<td>" +  v.name + "</td>";
-            rowData += '<td class="scheduler-detail-icon device_exporter_detail"><input type="hidden" value=\''+JSON.stringify(v)+'\' exist=\''+exist+'\'><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
-            rowData += '<td class="scheduler-edit-icon edit_device"><input type="hidden" value=\''+v.id+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
+            rowData += '<td class="scheduler-detail-icon edgex-support-device-devicelist-detail"><input type="hidden" value=\''+JSON.stringify(v)+'\' exist=\''+exist+'\'><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
+            rowData += '<td class="scheduler-edit-icon edgex-support-device-devicelist-edit"><input type="hidden" value=\''+JSON.stringify(v)+'\' exist=\''+exist+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
+            rowData += '<td class="scheduler-edit-icon edgex-support-device-devicelist-delete"><input type="hidden" value=\''+JSON.stringify(v)+'\' exist=\''+exist+'\'><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
             rowData += "</tr>";
             $("#edgex-support-device-devicelist tbody").append(rowData);
         });
@@ -531,43 +538,319 @@ orgEdgexFoundry.supportApplication = (function(){
         }else {
             $("#edgex-support-device-devicelist tfoot").hide()
         }
-        $(".device_exporter_detail").off('click').on('click',function(){
+        $(".edgex-support-device-devicelist-detail").off('click').on('click',function(){
             application.showDeviceDetail($(this).children("input[type='hidden']").val(), $(this.children).attr("exist"));
+        });
+        $(".edgex-support-device-devicelist-edit").off('click').on('click',function(){
+            if ($(this.children).attr("exist") == "false"){
+                application.addDeviceBtn($(this).children("input[type='hidden']").val())
+            }else {
+                application.editDeviceBtn($(this).children("input[type='hidden']").val())
+            }
+        });
+        $(".edgex-support-device-devicelist-delete").off('click').on('click',function(){
+            var deviceInfo = $(this).children("input[type='hidden']").val();
+            if ($(this.children).attr("exist") == "true") {
+                bootbox.confirm({
+                    title: "提示",
+                    message: "是否要删除设备: " + "<font color = 'red'>" + JSON.parse(deviceInfo).name+ "</font>" + "的注册信息?<br/><font color = 'red'>删除后不可恢复，确定删除?</>",
+                    className: 'green-red-buttons',
+                    callback: function (result) {
+                        if (result) {
+                            application.deleteDevice(deviceInfo)
+                        }
+                    }
+                });
+            }
         });
     }
     //显示设备详细信息
-    SupportApplication.prototype.showDeviceDetail = function (device, exist){
-        var deviceInfo = JSON.parse(device);
-        $("#edgex-support-device-command-detail").show('fast');
-        $("#edgex-support-device-command-name").html(deviceInfo.name)
+    SupportApplication.prototype.showDeviceDetail = function (deviceInfo, exist){
+        var device = JSON.parse(deviceInfo);
+        $("#edgex-support-device-detail").show('fast');
+        $("#edgex-support-device-detail-name").html(device.name);
         if (exist == "true"){
-            application.showCommand(device)
+            $("#edgex-support-device-detail-not_registed").hide();
+            $("#edgex-support-device-detail-registed").show('fast');
+            application.FillDeviceDetailPage(deviceInfo)
         }else {
-            $("#edgex-support-device-command-registed").hide();
-            $("#edgex-support-device-command-not_registed").show('fast');
-            $("#edgex-support-device-command-regist").off('click').on('click',function(){
-                application.registDevice(device);
-                application.renderDeviceList();
-                application.showCommand(device)
+            $("#edgex-support-device-detail-registed").hide();
+            $("#edgex-support-device-detail-not_registed").show('fast');
+            $("#edgex-support-device-detail-not_registed-regist").off('click').on('click',function(){
+                application.addDeviceBtn(deviceInfo);
             });
         }
-        $("#edgex-support-device-command-close").off('click').on('click', function () {
-            $("#edgex-support-device-command-detail").hide();
+        $("#edgex-support-device-detail-close").off('click').on('click', function () {
+            $("#edgex-support-device-detail input").val("");
+            $("#edgex-support-device-detail-command table").empty();
+            $("#edgex-support-device-detail").hide();
             application.renderDeviceList();
         })
+    }
+    //获取Export-Receiver内的设备信息
+    SupportApplication.prototype.showDeviceInExportReceiver = function(id){
+        var device = null
+        $.ajax({
+            url: '/export-receiver/api/v1/device/edgexid/' + id,
+            type:'GET',
+            contentType:'application/json',
+            async : false,
+            success:function(data){
+                device = data
+            },
+            error:function(){
+                alert("ERROR! 获取Export-Receiver设备信息失败")
+            }
+        });
+        return device
+    }
+    //填充设备详情页面
+    SupportApplication.prototype.FillDeviceDetailPage = function (deviceInfo) {
+        $("#edgex-support-device-devicelist").hide();
+        var deviceID = JSON.parse(deviceInfo).id;
+        var device = application.showDeviceInExportReceiver(deviceID);
+        $("#edgex-support-device-detail-basicInfo-edgexid").val(device.edgexid);
+        $("#edgex-support-device-detail-basicInfo-name").val(device.name);
+        $("#edgex-support-device-detail-basicInfo-cpu").val(device.cpu);
+        $("#edgex-support-device-detail-basicInfo-memory").val(device.memory);
+        $("#edgex-support-device-detail-basicInfo-disk").val(device.disk);
+        $.each(device.getcommands, function (index, command) {
+            var rowData = "<tr>";
+            rowData += '<td style="width: 16%; text-align: right">' + '<b>' + '名称:' + '</b>' + '</td>';
+            rowData += '<td style="width: 16%; text-align: left">' + '<input type="text" class="form-control" disabled value=' + command.name + ' >' + '</td>';
+            rowData += '<td style="width: 16%; text-align: right">' + '<b>' + 'get/set:' + '</b>' + '</td>';
+            rowData += '<td style="width: 16%; text-align: left">' + '<input type="text" class="form-control" disabled value=' + command.type + ' >' + '</td>';
+            rowData += '<td style="width: 16%; text-align: right" class="scheduler-detail-icon edgex-support-device-detail-command_detail"><input type="hidden" value=\'' + JSON.stringify(command) + '\'><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
+            $("#edgex-support-device-detail-command table").append(rowData);
+        })
+        $.each(device.putcommands, function (index, command) {
+            var rowData = "<tr>";
+            rowData += '<td style="width: 16%; text-align: right">' + '<b>' + '名称:' + '</b>' + '</td>';
+            rowData += '<td style="width: 16%; text-align: left">' + '<input type="text" class="form-control" disabled value=' + command.name + ' >' + '</td>';
+            rowData += '<td style="width: 16%; text-align: right">' + '<b>' + 'get/set:' + '</b>' + '</td>';
+            rowData += '<td style="width: 16%; text-align: left">' + '<input type="text" class="form-control" disabled value=' + command.type + ' >' + '</td>';
+            rowData += '<td style="width: 16%; text-align: right" class="scheduler-detail-icon edgex-support-device-detail-command_detail"><input type="hidden" value=\'' + JSON.stringify(command) + '\'><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
+            $("#edgex-support-device-detail-command table").append(rowData);
+        })
+        $(".edgex-support-device-detail-command_detail").off('click').on('click', function () {
+            var commandInfo = $(this).children("input[type='hidden']").val();
+            application.FillCommandDetailPage(commandInfo);
+        })
+    }
+    //填充设备详情的命令详情页面
+    SupportApplication.prototype.FillCommandDetailPage = function (commandInfo) {
+        var command = JSON.parse(commandInfo);
+        $("#edgex-support-device-detail-registed").hide();
+        $("#edgex-support-device-detail-command_detail input").val("");
+        $("#edgex-support-device-detail-command_detail").show('fast');
+        $("#edgex-support-device-detail-command_detail-name").html(command.name);
+        $("#edgex-support-device-detail-command_detail-basicinfo-name").val(command.name);
+        $("#edgex-support-device-detail-command_detail-basicinfo-deviceid").val(command.deviceid);
+        $("#edgex-support-device-detail-command_detail-basicinfo-type").val(command.type);
+        $("#edgex-support-device-detail-command_detail-basicinfo-url").val(command.url);
+        $("#edgex-support-device-detail-command_detail-basicinfo-desc").val(command.desc);
+        $("#edgex-support-device-detail-command_detail-basicinfo-time_limit").val(command.time_limit);
+        $("#edgex-support-device-detail-command_detail-basicinfo-cpu_request").val(command.cpu_request);
+        $("#edgex-support-device-detail-command_detail-basicinfo-memory_request").val(command.memory_request);
+        $("#edgex-support-device-detail-command_detail-basicinfo-disk_request").val(command.disk_request);
+        $("#edgex-support-device-detail-command_detail-basicinfo-kind").val(command.kind);
+        $("#edgex-support-device-detail-command_detail-basicinfo-exec_limit").val(command.exec_limit);
+        $("#edgex-support-device-detail-command_detail-basicinfo-host_name").val(command.host_name);
+        $("#edgex-support-device-detail-command_detail-basicinfo-host_port").val(command.host_port);
+        $("#edgex-support-device-detail-command_detail-task_labels table").empty();
+        $("#edgex-support-device-detail-command_detail-tolerations table").empty();
+        $("#edgex-support-device-detail-command_detail-image_need table").empty();
+        application.showAttributeDetailList("#edgex-support-device-detail-command_detail-task_labels table", JSON.stringify(command.task_labels));
+        application.showAttributeDetailList("#edgex-support-device-detail-command_detail-tolerations table", JSON.stringify(command.tolerations));
+        var image_need_element = new Array();
+        $.each(command.image_need, function (index,image_need) {
+            var Image_need_InputElementList = new Array();
+            var Image_need_InputElement = '<input type="text" class="form-control" disabled style="width: 80%" value="'+image_need+'"/>';
+            Image_need_InputElementList.push(Image_need_InputElement)
+            image_need_element.push(Image_need_InputElementList)
+        });
+        application.makeAttributeTable("#edgex-support-device-detail-command_detail-image_need table", image_need_element,8);
+        $("#edgex-support-device-detail-command_detail-exit").off('click').on('click', function () {
+            $("#edgex-support-device-detail-registed").show('fast');
+            $("#edgex-support-device-detail-command_detail").hide();
+        })
+    }
+    //删除设备，同时删除到Edgex-Export和Edgex-Export-Receiver
+    SupportApplication.prototype.deleteDevice = function(deviceInfo){
+        var device = JSON.parse(deviceInfo);
+        $.ajax({
+            url: '/export-receiver/api/v1/device/edgexid/' + device.id,
+            type:'Delete',
+            contentType:'application/json',
+            async : false,
+            dataType : 'text',
+            error:function(){
+                alert("ERROR! 删除设备到Export-Receiver失败")
+                return false
+            }
+        });
+        var core_export_registInfo = {};
+        $.ajax({
+            url: '/core-export/api/v1/registration/name/Edgex-Exporter-Receiver',
+            type:'GET',
+            contentType:'application/json',
+            async : false,
+            success:function(data){
+                core_export_registInfo = data
+            },
+            error:function(){
+                alert("ERROR! 获取Edgex设备导出注册信息失败")
+                return false
+            }
+        });
+        core_export_registInfo.filter.deviceIdentifiers.splice($.inArray(device.name,core_export_registInfo.filter.deviceIdentifiers),1);
+        $.ajax({
+            url: '/core-export/api/v1/registration',
+            type:'PUT',
+            contentType:'application/json',
+            async : false,
+            data : JSON.stringify(core_export_registInfo),
+            error:function(){
+                alert("ERROR! 更新Edgex设备导出注册信息失败")
+                return false
+            }
+        });
+    }
+    //点击编辑设备按键的功能
+    SupportApplication.prototype.editDeviceBtn = function(deviceInfo){
+        var device = JSON.parse(deviceInfo);
+        $("#edgex-support-device-devicelist").hide();
+        $("#edgex-support-device-edit-deviceList-submitDevice").attr("newdevice", "false");
+        application.FillEditDevicePage(JSON.stringify(application.showDeviceInExportReceiver(device.id)));
+    }
+    //点击新建设备按键的功能
+    SupportApplication.prototype.addDeviceBtn = function(deviceInfo) {
+        $("#edgex-support-device-devicelist").hide();
+        $("#edgex-support-device-detail").hide();
+        $("#edgex-support-device-edit-deviceList-submitDevice").attr("newdevice", "true")
+        var commandInfo = showDeviceCommandInEdgex(JSON.parse(deviceInfo).id);
+        var device = {
+            "edgexid" : JSON.parse(deviceInfo).id,
+            "name" : JSON.parse(deviceInfo).name,
+            "getcommands" : {},
+            "putcommands" : {}
+        };
+        $.each(commandInfo.commands, function (index, command) {
+            if (command.get != null){
+                device.getcommands[command.name] = {
+                    "deviceid" : JSON.parse(deviceInfo).id,
+                    "url" : command.get.url,
+                    "name" : command.name,
+                    "type" : "get",
+                    "task_labels": [],
+                    "tolerations": [],
+                    "image_need": []
+                }
+            }
+            if (command.put != null){
+                device.putcommands[command.name] = {
+                    "deviceid" : JSON.parse(deviceInfo).id,
+                    "url" : command.put.url,
+                    "name" : command.name,
+                    "type" : "put",
+                    "task_labels": [],
+                    "tolerations": [],
+                    "image_need": []
+                }
+            }
+        });
+        application.FillEditDevicePage(JSON.stringify(device))
+    }
+    function showDeviceCommandInEdgex(id){
+        var device = null
+        $.ajax({
+            url: '/core-command/api/v1/device/' + id,
+            type:'GET',
+            contentType:'application/json',
+            async : false,
+            success:function(data){
+                device = data
+            },
+            error:function(){
+                alert("ERROR! 获取Edgex 中注册的设备命令列表失败")
+            }
+        });
+        return device
+    }
+    //填充编辑设备定义信息页面
+    SupportApplication.prototype.FillEditDevicePage = function(deviceInfo) {
+        $("#edgex-support-device-edit").show('fast');
+        $("#edgex-support-device-edit input").val("");
+        $("#edgex-support-device-edit-deviceList-command table").empty();
+        var device = JSON.parse(deviceInfo);
+        $("#edgex-support-device-edit").show('fast');
+        $("#edgex-support-device-edit-deviceList").show('fast');
+        $("#edgex-support-device-edit-name").html(device.name);
+        $("#edgex-support-device-edit-deviceList-basicInfo input[name= 'name']").val(device.name);
+        $("#edgex-support-device-edit-deviceList-basicInfo input[name= 'cpu']").val(device.cpu);
+        $("#edgex-support-device-edit-deviceList-basicInfo input[name= 'memory']").val(device.memory);
+        $("#edgex-support-device-edit-deviceList-basicInfo input[name= 'disk']").val(device.disk);
+        $("#edgex-support-device-edit-deviceList-command table").empty();
+        $.each(device.getcommands, function (index, command) {
+            var rowData = "<tr>";
+            rowData += '<td style="width: 16%; text-align: right">' + '<b>' + '名称:' + '</b>' + '</td>';
+            rowData += '<td style="width: 16%; text-align: left">' + '<input type="text" class="form-control" disabled value=' + command.name + ' >' + '</td>';
+            rowData += '<td style="width: 16%; text-align: right">' + '<b>' + 'get/set:' + '</b>' + '</td>';
+            rowData += '<td style="width: 16%; text-align: left">' + '<input type="text" class="form-control" disabled value=' + command.type + ' >' + '</td>';
+            rowData += '<td style="width: 16%; text-align: right" class="scheduler-detail-icon edgex-support-device-edit-deviceList-command_detail"><input type="hidden" value=\'' + JSON.stringify(command) + '\'><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
+            rowData += '<td style="width: 16%; text-align: right" class="scheduler-detail-icon edgex-support-device-edit-deviceList-command-edit"><input type="hidden" value=\'' + JSON.stringify(command) + '\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
+            $("#edgex-support-device-edit-deviceList-command table").append(rowData);
+        });
+        $.each(device.putcommands, function (index, command) {
+            var rowData = "<tr>";
+            rowData += '<td style="width: 16%; text-align: right">' + '<b>' + '名称:' + '</b>' + '</td>';
+            rowData += '<td style="width: 16%; text-align: left">' + '<input type="text" class="form-control" disabled value=' + command.name + ' >' + '</td>';
+            rowData += '<td style="width: 16%; text-align: right">' + '<b>' + 'get/set:' + '</b>' + '</td>';
+            rowData += '<td style="width: 16%; text-align: left">' + '<input type="text" class="form-control" disabled value=' + command.type + ' >' + '</td>';
+            rowData += '<td style="width: 16%; text-align: right" class="scheduler-detail-icon edgex-support-device-edit-deviceList-command_detail"><input type="hidden" value=\'' + JSON.stringify(command) + '\'><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
+            rowData += '<td style="width: 16%; text-align: right" class="scheduler-detail-icon edgex-support-device-edit-deviceList-command-edit"><input type="hidden" value=\'' + JSON.stringify(command) + '\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
+            $("#edgex-support-device-edit-deviceList-command table").append(rowData);
+        });
+        $("#edgex-support-device-edit-deviceList-submitDevice").off('click').on('click', function () {
+            var newDevice = $("#edgex-support-device-edit-deviceList-submitDevice").attr("newdevice");
+            if (newDevice == "true") {
+                device.cpu = Number($("#edgex-support-device-edit-deviceList-basicInfo input[name= 'cpu']").val());
+                device.memory = Number($("#edgex-support-device-edit-deviceList-basicInfo input[name= 'memory']").val());
+                device.disk = Number($("#edgex-support-device-edit-deviceList-basicInfo input[name= 'disk']").val())
+                application.registDevice(JSON.stringify(device));
+            } else {
+                device.cpu = Number($("#edgex-support-device-edit-deviceList-basicInfo input[name= 'cpu']").val());
+                device.memory = Number($("#edgex-support-device-edit-deviceList-basicInfo input[name= 'memory']").val());
+                device.disk = Number($("#edgex-support-device-edit-deviceList-basicInfo input[name= 'disk']").val())
+                application.editDevice(JSON.stringify(device));
+            }
+            $("#edgex-support-device-edit").hide();
+            application.renderDeviceList();
+        });
+        $("#edgex-support-device-edit-deviceList-cancelSubmitDevice").off('click').on('click', function () {
+            $("#edgex-support-device-edit").hide();
+            application.renderDeviceList();
+        });
+        $(".edgex-support-device-edit-deviceList-command_detail").off('click').on('click', function () {
+            var commandInfo = $(this).children("input[type='hidden']").val();
+            application.showCommandDetailBtn(commandInfo)
+        });
+        $(".edgex-support-device-edit-deviceList-command-edit").off('click').on('click', function () {
+            device.cpu = Number($("#edgex-support-device-edit-deviceList-basicInfo input[name= 'cpu']").val());
+            device.memory = Number($("#edgex-support-device-edit-deviceList-basicInfo input[name= 'memory']").val());
+            device.disk = Number($("#edgex-support-device-edit-deviceList-basicInfo input[name= 'disk']").val())
+            var commandInfo = $(this).children("input[type='hidden']").val();
+            application.editCommandBtn(commandInfo, device)
+        });
     }
     //注册设备，同时注册到Edgex-Export和Edgex-Export-Receiver
     SupportApplication.prototype.registDevice = function(deviceInfo){
         var device = JSON.parse(deviceInfo);
-        var edgex_export_receiverInfo = {
-            "edgexid" : device.id,
-            "name" : device.name
-        };
         $.ajax({
             url: '/export-receiver/api/v1/device',
             type:'POST',
             contentType:'application/json',
-            data : JSON.stringify(edgex_export_receiverInfo),
+            data : deviceInfo,
             async : false,
             dataType : 'text',
             error:function(){
@@ -611,189 +894,153 @@ orgEdgexFoundry.supportApplication = (function(){
             }
         });
     }
-    //删除设备，同时删除到Edgex-Export和Edgex-Export-Receiver
-    SupportApplication.prototype.deleteDevice = function(deviceInfo){
-        var device = JSON.parse(deviceInfo);
+    //修改在ExportReceiver里的设备
+    SupportApplication.prototype.editDevice = function(deviceInfo){
         $.ajax({
-            url: '/export-receiver/api/v1/device/edgexid/' + device.id,
-            type:'Delete',
+            url: '/export-receiver/api/v1/device',
+            type:'PUT',
             contentType:'application/json',
+            data : deviceInfo,
             async : false,
             dataType : 'text',
             error:function(){
-                alert("ERROR! 删除设备到Export-Receiver失败")
-                return false
-            }
-        });
-        var core_export_registInfo = {};
-        $.ajax({
-            url: '/core-export/api/v1/registration/name/Edgex-Exporter-Receiver',
-            type:'GET',
-            contentType:'application/json',
-            async : false,
-            success:function(data){
-                core_export_registInfo = data
-            },
-            error:function(){
-                alert("ERROR! 获取Edgex设备导出注册信息失败")
-                return false
-            }
-        });
-        core_export_registInfo.filter.deviceIdentifiers.splice($.inArray(device.name,core_export_registInfo.filter.deviceIdentifiers),1);
-        $.ajax({
-            url: '/core-export/api/v1/registration',
-            type:'PUT',
-            contentType:'application/json',
-            async : false,
-            data : JSON.stringify(core_export_registInfo),
-            error:function(){
-                alert("ERROR! 更新Edgex设备导出注册信息失败")
+                alert("ERROR! 修改设备到Export-Receiver失败")
                 return false
             }
         });
     }
-    //显示设备注册命令信息
-    SupportApplication.prototype.showCommand = function(deviceInfo){
-        var device = JSON.parse(deviceInfo);
-        var edgexExportReceiverDevice = showDeviceInExportReceiver(device.id);
-        var edgexDeviceCommand = showDeviceCommandInEdgex(device.id);
-        if (edgexExportReceiverDevice == null || edgexDeviceCommand == null){
-            return false;
-        }
-        $("#edgex-support-device-command-registed").show('fast');
-        $("#edgex-support-device-command-not_registed").hide();
-        application.RenderCommandList(JSON.stringify(edgexExportReceiverDevice), JSON.stringify(edgexDeviceCommand))
-        $("#edgex-support-device-command-registed i[name= 'refreshDeviceCommandList']").off('click').on('click', function () {
-            application.showCommand(deviceInfo)
+    //查看某条Command的详细信息
+    SupportApplication.prototype.showCommandDetailBtn = function(commandInfo){
+        var command = JSON.parse(commandInfo);
+        $("#edgex-support-device-edit-deviceList").hide();
+        $("#edgex-support-device-edit-command_detail input").val("");
+        $("#edgex-support-device-edit-command_detail").show('fast');
+        $("#edgex-support-device-edit-command_detail-name").html(command.name);
+        $("#edgex-support-device-edit-command_detail-basicinfo-name").val(command.name);
+        $("#edgex-support-device-edit-command_detail-basicinfo-deviceid").val(command.deviceid);
+        $("#edgex-support-device-edit-command_detail-basicinfo-type").val(command.type);
+        $("#edgex-support-device-edit-command_detail-basicinfo-url").val(command.url);
+        $("#edgex-support-device-edit-command_detail-basicinfo-desc").val(command.desc);
+        $("#edgex-support-device-edit-command_detail-basicinfo-time_limit").val(command.time_limit);
+        $("#edgex-support-device-edit-command_detail-basicinfo-cpu_request").val(command.cpu_request);
+        $("#edgex-support-device-edit-command_detail-basicinfo-memory_request").val(command.memory_request);
+        $("#edgex-support-device-edit-command_detail-basicinfo-disk_request").val(command.disk_request);
+        $("#edgex-support-device-edit-command_detail-basicinfo-kind").val(command.kind);
+        $("#edgex-support-device-edit-command_detail-basicinfo-exec_limit").val(command.exec_limit);
+        $("#edgex-support-device-edit-command_detail-basicinfo-host_name").val(command.host_name);
+        $("#edgex-support-device-edit-command_detail-basicinfo-host_port").val(command.host_port);
+        $("#edgex-support-device-edit-command_detail-task_labels table").empty();
+        $("#edgex-support-device-edit-command_detail-tolerations table").empty();
+        $("#edgex-support-device-edit-command_detail-image_need table").empty();
+        application.showAttributeDetailList("#edgex-support-device-edit-command_detail-task_labels table", JSON.stringify(command.task_labels));
+        application.showAttributeDetailList("#edgex-support-device-edit-command_detail-tolerations table", JSON.stringify(command.tolerations));
+        var image_need_element = new Array();
+        $.each(command.image_need, function (index,image_need) {
+            var Image_need_InputElementList = new Array();
+            var Image_need_InputElement = '<input type="text" class="form-control" disabled style="width: 80%" value="'+image_need+'"/>';
+            Image_need_InputElementList.push(Image_need_InputElement)
+            image_need_element.push(Image_need_InputElementList)
+        });
+        application.makeAttributeTable("#edgex-support-device-edit-command_detail-image_need table", image_need_element,8);
+        $("#edgex-support-device-edit-command_detail-exit").off('click').on('click', function () {
+            $("#edgex-support-device-edit-deviceList").show('fast');
+            $("#edgex-support-device-edit-command_detail").hide();
         })
-        $("#edgex-support-device-command-registed i[name= 'delDevice']").off('click').on('click', function () {
-           deleteDeviceBtn(deviceInfo)
-        })
     }
-    function showDeviceInExportReceiver(id){
-        var device = null
-        $.ajax({
-            url: '/export-receiver/api/v1/device/edgexid/' + id,
-            type:'GET',
-            contentType:'application/json',
-            async : false,
-            success:function(data){
-                device = data
-            },
-            error:function(){
-                alert("ERROR! 获取Export-Receiver设备信息失败")
-            }
-        });
-        return device
-    }
-    function showDeviceCommandInEdgex(id){
-        var device = null
-        $.ajax({
-            url: '/core-command/api/v1/device/' + id,
-            type:'GET',
-            contentType:'application/json',
-            async : false,
-            success:function(data){
-                device = data
-            },
-            error:function(){
-                alert("ERROR! 获取Edgex 中注册的设备命令列表失败")
-            }
-        });
-        return device
-    }
-    function deleteDeviceBtn(deviceInfo){
-        var device = JSON.parse(deviceInfo);
-        bootbox.confirm({
-            title: "提示",
-            message: "是否要删除Device: " + "<font color = 'red'>" + device.name+ "</font>" + "?<br/><font color = 'red'>删除后不可恢复，确定删除?</font>",
-            className: 'green-red-buttons',
-            callback: function (result) {
-                if (result) {
-                    application.deleteDevice(deviceInfo);
-                    $("#edgex-support-device-command-detail").hide();
-                    application.renderDeviceList();
-                }
-            }
-        });
-    }
-    //填充命令列表
-    SupportApplication.prototype.RenderCommandList = function(exporterdevice, edgexcommand){
-        var edgexExportReceiverDevice = JSON.parse(exporterdevice), edgexDeviceCommand = JSON.parse(edgexcommand);
-        var mergedCommandList = application.MergeCommmandList(exporterdevice, edgexcommand);
-        $("#edgex-support-device-commandlist tbody").empty();
-        $.each(mergedCommandList, function (index,command) {
-            var rowData = "<tr>";
-            rowData += "<td>" + (index + 1) +"</td>";
-            rowData += "<td>" +  command.name + "</td>";
-            rowData += "<td>" +  command.method + "</td>";
-            var registed = command.exportreceiverdata != null
-            if (registed){
-                rowData += '<td class="scheduler-detail-icon command_detail"><input type="hidden" value=\''+JSON.stringify(command)+'\'><div class="edgexIconBtn"><i class="fa fa-search-plus fa-lg" aria-hidden="true"></i> </div></td>';
-            }else{
-                rowData += "<td>" +  '未注册' + "</td>";
-            }
-            rowData += '<td class="scheduler-detail-icon command_addOrEdit"><input type="hidden" value=\''+JSON.stringify(command)+'\' registed=\''+registed+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
-            rowData += "</tr>";
-            $("#edgex-support-device-commandlist tbody").append(rowData);
-        });
-        if (mergedCommandList.length == 0){
-            $("#edgex-support-device-commandlist tfoot").show('fast');
-        }else {
-            $("#edgex-support-device-commandlist tfoot").hide()
-        }
-        $(".command_addOrEdit").off('click').on('click',function(){
-            var registed = $(this.children).attr("registed");
-            if (registed == "false"){
-                application.addCommandBtn()
-            }else {
-                application.editCommandBtn()
-            }
-        });
-    }
-    //将Edgex中的命令和Export-Receiver的命令归并起来
-    SupportApplication.prototype.MergeCommmandList = function(exporterdevice, edgexcommand){
-        var edgexExportReceiverDevice = JSON.parse(exporterdevice), edgexDeviceCommand = JSON.parse(edgexcommand);
-        var mergedCommandList = new Array();
-        $.each(edgexDeviceCommand.commands, function (index, command) {
-            if (command.get != null){
-                var commandelement = {};
-                commandelement.name = command.name;
-                commandelement.method = "get";
-                commandelement.edgexdata = command.get;
-                commandelement.exportreceiverdata = edgexExportReceiverDevice.getcommands[command.name];
-                mergedCommandList.push(JSON.parse(JSON.stringify(commandelement)));
-            }
-            if (command.put != null){
-                var commandelement = {};
-                commandelement.name = command.name;
-                commandelement.method = "put";
-                commandelement.edgexdata = command.put;
-                commandelement.exportreceiverdata = edgexExportReceiverDevice.putcommands[command.name];
-                mergedCommandList.push(JSON.parse(JSON.stringify(commandelement)));
-            }
-        })
-        return mergedCommandList
-    }
-    //添加Command按钮的功能
-    SupportApplication.prototype.addCommandBtn = function(){
-        $("#edgex-support-device-command-detail").hide();
-        $("#edgex-support-device-command-add").show('fast');
-        $("#edgex-support-device-command-add div.add-command").show('fast');
-        $("#edgex-support-task-add div.update-command").hide();
+    //编辑Command按钮的功能
+    SupportApplication.prototype.editCommandBtn = function(commandInfo, device){
+        var command = JSON.parse(commandInfo);
+        $("#edgex-support-device-edit-deviceList").hide();
+        $("#edgex-support-device-edit-command_edit").show('fast');
         var task_label_list = {}, toleration_list = {}, image_need_list = {};
+        fillEditCommandPage(commandInfo, task_label_list, toleration_list, image_need_list);
         Init_Task_Label_Add_Btn(task_label_list);
         Init_Task_Tolerations_Add_Btn(toleration_list);
         Init_Task_ImageNeed_Add_Btn(image_need_list)
+        $("#edgex-support-device-edit-command_edit-confirm").off('click').on('click', function () {
+            if (command.type == "get"){
+                device.getcommands[command.name] = JSON.parse(application.readEditCommandPage())
+            }else if (command.type == "put"){
+                device.putcommands[command.name] = JSON.parse(application.readEditCommandPage())
+            }
+            application.FillEditDevicePage(JSON.stringify(device));
+            $("#edgex-support-device-edit-command_edit input").val("");
+            $("#edgex-support-device-edit-command_edit select").val("");
+            $("#edgex-support-device-edit-command_edit").hide();
+        })
+        $("#edgex-support-device-edit-command_edit-cancel").off('click').on('click', function () {
+            $("#edgex-support-device-edit-command_edit input").val("");
+            $("#edgex-support-device-edit-command_edit select").val("");
+            $("#edgex-support-device-edit-command_edit").hide();
+            application.FillEditDevicePage(JSON.stringify(device));
+        })
+    }
+    function fillEditCommandPage(commandInfo, task_label_list, toleration_list, image_need_list) {
+        var command = JSON.parse(commandInfo);
+        $("#edgex-support-device-edit-command_edit input").val("");
+        $("#edgex-support-device-edit-command_edit select").val("");
+        $("#edgex-support-device-edit-command_edit-basicinfo-name").val(command.name);
+        $("#edgex-support-device-edit-command_edit-basicinfo-deviceid").val(command.deviceid);
+        $("#edgex-support-device-edit-command_edit-basicinfo-type").val(command.type);
+        $("#edgex-support-device-edit-command_edit-basicinfo-url").val(command.url);
+        $("#edgex-support-device-edit-command_edit-basicinfo-desc").val(command.desc);
+        if (command.time_limit != null){
+            $("#edgex-support-device-edit-command_edit-basicinfo-time_limit_num").val(command.time_limit.split(/([0-9]*)/)[1]);
+            $("#edgex-support-device-edit-command_edit-basicinfo-time_limit_unit").val(command.time_limit.split(/([0-9]*)/)[2]);
+        }
+        $("#edgex-support-device-edit-command_edit-basicinfo-cpu_request").val(command.cpu_request);
+        $("#edgex-support-device-edit-command_edit-basicinfo-memory_request").val(command.memory_request);
+        $("#edgex-support-device-edit-command_edit-basicinfo-disk_request").val(command.disk_request);
+        $("#edgex-support-device-edit-command_edit-basicinfo-kind").val(command.kind);
+        $("#edgex-support-device-edit-command_edit-basicinfo-exec_limit").val(command.exec_limit);
+        $("#edgex-support-device-edit-command_edit-basicinfo-host_name").val(command.host_name);
+        $("#edgex-support-device-edit-command_edit-basicinfo-host_port").val(command.host_port);
+        $.each(command.task_labels, function (index,TaskLabel) {
+            var random = Math.random();
+            var TaskLabel_key = '<input type="text" class="form-control" detail="key" disabled value='+TaskLabel.key+' >';
+            var TaskLabel_value = '<input type="text" class="form-control" detail="value" disabled value='+TaskLabel.value+' >';
+            var TaskLabel_del_bth = '<div class="edgexIconBtn delTaskLabel" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true"/>' + '</div>';
+            var TaskLabel_form_element = new Array()
+            TaskLabel_form_element.push(TaskLabel_key);
+            TaskLabel_form_element.push(TaskLabel_value);
+            TaskLabel_form_element.push(TaskLabel_del_bth);
+            task_label_list[random] = TaskLabel_form_element;
+        });
+        var TableName = "#edgex-support-device-edit-command_edit-task_labels table[name= Task_Labels_List]";
+        application.makeAttributeTable(TableName, task_label_list, 12);
+        $.each(command.tolerations, function (index,Toleration) {
+            var random = Math.random();
+            var Toleration_key = '<input type="text" class="form-control" detail="key" disabled value='+Toleration.key+' >';
+            var Toleration_value = '<input type="text" class="form-control" detail="value" disabled value='+Toleration.value+' >';
+            var Toleration_del_bth = '<div class="edgexIconBtn delToleration" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true"/>' + '</div>';
+            var Toleration_form_element = new Array()
+            Toleration_form_element.push(Toleration_key);
+            Toleration_form_element.push(Toleration_value);
+            Toleration_form_element.push(Toleration_del_bth);
+            toleration_list[random] = Toleration_form_element;
+        });
+        var TableName = "#edgex-support-device-edit-command_edit-tolerations table[name= Toleration_List]";
+        application.makeAttributeTable(TableName, toleration_list, 12);
+        $.each(command.image_need, function (index,Image) {
+            var random = Math.random();
+            var Image = '<input type="text" class="form-control" disabled value='+Image+' >';
+            var Image_del_bth = '<div class="edgexIconBtn delImage" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true"/>' + '</div>';
+            var Image_need_form_element = new Array()
+            Image_need_form_element.push(Image);
+            Image_need_form_element.push(Image_del_bth);
+            image_need_list[random] = Image_need_form_element;
+        });
+        var TableName = "#edgex-support-device-edit-command_edit-image_need table[name= Image_Need_List]";
+        application.makeAttributeTable(TableName, image_need_list, 12);
     }
     function Init_Task_Label_Add_Btn(task_label_list){
-        $("#edgex-support-device-command-add-task_labels table[name= New_Task_Labels] i[name= Add_Task_Label]").off('click').on('click',function () {
+        $("#edgex-support-device-edit-command_edit-task_labels table[name= New_Task_Labels] i[name= Add_Task_Label]").off('click').on('click',function () {
             var label = {};
-            label.key = $("#edgex-support-device-command-add-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_key]").val();
-            label.value = $("#edgex-support-device-command-add-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_value]").val();
+            label.key = $("#edgex-support-device-edit-command_edit-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_key]").val();
+            label.value = $("#edgex-support-device-edit-command_edit-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_value]").val();
             if (label.key != "" && label.value != ""){
-                $("#edgex-support-device-command-add-task_labels table[name= New_Task_Labels] input").val("");
-                $("#edgex-support-device-command-add-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_key]").focus();
+                $("#edgex-support-device-edit-command_edit-task_labels table[name= New_Task_Labels] input").val("");
+                $("#edgex-support-device-edit-command_edit-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_key]").focus();
                 var random = Math.random();
                 var label_key = '<input type="text" class="form-control" disabled detail="key" value='+label.key+' >';
                 var label_value = '<input type="text" class="form-control" disabled detail="value" value='+label.value+' >';
@@ -803,26 +1050,26 @@ orgEdgexFoundry.supportApplication = (function(){
                 label_form_element.push(label_value);
                 label_form_element.push(label_del_bth);
                 task_label_list[random] = label_form_element;
-                var TableName = "#edgex-support-device-command-add-task_labels table[name= Task_Labels_List]";
+                var TableName = "#edgex-support-device-edit-command_edit-task_labels table[name= Task_Labels_List]";
                 application.makeAttributeTable(TableName, task_label_list, 12);
             }
         });
-        $("#edgex-support-device-command-add-task_labels table[name= Task_Labels_List]").off('click').on('click', ".delTaskLabel", function () {
+        $("#edgex-support-device-edit-command_edit-task_labels table[name= Task_Labels_List]").off('click').on('click', ".delTaskLabel", function () {
             var random = $(this).attr("random");
             delete task_label_list[random];
-            var TableName = "#edgex-support-device-command-add-task_labels table[name= Task_Labels_List]";
+            var TableName = "#edgex-support-device-edit-command_edit-task_labels table[name= Task_Labels_List]";
             application.makeAttributeTable(TableName, task_label_list, 12);
-            $("#edgex-support-device-command-add-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_key]").focus();
+            $("#edgex-support-device-edit-command_edit-task_labels table[name= New_Task_Labels] input[name= New_Task_Label_key]").focus();
         });
     }
     function Init_Task_Tolerations_Add_Btn(toleration_list){
-        $("#edgex-support-device-command-add-tolerations table[name= New_Tolerations] i[name= Add_Toleration]").off('click').on('click',function () {
+        $("#edgex-support-device-edit-command_edit-tolerations table[name= New_Tolerations] i[name= Add_Toleration]").off('click').on('click',function () {
             var toleration = {};
-            toleration.key = $("#edgex-support-device-command-add-tolerations table[name= New_Tolerations] input[name= New_Toleration_key]").val();
-            toleration.value = $("#edgex-support-device-command-add-tolerations table[name= New_Tolerations] input[name= New_Toleration_value]").val();
+            toleration.key = $("#edgex-support-device-edit-command_edit-tolerations table[name= New_Tolerations] input[name= New_Toleration_key]").val();
+            toleration.value = $("#edgex-support-device-edit-command_edit-tolerations table[name= New_Tolerations] input[name= New_Toleration_value]").val();
             if (toleration.key != "" && toleration.value != ""){
-                $("#edgex-support-device-command-add-tolerations table[name= New_Tolerations] input").val("");
-                $("#edgex-support-device-command-add-tolerations table[name= New_Tolerations] input[name= New_Toleration_key]").focus();
+                $("#edgex-support-device-edit-command_edit-tolerations table[name= New_Tolerations] input").val("");
+                $("#edgex-support-device-edit-command_edit-tolerations table[name= New_Tolerations] input[name= New_Toleration_key]").focus();
                 var random = Math.random();
                 var toleration_key = '<input type="text" class="form-control" disabled detail="key" value='+toleration.key+' >';
                 var toleration_value = '<input type="text" class="form-control" disabled detail="value" value='+toleration.value+' >';
@@ -832,24 +1079,24 @@ orgEdgexFoundry.supportApplication = (function(){
                 toleration_form_element.push(toleration_value);
                 toleration_form_element.push(toleration_del_bth);
                 toleration_list[random] = toleration_form_element;
-                var TableName = "#edgex-support-device-command-add-tolerations table[name= Toleration_List]";
+                var TableName = "#edgex-support-device-edit-command_edit-tolerations table[name= Toleration_List]";
                 application.makeAttributeTable(TableName, toleration_list, 12);
             }
         });
-        $("#edgex-support-device-command-add-tolerations table[name= Toleration_List]").off('click').on('click', ".delToleration", function () {
+        $("#edgex-support-device-edit-command_edit-tolerations table[name= Toleration_List]").off('click').on('click', ".delToleration", function () {
             var random = $(this).attr("random");
             delete toleration_list[random];
-            var TableName = "#edgex-support-device-command-add-tolerations table[name= Toleration_List]";
+            var TableName = "#edgex-support-device-edit-command_edit-tolerations table[name= Toleration_List]";
             application.makeAttributeTable(TableName, toleration_list, 12);
-            $("#edgex-support-device-command-add-tolerations table[name= New_Tolerations] input[name= New_Toleration_key]").focus();
+            $("#edgex-support-device-edit-command_edit-tolerations table[name= New_Tolerations] input[name= New_Toleration_key]").focus();
         });
     }
     function Init_Task_ImageNeed_Add_Btn(image_need_list){
-        $("#edgex-support-device-command-add-image_need table[name= New_Image_Need] i[name= Add_Image_Need]").off('click').on('click',function () {
-            var image_need = $("#edgex-support-device-command-add-image_need table[name= New_Image_Need] input[name= New_Image_Need]").val();
+        $("#edgex-support-device-edit-command_edit-image_need table[name= New_Image_Need] i[name= Add_Image_Need]").off('click').on('click',function () {
+            var image_need = $("#edgex-support-device-edit-command_edit-image_need table[name= New_Image_Need] input[name= New_Image_Need]").val();
             if (image_need != ""){
-                $("#edgex-support-device-command-add-image_need table[name= New_Image_Need] input").val("");
-                $("#edgex-support-device-command-add-image_need table[name= New_Image_Need] input[name= New_Image_Need]").focus();
+                $("#edgex-support-device-edit-command_edit-image_need table[name= New_Image_Need] input").val("");
+                $("#edgex-support-device-edit-command_edit-image_need table[name= New_Image_Need] input[name= New_Image_Need]").focus();
                 var random = Math.random();
                 var image_need_element = '<input type="text" class="form-control" disabled value='+image_need+' >';
                 var image_need_del_bth = '<div class="edgexIconBtn delImage" random='+random+'>' + '<i class="fa fa-minus-circle fa-lg" aria-hidden="true" />' + '</div>';
@@ -857,28 +1104,45 @@ orgEdgexFoundry.supportApplication = (function(){
                 image_need_form_element.push(image_need_element);
                 image_need_form_element.push(image_need_del_bth);
                 image_need_list[random] = image_need_form_element;
-                var TableName = "#edgex-support-device-command-add-image_need table[name= Image_Need_List]";
+                var TableName = "#edgex-support-device-edit-command_edit-image_need table[name= Image_Need_List]";
                 application.makeAttributeTable(TableName, image_need_list, 12);
             }
         });
-        $("#edgex-support-device-command-add-image_need table[name= Image_Need_List]").off('click').on('click', ".delImage", function () {
+        $("#edgex-support-device-edit-command_edit-image_need table[name= Image_Need_List]").off('click').on('click', ".delImage", function () {
             var random = $(this).attr("random");
             delete image_need_list[random];
-            var TableName = "#edgex-support-device-command-add-image_need table[name= Image_Need_List]";
+            var TableName = "#edgex-support-device-edit-command_edit-image_need table[name= Image_Need_List]";
             application.makeAttributeTable(TableName, image_need_list, 12);
-            $("#edgex-support-device-command-add-image_need table[name= New_Image_Need] input[name= New_Image_Need]").focus();
+            $("#edgex-support-device-edit-command_edit-image_need table[name= New_Image_Need] input[name= New_Image_Need]").focus();
         });
     }
-    //关闭添加Command页面按钮的功能
-    SupportApplication.prototype.cancelAddCommandBtn = function(){
-        $("#edgex-support-task-list-main").show();
-        $("#edgex-support-device-command-add").hide();
-        $("#edgex-support-device-command-add input").val("");
-        $("#edgex-support-device-command-add select").val("");
-        $("#edgex-support-device-command-add-task_labels table[name= Task_Labels_List]").empty();
-        $("#edgex-support-device-command-add-tolerations table[name= Toleration_List]").empty();
-        $("#edgex-support-device-command-add-image_need table[name= Image_Need_List]").empty();
+    //读取编辑Command页面
+    SupportApplication.prototype.readEditCommandPage = function(){
+        var command = {};
+        command.name = $("#edgex-support-device-edit-command_edit-basicinfo-name").val();
+        command.deviceid = $("#edgex-support-device-edit-command_edit-basicinfo-deviceid").val().trim();
+        command.type = $("#edgex-support-device-edit-command_edit-basicinfo-type").val();
+        command.url = $("#edgex-support-device-edit-command_edit-basicinfo-url").val();
+        command.desc = $("#edgex-support-device-edit-command_edit-basicinfo-desc").val();
+        command.time_limit = $("#edgex-support-device-edit-command_edit-basicinfo-time_limit_num").val() + $("#edgex-support-device-edit-command_edit-basicinfo-time_limit_unit").val();
+        command.cpu_request = Number($("#edgex-support-device-edit-command_edit-basicinfo-cpu_request").val());
+        command.memory_request = Number($("#edgex-support-device-edit-command_edit-basicinfo-memory_request").val());
+        command.disk_request = Number($("#edgex-support-device-edit-command_edit-basicinfo-disk_request").val());
+        command.kind = $("#edgex-support-device-edit-command_edit-basicinfo-kind").val();
+        command.exec_limit = $("#edgex-support-device-edit-command_edit-basicinfo-exec_limit").val();
+        command.host_name = $("#edgex-support-device-edit-command_edit-basicinfo-host_name").val();
+        command.host_port = $("#edgex-support-device-edit-command_edit-basicinfo-host_port").val();
+        command.task_labels = application.getAttributeVars("#edgex-support-device-edit-command_edit-task_labels table[name= Task_Labels_List]");
+        command.tolerations = application.getAttributeVars("#edgex-support-device-edit-command_edit-tolerations table[name= Toleration_List]");
+        command.image_need = [];
+        $("#edgex-support-device-edit-command_edit-image_need table[name= Image_Need_List]").each(function (tindex,titem){
+            $(titem).find("input").each(function(newimageindex,newimage){
+                command.image_need.push(newimage.value);
+            });
+        });
+        return JSON.stringify(command)
     }
+
 
     //===================Device Section End==================================
 

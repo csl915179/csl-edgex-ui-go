@@ -200,29 +200,30 @@
     </div>
     <!--Node section end-->
 
-    <!--设备列表页 开始-->
+    <!--设备页 开始-->
     <div class="panel panel-success">
         <div class="panel-heading">
             <h3 class="panel-title">设备列表</h3>
         </div>
-        <div class="panel panel-default" style="border:none;outline:none;margin:0;">
-            <div class="panel-heading">
-                <div class="edgexIconBtn">
-                    <i class="fa fa-refresh fa-lg fa-fw" aria-hidden="true" onclick="orgEdgexFoundry.supportApplication.renderDeviceList()"></i>
+        <!--设备列表-->
+        <div class="panel-body" style="padding:0;" id="edgex-support-device-devicelist">
+            <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                <div class="panel-heading">
+                    <div class="edgexIconBtn">
+                        <i class="fa fa-refresh fa-lg fa-fw" aria-hidden="true" onclick="orgEdgexFoundry.supportApplication.renderDeviceList()"></i>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!--设备列表-->
-        <div class="panel-body" style="padding:0;">
-            <div id="edgex-support-device-devicelist">
+            <div>
                 <table class="table  table-responsive table-hover table-striped">
                     <thead>
                     <tr class="active">
                         <th>#</th>
                         <th>ID</th>
                         <th>名称</th>
-                        <th>查看命令列表</th>
-                        <th>修改/新建在Export-Receiver中定义命令信息</th>
+                        <th>查看定义信息</th>
+                        <th>修改/新建设备在Export-Receiver中定义的信息</th>
+                        <th>删除设备</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -238,109 +239,211 @@
         <!--设备列表 结束-->
 
         <!--设备详情页-->
-        <div id="edgex-support-device-command" class="panel panel-success">
-            <!--硬件信息-->
-            <div class="panel panel-success" id="edgex-support-device-resource-detail">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        设备资源情况
-                    </h3>
-                </div>
+        <div id="edgex-support-device-detail" style="display: none" class="panel panel-success">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    设备<span id="edgex-support-device-detail-name"/>定义信息
+                    <button type="button" class="close pull-right" aria-label="Close" id="edgex-support-device-detail-close"><span style="color:#333!important;" aria-hidden="true">&times;</span></button>
+                </h3>
             </div>
-            <!--硬件信息 结束-->
-
-            <!--命令列表-->
-            <div class="panel panel-success" style="display: none" id="edgex-support-device-command-detail">
+            <!--未注册页面-->
+            <div class="panel panel-success" id="edgex-support-device-detail-not_registed" style="display: none">
+                <h3 style="text-align:center">当前设备还没有在Edgex-Export-Receiver里注册</h3>
+                <div align="center"><button type="button" class="btn btn-success" id="edgex-support-device-detail-not_registed-regist">注册</button></div>
+            </div>
+            <!--未注册页面 结束-->
+            <!--设备注册详情页-->
+            <div id="edgex-support-device-detail-registed" class="panel panel-success" style="display: none">
+                <fieldset id="edgex-support-device-detail-basicInfo">
+                    <legend>基本信息</legend>
+                    <table>
+                        <td style="width: 16%; text-align: right"><b>ID: </b></td>
+                        <td style="width: 16%; text-align: left"><input class="form-control" disabled id="edgex-support-device-detail-basicInfo-edgexid"/></td>
+                        <td style="width: 16%; text-align: right"><b>名称: </b></td>
+                        <td style="width: 16%; text-align: left"><input class="form-control" disabled id="edgex-support-device-detail-basicInfo-name"/></td>
+                        <tr/>
+                        <td style="width: 16%; text-align: right"><b>CPU资源(G cycles): </b></td>
+                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-basicInfo-cpu"/></td>
+                        <td style="width: 16%; text-align: right"><b>内存资源(MB): </b></td>
+                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-basicInfo-memory"/></td>
+                        <td style="width: 16%; text-align: right"><b>磁盘资源(MB): </b></td>
+                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-basicInfo-disk"/></td>
+                    </table>
+                </fieldset>
+                <fieldset id="edgex-support-device-detail-command">
+                    <legend>命令列表</legend>
+                    <table></table>
+                </fieldset>
+            </div>
+            <!--设备注册详情页 结束-->
+            <!--命令详情页-->
+            <div id="edgex-support-device-detail-command_detail" style="display: none" class="panel panel-success">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        设备<span id="edgex-support-device-command-name"></span>命令列表
-                        <button type="button" class="close pull-right" aria-label="Close" id="edgex-support-device-command-close"><span style="color:#333!important;" aria-hidden="true">&times;</span></button>
+                        Command
+                        <span id="edgex-support-device-detail-command_detail-name"/>
+                        详细信息
+                        <button id="edgex-support-device-detail-command_detail-exit" type="button" class="close pull-right" aria-label="Close"><span style="color:#333!important;" aria-hidden="true">&times;</span></button>
                     </h3>
                 </div>
-                <div class="panel-body" style="padding:0;">
-                    <form class="edgex-support-application-form">
-                        <div id="edgex-support-device-command-not_registed" style="display: none">
-                            <h3 style="text-align:center">当前设备还没有在Edgex-Export-Receiver里注册</h3>
-                            <div align="center"><button type="button" class="btn btn-success" id="edgex-support-device-command-regist">注册</button></div>
-                        </div>
-                        <div id="edgex-support-device-command-registed" style="display: none">
-                            <div class="panel panel-default" style="border:none;outline:none;margin:0;">
-                                <div class="panel-heading" style="padding:5px 2px;">
-                                    <div class="edgexIconBtn">
-                                        <i class="fa fa-refresh fa-lg fa-fw" aria-hidden="true" name="refreshDeviceCommandList"></i>
-                                    </div>
-                                    <div class="edgexIconBtn">
-                                        <i class="fa fa-trash-o fa-lg" aria-hidden="true" name="delDevice"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <table class="table  table-responsive table-hover table-striped" id="edgex-support-device-commandlist">
-                                    <thead>
-                                        <tr class="active">
-                                            <th>#</th>
-                                            <th>名称</th>
-                                            <th>方法</th>
-                                            <th>查看注册详细信息</th>
-                                            <th>新建/编辑定义信息</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                    <tfoot style="display:none;">
-                                        <tr align="center">
-                                            <td colspan=13>No Data.</td>
-                                        </tr>
-                                    </tfoot>
+                <div class="edgex-support-device-detail-command_detail-basicinfo">
+                    <fieldset>
+                        <legend>Command基本信息</legend>
+                        <table>
+                            <td><b>名称:</b></td>
+                            <td><input class="form-control" disabled id="edgex-support-device-detail-command_detail-basicinfo-name"/></td>
+                            <td><b>对应设备ID:</b></td>
+                            <td><input class="form-control" disabled id="edgex-support-device-detail-command_detail-basicinfo-deviceid"/></td>
+                            <td><b>get/set:</b></td>
+                            <td><input class="form-control" disabled id="edgex-support-device-detail-command_detail-basicinfo-type"/></td>
+                            <td><b>URL:</b></td>
+                            <td><input class="form-control" disabled id="edgex-support-device-detail-command_detail-basicinfo-url"/></td>
+                            <tr/>
+                        </table>
+                        <HR/>
+                        <table>
+                            <td><b>Description:</b></td>
+                            <td><input disabled class="form-control" id="edgex-support-device-detail-command_detail-basicinfo-desc"/></td>
+                            <td><b>执行时间限制:</b></td>
+                            <td><input disabled class="form-control" id="edgex-support-device-detail-command_detail-basicinfo-time_limit"/></td>
+                        </table>
+                    </fieldset>
+                </div>
+                <div id="edgex-support-device-detail-command_detail-detail">
+                    <table>
+                        <td style="width: 40%">
+                            <fieldset id="edgex-support-device-detail-command_detail-hardware-resource">
+                                <legend>硬件资源需求信息</legend>
+                                <table>
+                                    <td style="width: 25%; text-align: right"><b>CPU(G cycles): </b></td>
+                                    <td style="width: 15%; text-align: left"><input disabled class="form-control" id="edgex-support-device-detail-command_detail-basicinfo-cpu_request"/></td>
+                                    <td style="width: 15%; text-align: right"><b>内存(MB): </b></td>
+                                    <td style="width: 15%; text-align: left"><input disabled class="form-control" id="edgex-support-device-detail-command_detail-basicinfo-memory_request"/></td>
+                                    <td style="width: 15%; text-align: right"><b>磁盘(MB): </b></td>
+                                    <td style="width: 15%; text-align: left"><input disabled class="form-control" id="edgex-support-device-detail-command_detail-basicinfo-disk_request"/></td>
                                 </table>
-                            </div>
-                        </div>
-                    </form>
+                            </fieldset>
+                        </td>
+                        <td style="width: 30%">
+                            <fieldset id="edgex-support-device-detail-command_detail-hardware-kind_and_exec_limt">
+                                <legend>类型和执行限制信息</legend>
+                                <table>
+                                    <td style="width: 20%; text-align: center"><b>类型: </b></td>
+                                    <td style="width: 30%; text-align: right"><input disabled class="form-control" id="edgex-support-device-detail-command_detail-basicinfo-kind"/></td>
+                                    <td style="width: 20%; text-align: center"><b>执行限制: </b></td>
+                                    <td style="width: 30%; text-align: right"><input disabled class="form-control" id="edgex-support-device-detail-command_detail-basicinfo-exec_limit"/></td>
+                                </table>
+                            </fieldset>
+                        </td>
+                        <td style="width: 30%">
+                            <fieldset id="edgex-support-device-detail-command-detail-host">
+                                <legend>Host信息</legend>
+                                <table>
+                                    <td style="text-align: right"><b>Name: </b></td>
+                                    <td style="text-align: left"><input disabled class="form-control" id="edgex-support-device-detail-command_detail-basicinfo-host_name"/></td>
+                                    <td style="text-align: right"><b>Port: </b></td>
+                                    <td style="text-align: left"><input disabled class="form-control" id="edgex-support-device-detail-command_detail-basicinfo-host_port"/></td>
+                                </table>
+                            </fieldset>
+                        </td>
+                    </table>
+                    <fieldset id="edgex-support-device-detail-command_detail-task_labels">
+                        <legend>Command Task Label信息</legend>
+                        <table name="Task_Labels_List"/>
+                    </fieldset>
+                    <fieldset id="edgex-support-device-detail-command_detail-tolerations">
+                        <legend>Toleration信息</legend>
+                        <table name="Toleration_List"/>
+                    </fieldset>
+                    <fieldset id="edgex-support-device-detail-command_detail-image_need">
+                        <legend>Image需求信息</legend>
+                        <table name="Image_Need_List"/>
+                    </fieldset>
                 </div>
             </div>
-            <!--命令列表 结束-->
+            <!--命令详情页 结束-->
+        </div>
+        <!--设备详情页 结束-->
 
+        <!--编辑设备页-->
+        <div id="edgex-support-device-edit" class="panel panel-success" style="display: none">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    编辑/新建设备<span id="edgex-support-device-edit-name"/>定义信息
+                </h3>
+            </div>
+            <!--编辑设备展示列表-->
+            <div class="panel panel-success" id="edgex-support-device-edit-deviceList">
+                <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                    <div class="panel-heading">
+                        <div class="edgexIconBtn">
+                            <i class="fa fa-check fa-lg" aria-hidden="true" newdevice="false" id="edgex-support-device-edit-deviceList-submitDevice"></i>
+                        </div>
+                        <div class="edgexIconBtn">
+                            <i class="fa fa-close fa-lg" aria-hidden="true" id="edgex-support-device-edit-deviceList-cancelSubmitDevice"></i>
+                        </div>
+                    </div>
+                </div>
+                <fieldset id="edgex-support-device-edit-deviceList-basicInfo">
+                    <legend>基本信息</legend>
+                    <table>
+                        <td style="width: 16%; text-align: right"><b>ID: </b></td>
+                        <td style="width: 16%; text-align: left"><input class="form-control" disabled name="edgexid"/></td>
+                        <td style="width: 16%; text-align: right"><b>名称: </b></td>
+                        <td style="width: 16%; text-align: left"><input class="form-control" disabled name="name"/></td>
+                        <tr/>
+                        <td style="width: 16%; text-align: right"><b>CPU资源(G cycles): </b></td>
+                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" name="cpu"/></td>
+                        <td style="width: 16%; text-align: right"><b>内存资源(MB): </b></td>
+                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" name="memory"/></td>
+                        <td style="width: 16%; text-align: right"><b>磁盘资源(MB): </b></td>
+                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" name="disk"/></td>
+                    </table>
+                </fieldset>
+                <fieldset id="edgex-support-device-edit-deviceList-command">
+                    <legend>命令列表</legend>
+                    <table></table>
+                </fieldset>
+            </div>
+            <!--编辑设备展示列表 结束-->
             <!--新建/编辑命令定义信息-->
-            <div id="edgex-support-device-command-add" style="display: none" class="panel panel-success">
+            <div id="edgex-support-device-edit-command_edit" style="display: none" class="panel panel-success" >
                 <div class="panel-heading">
-                    <h3 class="panel-title">新建/编辑定义信息</h3>
+                    <h3 class="panel-title">编辑Command</h3>
                 </div>
                 <div class="panel panel-default" style="border:none;outline:none;margin:0;">
                     <div class="panel-heading" style="padding:5px 2px;">
-                        <div class="edgexIconBtn add-command"  onclick="orgEdgexFoundry.supportApplication.commitCommandBtn('new');">
+                        <div class="edgexIconBtn" id="edgex-support-device-edit-command_edit-confirm">
                             <i class="fa fa-check fa-lg" aria-hidden="true"></i>
                         </div>
-                        <div class="edgexIconBtn update-command" style="display:none;" onclick="orgEdgexFoundry.supportApplication.commitCommandBtn();">
-                            <i class="fa fa-check fa-lg" aria-hidden="true"></i>
-                        </div>
-                        <div class="edgexIconBtn" onclick="orgEdgexFoundry.supportApplication.cancelAddCommandBtn()">
+                        <div class="edgexIconBtn" id="edgex-support-device-edit-command_edit-cancel">
                             <i class="fa fa-close fa-lg" aria-hidden="true"></i>
                         </div>
                     </div>
                 </div>
                 <div class="panel-body" style="padding:0;">
-                    <div id="edgex-support-device-command-add-basicinfo" style="margin-bottom: 20px">
+                    <div id="edgex-support-device-edit-command_edit-basicinfo" style="margin-bottom: 20px">
                         <fieldset>
                             <legend>Command基本信息</legend>
                             <table>
                                 <td><b>名称:</b></td>
-                                <td><input type="text" class="form-control" disabled id="edgex-support-device-command-add-basicinfo-name"/></td>
+                                <td><input type="text" class="form-control" disabled id="edgex-support-device-edit-command_edit-basicinfo-name"/></td>
                                 <td><b>对应设备ID:</b></td>
-                                <td><input type="text" class="form-control" disabled id="edgex-support-device-command-add-basicinfo-edgexid"/></td>
-                                <td><b>方法:</b></td>
-                                <td><input type="text" class="form-control" disabled id="edgex-support-device-command-add-basicinfo-type"/></td>
+                                <td><input type="text" class="form-control" disabled id="edgex-support-device-edit-command_edit-basicinfo-deviceid"/></td>
+                                <td><b>get/set:</b></td>
+                                <td><input type="text" class="form-control" disabled id="edgex-support-device-edit-command_edit-basicinfo-type"/></td>
                                 <td><b>URL:</b></td>
-                                <td><input type="text" class="form-control" disabled id="edgex-support-device-command-add-basicinfo-url"/></td>
+                                <td><input type="text" class="form-control" disabled id="edgex-support-device-edit-command_edit-basicinfo-url"/></td>
                                 <tr/>
                             </table>
                             <HR/>
                             <table>
                                 <td><b>Description:</b></td>
-                                <td><input type="text" class="form-control" id="edgex-support-device-command-add-basicinfo-desc"/></td>
+                                <td><input type="text" class="form-control" id="edgex-support-device-edit-command_edit-basicinfo-desc"/></td>
                                 <td><b>执行时间限制:</b></td>
-                                <td><input type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-time_limit_num"/></td>
+                                <td><input type="number" class="form-control" id="edgex-support-device-edit-command_edit-basicinfo-time_limit_num"/></td>
                                 <td>
-                                    <select class="form-control" id="edgex-support-device-command-add-basicinfo-time_limit_unit">
+                                    <select class="form-control" id="edgex-support-device-edit-command_edit-basicinfo-time_limit_unit">
                                         <option value="ms">ms</option>
                                         <option value="s">s</option>
                                         <option value="min">min</option>
@@ -351,28 +454,28 @@
                             </table>
                         </fieldset>
                     </div>
-                    <div id="edgex-support-device-command-add-detail">
+                    <div id="edgex-support-device-edit-command_edit-detail">
                         <table>
-                            <td style="width: 50%">
-                                <fieldset id="edgex-support-device-command-detail-hardware-resource">
+                            <td style="width: 40%">
+                                <fieldset id="edgex-support-device-edit-command-detail-hardware-resource">
                                     <legend>硬件资源需求信息</legend>
                                     <table>
-                                        <td style="width: 16%; text-align: right"><b>CPU(G cycles): </b></td>
-                                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-cpu_request"/></td>
-                                        <td style="width: 16%; text-align: right"><b>内存(MB): </b></td>
-                                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-memory_request"/></td>
-                                        <td style="width: 16%; text-align: right"><b>磁盘(MB): </b></td>
-                                        <td style="width: 16%; text-align: left"><input type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-disk_request"/></td>
+                                        <td style="width: 25%; text-align: right"><b>CPU(G cycles): </b></td>
+                                        <td style="width: 15%; text-align: left"><input type="number" class="form-control" id="edgex-support-device-edit-command_edit-basicinfo-cpu_request"/></td>
+                                        <td style="width: 15%; text-align: right"><b>内存(MB): </b></td>
+                                        <td style="width: 15%; text-align: left"><input type="number" class="form-control" id="edgex-support-device-edit-command_edit-basicinfo-memory_request"/></td>
+                                        <td style="width: 15%; text-align: right"><b>磁盘(MB): </b></td>
+                                        <td style="width: 15%; text-align: left"><input type="number" class="form-control" id="edgex-support-device-edit-command_edit-basicinfo-disk_request"/></td>
                                     </table>
                                 </fieldset>
                             </td>
-                            <td style="width: 25%">
-                                <fieldset id="edgex-support-device-command-detail-hardware-kind_and_exec_limt">
+                            <td style="width: 30%">
+                                <fieldset id="edgex-support-device-edit-command-detail-hardware-kind_and_exec_limt">
                                     <legend>类型和执行限制信息</legend>
                                     <table>
                                         <td style="text-align: right"><b>类型: </b></td>
                                         <td style="text-align: left">
-                                            <select type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-kind">
+                                            <select type="number" class="form-control" id="edgex-support-device-edit-command_edit-basicinfo-kind">
                                                 <option value="Pod">Pod</option>
                                                 <option value="ReplicationController">ReplicationController</option>
                                                 <option value="ReplicaSet">ReplicaSet</option>
@@ -383,7 +486,7 @@
                                         </td>
                                         <td style="text-align: right"><b>执行限制: </b></td>
                                         <td style="text-align: left">
-                                            <select type="number" class="form-control" id="edgex-support-device-command-add-basicinfo-exec_limit">
+                                            <select type="number" class="form-control" id="edgex-support-device-edit-command_edit-basicinfo-exec_limit">
                                                 <option value="LocalOrRemote">本地/远端</option>
                                                 <option value="Local">本地</option>
                                                 <option value="Remote">远端</option>
@@ -392,19 +495,19 @@
                                     </table>
                                 </fieldset>
                             </td>
-                            <td style="width: 25%">
-                                <fieldset id="edgex-support-device-command-detail-host">
+                            <td style="width: 30%">
+                                <fieldset id="edgex-support-device-edit-command-detail-host">
                                     <legend>Host信息</legend>
                                     <table>
-                                        <td style="text-align: right"><b>HostName: </b></td>
-                                        <td style="text-align: left"><input type="text" class="form-control" id="edgex-support-device-command-add-basicinfo-host_name"/></td>
-                                        <td style="text-align: right"><b>HostPort: </b></td>
-                                        <td style="text-align: left"><input type="number" min="5001" max="65535" class="form-control" id="edgex-support-device-command-add-basicinfo-host_port"/></td>
+                                        <td style="text-align: right"><b>Name: </b></td>
+                                        <td style="text-align: left"><input type="text" class="form-control" id="edgex-support-device-edit-command_edit-basicinfo-host_name"/></td>
+                                        <td style="text-align: right"><b>Port: </b></td>
+                                        <td style="text-align: left"><input type="number" min="5001" max="65535" class="form-control" id="edgex-support-device-edit-command_edit-basicinfo-host_port"/></td>
                                     </table>
                                 </fieldset>
                             </td>
                         </table>
-                        <fieldset id="edgex-support-device-command-add-task_labels">
+                        <fieldset id="edgex-support-device-edit-command_edit-task_labels">
                             <legend>Command Task Label信息</legend>
                             <table name="Task_Labels_List"/>
                             <HR/>
@@ -420,7 +523,7 @@
                                 </td>
                             </table>
                         </fieldset>
-                        <fieldset id="edgex-support-device-command-add-tolerations">
+                        <fieldset id="edgex-support-device-edit-command_edit-tolerations">
                             <legend>Toleration信息</legend>
                             <table name="Toleration_List"/>
                             <HR/>
@@ -436,7 +539,7 @@
                                 </td>
                             </table>
                         </fieldset>
-                        <fieldset id="edgex-support-device-command-add-image_need">
+                        <fieldset id="edgex-support-device-edit-command_edit-image_need">
                             <legend>Image需求信息</legend>
                             <table name="Image_Need_List"/>
                             <HR/>
@@ -453,9 +556,94 @@
                 </div>
             </div>
             <!--新建/编辑命令定义信息 结束-->
-
+            <!--命令详情页-->
+            <div id="edgex-support-device-edit-command_detail" style="display: none" class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        Command
+                        <span id="edgex-support-device-edit-command_detail-name"/>
+                        详细信息
+                        <button id="edgex-support-device-edit-command_detail-exit" type="button" class="close pull-right" aria-label="Close"><span style="color:#333!important;" aria-hidden="true">&times;</span></button>
+                    </h3>
+                </div>
+                <div class="edgex-support-device-edit-command_detail-basicinfo">
+                    <fieldset>
+                        <legend>Command基本信息</legend>
+                        <table>
+                            <td><b>名称:</b></td>
+                            <td><input class="form-control" disabled id="edgex-support-device-edit-command_detail-basicinfo-name"/></td>
+                            <td><b>对应设备ID:</b></td>
+                            <td><input class="form-control" disabled id="edgex-support-device-edit-command_detail-basicinfo-deviceid"/></td>
+                            <td><b>get/set:</b></td>
+                            <td><input class="form-control" disabled id="edgex-support-device-edit-command_detail-basicinfo-type"/></td>
+                            <td><b>URL:</b></td>
+                            <td><input class="form-control" disabled id="edgex-support-device-edit-command_detail-basicinfo-url"/></td>
+                            <tr/>
+                        </table>
+                        <HR/>
+                        <table>
+                            <td><b>Description:</b></td>
+                            <td><input disabled class="form-control" id="edgex-support-device-edit-command_detail-basicinfo-desc"/></td>
+                            <td><b>执行时间限制:</b></td>
+                            <td><input disabled class="form-control" id="edgex-support-device-edit-command_detail-basicinfo-time_limit"/></td>
+                        </table>
+                    </fieldset>
+                </div>
+                <div id="edgex-support-device-edit-command_detail-detail">
+                    <table>
+                        <td style="width: 40%">
+                            <fieldset id="edgex-support-device-edit-command_detail-hardware-resource">
+                                <legend>硬件资源需求信息</legend>
+                                <table>
+                                    <td style="width: 25%; text-align: right"><b>CPU(G cycles): </b></td>
+                                    <td style="width: 15%; text-align: left"><input disabled class="form-control" id="edgex-support-device-edit-command_detail-basicinfo-cpu_request"/></td>
+                                    <td style="width: 15%; text-align: right"><b>内存(MB): </b></td>
+                                    <td style="width: 15%; text-align: left"><input disabled class="form-control" id="edgex-support-device-edit-command_detail-basicinfo-memory_request"/></td>
+                                    <td style="width: 15%; text-align: right"><b>磁盘(MB): </b></td>
+                                    <td style="width: 15%; text-align: left"><input disabled class="form-control" id="edgex-support-device-edit-command_detail-basicinfo-disk_request"/></td>
+                                </table>
+                            </fieldset>
+                        </td>
+                        <td style="width: 30%">
+                            <fieldset id="edgex-support-device-edit-command_detail-hardware-kind_and_exec_limt">
+                                <legend>类型和执行限制信息</legend>
+                                <table>
+                                    <td style="width: 20%; text-align: center"><b>类型: </b></td>
+                                    <td style="width: 30%; text-align: right"><input disabled class="form-control" id="edgex-support-device-edit-command_detail-basicinfo-kind"/></td>
+                                    <td style="width: 20%; text-align: center"><b>执行限制: </b></td>
+                                    <td style="width: 30%; text-align: right"><input disabled class="form-control" id="edgex-support-device-edit-command_detail-basicinfo-exec_limit"/></td>
+                                </table>
+                            </fieldset>
+                        </td>
+                        <td style="width: 30%">
+                            <fieldset id="edgex-support-device-edit-command-detail-host">
+                                <legend>Host信息</legend>
+                                <table>
+                                    <td style="text-align: right"><b>Name: </b></td>
+                                    <td style="text-align: left"><input disabled class="form-control" id="edgex-support-device-edit-command_detail-basicinfo-host_name"/></td>
+                                    <td style="text-align: right"><b>Port: </b></td>
+                                    <td style="text-align: left"><input disabled class="form-control" id="edgex-support-device-edit-command_detail-basicinfo-host_port"/></td>
+                                </table>
+                            </fieldset>
+                        </td>
+                    </table>
+                    <fieldset id="edgex-support-device-edit-command_detail-task_labels">
+                        <legend>Command Task Label信息</legend>
+                        <table name="Task_Labels_List"/>
+                    </fieldset>
+                    <fieldset id="edgex-support-device-edit-command_detail-tolerations">
+                        <legend>Toleration信息</legend>
+                        <table name="Toleration_List"/>
+                    </fieldset>
+                    <fieldset id="edgex-support-device-edit-command_detail-image_need">
+                        <legend>Image需求信息</legend>
+                        <table name="Image_Need_List"/>
+                    </fieldset>
+                </div>
+            </div>
+            <!--命令详情页 结束-->
         </div>
-        <!--设备详情页 结束-->
+        <!--编辑设备页 结束-->
     </div>
     <!--设备列表页 结束-->
 
