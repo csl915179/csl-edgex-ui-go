@@ -43,9 +43,14 @@
 		"icon":"",
 		"children":[]
 	},{
-		"title":"应用管理",
-		"url": "/pages/appmanage.html",
+		"title":"设备资源管理",
+		"url": "/pages/deviceResourceManage.html",
 		"icon":"",
 		"children":[]
+	},{
+	"title":"应用与任务管理",
+	"url": "/pages/appmanage.html",
+	"icon":"",
+	"children":[]
 	}
 ]

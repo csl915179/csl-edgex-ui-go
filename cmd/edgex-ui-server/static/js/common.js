@@ -34,3 +34,38 @@ var dateToString = function (num){
 	var str = y + '-' + M + '-' + d + ' ' + hh + ':' + mm + ':' + ss
 	return str;
 }
+
+Date.prototype.Format = function (fmt) {
+	var o = {
+		"M+": this.getMonth() + 1, // Month
+		"d+": this.getDate(), // Day
+		"h+": this.getHours(), // Hour
+		"m+": this.getMinutes(), // Minute
+		"s+": this.getSeconds(), // Second
+		"q+": Math.floor((this.getMonth() + 3) / 3), // Quarter
+		"S": this.getMilliseconds() // Millisecond
+	};
+	if (/(y+)/.test(fmt))
+		fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+	for (var k in o)
+		if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+	return fmt;
+};
+
+
+//ISO 8601 format (YYYYMMDD'T'HHmmss)
+var ISO8601DateStrToLocalDateStr = function (iso8601String) {
+	var year = iso8601String.substring(0,4);
+	var month = iso8601String.substring(4,6);
+	var day = iso8601String.substring(6,8);
+	var hour = iso8601String.substring(9,11);
+	var minute = iso8601String.substring(11,13);
+	var second = iso8601String.substring(13);
+	return new Date(Date.UTC(year,month,day,hour,minute,second)).Format("yyyy-MM-dd hh:mm:ss");
+};
+
+//YYYYMMDD'T'HHmmss
+var LocalDateStrToISO8601DateStr = function (localString) {
+	//iso8601 YYYY-MM-DDTHH:mm:ss.sssZ
+	return new Date(localString).toISOString().replace(/\..+/,'').replace(/[-:]/g,"")
+};
