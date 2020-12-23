@@ -76,3 +76,12 @@ func RemoveGateway(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func QueryCurrentGateway(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	m := make(map[string]string)
+	m["gateway"] = common.DynamicProxyCache[r.Header.Get(common.SessionTokenKey)]
+	result, _ := json.Marshal(&m)
+	w.Header().Set(common.ContentTypeKey, common.JsonContentType)
+	w.Write(result)
+}

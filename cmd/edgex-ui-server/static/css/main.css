@@ -109,7 +109,7 @@
       -moz--transform: translateY(-50%);
 }
 
-.headbar li.title {
+.headbar li.title{
 	font-weight: bold;
 	font-size: medium;
 	color: white;

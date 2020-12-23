@@ -34,36 +34,11 @@ func InitRestRoutes() http.Handler {
 
 	s.HandleFunc("/gateway", controller.QueryAllGateway).Methods(http.MethodGet)
 	s.HandleFunc("/gateway", controller.AddGateway).Methods(http.MethodPost)
+	s.HandleFunc("/gateway/currentgateway", controller.QueryCurrentGateway).Methods(http.MethodGet)
 	s.HandleFunc("/gateway/{id}", controller.RemoveGateway).Methods(http.MethodDelete)
 	s.HandleFunc("/gateway/proxy", controller.ProxyConfigGateway).Methods(http.MethodPost)
 
 	s.HandleFunc("/exportshow", controller.ExportShow).Methods(http.MethodPost)
-
-	s.HandleFunc("/profile/download", controller.DowloadProfile).Methods(http.MethodGet)
-	//s.HandleFunc("/profile/ls", controller.FindProfileList_by_Service).Methods(http.MethodGet)
-
-	//application manage
-	s.HandleFunc("/application", controller.QueryAllApplication).Methods(http.MethodGet)
-	s.HandleFunc("/application", controller.AddApplication).Methods(http.MethodPost)
-	s.HandleFunc("/application", controller.UpdateApplication).Methods(http.MethodPut)
-	s.HandleFunc("/application/{id}", controller.RemoveApplication).Methods(http.MethodDelete)
-	s.HandleFunc("/application/exec/{appid}", controller.ExecAppTask).Methods(http.MethodGet)
-	s.HandleFunc("/application/findnode/{nodeid}", controller.FindApplicationByNode).Methods(http.MethodGet)
-
-	// task manage
-	s.HandleFunc("/task/{appid}", controller.QueryAllTask).Methods(http.MethodGet)
-	s.HandleFunc("/task", controller.AddTask).Methods(http.MethodPost)
-	s.HandleFunc("/task", controller.UpdateTask).Methods(http.MethodPut)
-	s.HandleFunc("/task/{id}", controller.RemoveTask).Methods(http.MethodDelete)
-	s.HandleFunc("/task/findapp/{id}", controller.FindTaskApp).Methods(http.MethodGet)
-
-
-
-	//node manage
-	s.HandleFunc("/node",controller.QueryAllNode).Methods(http.MethodGet)
-	s.HandleFunc("/node",controller.UpdateNode).Methods(http.MethodPut)
-	s.HandleFunc("/node",controller.AddNode).Methods(http.MethodPost)
-	s.HandleFunc("/node/{id}",controller.RemoveNode).Methods(http.MethodDelete)
 
 	s1 := r.PathPrefix("").Subrouter()
 	s1.HandleFunc("/ws", component.WebSocketHandler)

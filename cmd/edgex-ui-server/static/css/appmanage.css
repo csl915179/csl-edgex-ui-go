@@ -1,65 +1,5 @@
 @charset "UTF-8";
 
-#edgex-support-application-list,
-#edgex-support-task-list {
-    overflow: auto;
-}
-
-#edgex-support-application-list table th,
-#edgex-support-application-list table tr {
-    word-break: keep-all;
-    white-space: nowrap;
-    text-align: center;
-}
-
-.edgex-support-task-section{
-    padding: 0;
-    margin: 0;
-}
-
-#edgex-support-task-list table th,
-#edgex-support-task-list table tr {
-
-    word-break: keep-all;
-    white-space: nowrap;
-    text-align: center;
-}
-
-.schedule-address-search-icon {
-    color:rgb(68, 157, 68);
-}
-.schedule-address-search-icon i:hover {
-    /*color:black;*/
-    font-size:30px;
-    z-index: 999;
-}
-
-#edgex-support-task-address,
-#edgex-support-task-editor-panel {
-    position:absolute;
-    top:0;
-    bottom:0;
-    right:0;
-    left:0;
-    margin:auto;
-    display: none;
-    width: 90%;
-    height: 140px;
-    z-index: 999;
-    overflow: auto;
-}
-
-#edgex-support-task-address table  {
-    overflow: auto;
-}
-
-#edgex-support-task-address table th,
-#edgex-support-task-address table tr {
-    word-break: keep-all;
-    white-space: nowrap;
-    text-align: center;
-}
-
 fieldset{
     padding:.35em .625em .75em;
     margin:0 2px;
@@ -75,28 +15,56 @@ legend{
     color: green;
 }
 
-#edgex-support-application-add-or-update{
+div#edgex-support-scheduleresult-app_detail {
+    display: none;
     position:absolute;
-    top:0;
+    top:0%;
     bottom:0;
     right:0;
     left:0;
     margin:auto;
-    display: none;
     width: 50%;
-    height: 600px;
-    z-index: 999;
+    height: 240px;
+    z-index: 990;
 }
 
-/*#edgex-support-scheduleevent-add {
-  position:absolute;
-  top:0;
-  bottom:0;
-  right:0;
-  left:0;
-  margin:auto;
-  display: none;
-  width: 90%;
-  height: 500px;
-  z-index: 999;
-}*/
+div#edgex-support-event-app_tasks{
+    display: none;
+    position:absolute;
+    top:100%;
+    bottom:0;
+    right:0;
+    left:0;
+    margin:auto;
+    width: 95%;
+    height: 480px;
+    z-index: 990;
+}
+
+
+div#edgex-support-eventtoexecute-app_tasks{
+    display: none;
+    position:absolute;
+    top:200%;
+    bottom:0;
+    right:0;
+    left:0;
+    margin:auto;
+    width: 95%;
+    height: 480px;
+    z-index: 990;
+}
+
+
+div#edgex-support-eventexecuted-app_tasks{
+    display: none;
+    position:absolute;
+    top:300%;
+    bottom:0;
+    right:0;
+    left:0;
+    margin:auto;
+    width: 95%;
+    height: 480px;
+    z-index: 990;
+}

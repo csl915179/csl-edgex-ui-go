@@ -40,17 +40,17 @@
 	},{
 		"title":"配置文件管理",
 		"url": "/pages/profile.html",
-		"icon":"",
+		"icon":"fa fa-book",
 		"children":[]
 	},{
 		"title":"设备资源管理",
 		"url": "/pages/deviceResourceManage.html",
-		"icon":"",
+		"icon":"fa fa-tablet",
 		"children":[]
 	},{
 	"title":"应用与任务管理",
 	"url": "/pages/appmanage.html",
-	"icon":"",
+	"icon":" fa fa-check-square-o",
 	"children":[]
 	}
 ]
