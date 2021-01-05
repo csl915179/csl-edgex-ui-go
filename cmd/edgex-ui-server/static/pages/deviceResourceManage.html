@@ -19,7 +19,7 @@
         <div class="panel panel-default" style="border:none;outline:none;margin:0;">
             <div class="panel-heading">
                 <div class="edgexIconBtn">
-                    <i class="fa fa-refresh fa-lg fa-fw" aria-hidden="true" onclick="orgEdgexFoundry.supportApplication.renderDeviceList()"></i>
+                    <i class="fa fa-refresh fa-lg fa-fw" aria-hidden="true" onclick="orgEdgexFoundry.supportDeviceResource.renderDeviceList()"></i>
                 </div>
             </div>
         </div>
@@ -30,6 +30,7 @@
                     <th>#</th>
                     <th>ID</th>
                     <th>名称</th>
+                    <th>注册情况</th>
                     <th>查看定义信息</th>
                     <th>修改/新建设备在Export-Receiver中定义的信息</th>
                     <th>删除设备定义信息</th>
@@ -52,37 +53,66 @@
         <div class="panel-heading">
             <h3 class="panel-title">
                 设备<span id="edgex-support-device-detail-name"/>定义信息
-                <button type="button" class="close pull-right" aria-label="Close" id="edgex-support-device-detail-close"><span style="color:#333!important;" aria-hidden="true">&times;</span></button>
             </h3>
         </div>
         <!--未注册页面-->
         <div class="panel panel-success" id="edgex-support-device-detail-not_registed" style="display: none">
             <h3 style="text-align:center">当前设备还没有在Edgex-Export-Receiver里注册</h3>
-            <div align="center"><button type="button" class="btn btn-success" id="edgex-support-device-detail-not_registed-regist">注册</button></div>
+            <div align="center">
+                <button type="button" class="btn btn-success" id="edgex-support-device-detail-not_registed-regist">注册</button>
+                <button type="button" class="btn btn-warning" id="edgex-support-device-detail-not_registed-exit">取消</button>
+            </div>
         </div>
         <!--未注册页面 结束-->
         <!--设备注册详情页-->
         <div id="edgex-support-device-detail-registed" class="panel panel-success" style="display: none">
-            <fieldset id="edgex-support-device-detail-basicInfo">
+            <div class="panel panel-success" id="edgex-support-device-detail-registed-page_control">
+                <div class="panel panel-default" style="border:none;outline:none;margin:0;">
+                    <div class="panel-heading">
+                        <div class="edgexIconBtn">
+                            <i class="fa fa-refresh fa-lg" aria-hidden="true" newdevice="false" name="refresh"></i>
+                        </div>
+                        <div class="edgexIconBtn">
+                            <i class="fa fa-close fa-lg" aria-hidden="true" name="close"></i>
+                        </div>
+                    </div>
+                </div>
+                <fieldset id="edgex-support-device-detail-basicInfo">
                 <legend>基本信息</legend>
                 <table>
                     <td style="width: 16%; text-align: right"><b>ID: </b></td>
                     <td style="width: 16%; text-align: left"><input class="form-control" disabled id="edgex-support-device-detail-basicInfo-edgexid"/></td>
                     <td style="width: 16%; text-align: right"><b>名称: </b></td>
                     <td style="width: 16%; text-align: left"><input class="form-control" disabled id="edgex-support-device-detail-basicInfo-name"/></td>
-                    <tr/>
-                    <td style="width: 16%; text-align: right"><b>CPU资源(G cycles): </b></td>
-                    <td style="width: 16%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-basicInfo-cpu"/></td>
-                    <td style="width: 16%; text-align: right"><b>内存资源(MB): </b></td>
-                    <td style="width: 16%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-basicInfo-memory"/></td>
-                    <td style="width: 16%; text-align: right"><b>磁盘资源(MB): </b></td>
-                    <td style="width: 16%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-basicInfo-disk"/></td>
                 </table>
             </fieldset>
-            <fieldset id="edgex-support-device-detail-command">
-                <legend>命令列表</legend>
-                <table></table>
+                <fieldset id="edgex-support-device-detail-resourceInfo">
+                <legend>资源情况</legend>
+                <table>
+                    <td style="width: 15%; text-align: right"><b>CPU资源(G cycles): </b></td>
+                    <td style="width: 10%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-resourceInfo-cpu"/></td>
+                    <td style="width: 15%; text-align: right"><b>内存资源(MB): </b></td>
+                    <td style="width: 10%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-resourceInfo-memory"/></td>
+                    <td style="width: 15%; text-align: right"><b>磁盘资源(MB): </b></td>
+                    <td style="width: 10%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-resourceInfo-disk"/></td>
+                    <td style="width: 15%; text-align: right"><b>网络带宽: </b></td>
+                    <td style="width: 10%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-resourceInfo-net_rate"/></td>
+                    <tr/>
+                    <td style="width: 15%; text-align: right"><b>可用CPU资源(G cycles): </b></td>
+                    <td style="width: 10%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-resourceInfo-availablecpu"/></td>
+                    <td style="width: 15%; text-align: right"><b>可用内存资源(MB): </b></td>
+                    <td style="width: 10%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-resourceInfo-availablememory"/></td>
+                    <td style="width: 15%; text-align: right"><b>可用磁盘资源(MB): </b></td>
+                    <td style="width: 10%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-resourceInfo-availabledisk"/></td>
+                    <td style="width: 15%; text-align: right"><b>可用网络带宽: </b></td>
+                    <td style="width: 10%; text-align: left"><input type="number" class="form-control" disabled id="edgex-support-device-detail-resourceInfo-availablenet_rate"/></td>
+                </table>
             </fieldset>
+                <fieldset id="edgex-support-device-detail-command">
+                    <legend>命令列表</legend>
+                    <table></table>
+                </fieldset>
+            </div>
         </div>
         <!--设备注册详情页 结束-->
         <!--命令详情页-->
@@ -174,7 +204,8 @@
         </div>
         <!--命令详情页 结束-->
     </div>
-    <!--设备详情页 结束-->
+        <!--设备详情页 结束-->
+    </div>
 
     <!--编辑设备页-->
     <div id="edgex-support-device-edit" class="panel panel-success" style="display: none">
@@ -198,17 +229,19 @@
             <fieldset id="edgex-support-device-edit-deviceList-basicInfo">
                 <legend>基本信息</legend>
                 <table>
-                    <td style="width: 16%; text-align: right"><b>ID: </b></td>
-                    <td style="width: 16%; text-align: left"><input class="form-control" disabled name="edgexid"/></td>
-                    <td style="width: 16%; text-align: right"><b>名称: </b></td>
-                    <td style="width: 16%; text-align: left"><input class="form-control" disabled name="name"/></td>
+                    <td style="width: 12.5%; text-align: right"><b>ID: </b></td>
+                    <td style="width: 12.5%; text-align: left"><input class="form-control" disabled name="edgexid"/></td>
+                    <td style="width: 12.5%; text-align: right"><b>名称: </b></td>
+                    <td style="width: 12.5%; text-align: left"><input class="form-control" disabled name="name"/></td>
                     <tr/>
-                    <td style="width: 16%; text-align: right"><b>CPU资源(G cycles): </b></td>
-                    <td style="width: 16%; text-align: left"><input type="number" class="form-control" name="cpu"/></td>
-                    <td style="width: 16%; text-align: right"><b>内存资源(MB): </b></td>
-                    <td style="width: 16%; text-align: left"><input type="number" class="form-control" name="memory"/></td>
-                    <td style="width: 16%; text-align: right"><b>磁盘资源(MB): </b></td>
-                    <td style="width: 16%; text-align: left"><input type="number" class="form-control" name="disk"/></td>
+                    <td style="width: 12.5%; text-align: right"><b>CPU资源(G cycles): </b></td>
+                    <td style="width: 12.5%; text-align: left"><input type="number" class="form-control" name="cpu"/></td>
+                    <td style="width: 12.5%; text-align: right"><b>内存资源(MB): </b></td>
+                    <td style="width: 12.5%; text-align: left"><input type="number" class="form-control" name="memory"/></td>
+                    <td style="width: 12.5%; text-align: right"><b>磁盘资源(MB): </b></td>
+                    <td style="width: 12.5%; text-align: left"><input type="number" class="form-control" name="disk"/></td>
+                    <td style="width: 12.5%; text-align: right"><b>网络带宽: </b></td>
+                    <td style="width: 12.5%; text-align: left"><input type="number" class="form-control" name="net_rate"/></td>
                 </table>
             </fieldset>
             <fieldset id="edgex-support-device-edit-deviceList-command">

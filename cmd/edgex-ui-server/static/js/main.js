@@ -38,11 +38,11 @@ $(document).ready(function(){
 		success:function(data){
 			var menu = eval(data);
 			menuRender(menu);
-			$(".center .tab-content #edgex-foundry-tab-Gateway ").load("/pages/gateway.html");
+			$(".center .tab-content #edgex-foundry-tab-网关 ").load("/pages/gateway.html");
 			// $(".sidebar li[url='/pages/gateway.html']").css({color:'#339933',borderBottom: '2px solid',borderBottomColor:'#339933'});
 			$(".sidebar li[url='/pages/gateway.html']").css({color:'#339933',borderBottom: '',backgroundColor:'rgba(51, 153, 51, 0.5)'});
-			edgexFoundryCreatedTabs.push("edgex-foundry-tab-Gateway");
-			$("a[href='#edgex-foundry-tab-Gateway']").tab('show');
+			edgexFoundryCreatedTabs.push("edgex-foundry-tab-网关");
+			$("a[href='#edgex-foundry-tab-网关']").tab('show');
 			bindCloseTab();
 		}
 	});
@@ -78,7 +78,7 @@ $(document).ready(function(){
 		$(".main_msgbox").animate({"right":"-400px"},"fast");
 	});
 
-	//render side_bar menu dynamically when load index page.
+	//render side_bar menu dynamically when load index page.点击左侧切换的功能
 	function menuRender(data){
 		for(var i=0; i<data.length;i++){
 			var menu = data[i];
@@ -97,7 +97,7 @@ $(document).ready(function(){
 		}
 
 		//bind menu event of click
-		$(".sidebar li").on('click',function(event){
+		$(".sidebar li").off('click').on('click',function(event){
 			event.stopPropagation();//prevent event propagate to parent node when click on current node
 			//if not leaf node,expand current node.
 			if($(this).attr("children") == "true"){
@@ -125,6 +125,7 @@ $(document).ready(function(){
 				});
 				return;
 			};
+
 			// $(".sidebar li").not($(this)).css({color:'',borderBottom: '',borderBottomColor:''});
 			// $(this).css({color:'#339933',borderBottom: '2px solid',borderBottomColor:'#339933'});
 			$(".sidebar li").not($(this)).css({color:'',borderBottom: '',borderBottomColor:'',backgroundColor:''});
@@ -137,10 +138,11 @@ $(document).ready(function(){
 	}
 
 
+	//点击关闭某个页面时的功能
 	function bindCloseTab() {
 		$("#edgex-foundry-tabs-index-main .edgex-tab button").off('click').on('click',function(){
 		  event.stopPropagation();
-			if ($(this).parent().attr("tabindex") == "edgex-foundry-tab-Gateway") {
+			if ($(this).parent().attr("tabindex") == "edgex-foundry-tab-网关") {
 				bootbox.alert({
 					message: "Can not remove gateway tab!",
 					className: 'red-green-buttons'

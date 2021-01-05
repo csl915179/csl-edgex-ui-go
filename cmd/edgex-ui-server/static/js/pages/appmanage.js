@@ -663,6 +663,7 @@ orgEdgexFoundry.supportApplication = (function(){
                 row += '<td>' + taskElement.exec_place + '</td>';
                 row += '<td>' + taskElement.exec_time + '</td>';
                 row += '<td>' + taskElement.exec_result + '</td>';
+                row += '<td>' + taskElement.energy_used + '</td>';
                 tasktable.append(row)
             })
         })

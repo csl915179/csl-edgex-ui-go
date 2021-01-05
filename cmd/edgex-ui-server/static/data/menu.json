@@ -1,10 +1,10 @@
 [
 	{
-		"title":"Gateway",
+		"title":"网关",
 		"url": "/pages/gateway.html",
 		"icon":"fa fa-bank"
 	},{
-		"title":"DeviceService",
+		"title":"设备服务管理",
 		"url": "/pages/devices/deviceService.html",
 		"icon":"fa fa-gears"
 	},{
