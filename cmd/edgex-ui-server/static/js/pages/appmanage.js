@@ -61,6 +61,8 @@ orgEdgexFoundry.supportApplication = (function(){
         divideScheduleresultTable: null,
         getScheduledTaskList: null,
         renderEventList:null,
+        renderExecuteEventList:null,
+        getSchedulerConfig:null,
         divideEventTable: null,
         getEventList:null,
         divideEventToExecuteTable: null,
@@ -366,8 +368,11 @@ orgEdgexFoundry.supportApplication = (function(){
     //查看调度结果
     SupportApplication.prototype.renderScheduleResultList = function () {
         application.divideScheduleresultTable(0);
-        $("#edgex-support-scheduleresult-refresh_scheduleresult").off('click').on('click', function () {
+        $("#edgex-support-scheduleresult-refresh_scheduleresult i[name='refresh']").off('click').on('click', function () {
             application.renderScheduleResultList()
+        })
+        $("#edgex-support-scheduleresult-refresh_scheduleresult i[name='config']").off('click').on('click', function () {
+            application.getSchedulerConfig()
         })
     };
 
@@ -448,6 +453,58 @@ orgEdgexFoundry.supportApplication = (function(){
         application.divideEventExecutedTable(0);
         $("#edgex-support-event-refresh").off('click').on('click', function () {
             application.renderExecuteEventList();
+        })
+    };
+
+    //获取当前调度器配置
+    SupportApplication.prototype.getSchedulerConfig = function(){
+        $("#edgex-support-scheduleresult-config").show('fast');
+        var lock = true;
+        var config;
+        $.ajax({
+            url:'/export-receiver/api/v1/scheduleresult/appschedule',
+            type:'GET',
+            async:false,
+            success:function (data) {
+                config = data
+            }
+        });
+        $("#edgex-support-scheduleresult-config input[name='Host']").val(config.host);
+        $("#edgex-support-scheduleresult-config input[name='Port']").val(config.port);
+        $("#edgex-support-scheduleresult-config input[name='Path']").val(config.path);
+        $("#edgex-support-scheduleresult-config div[name='LOCK']").off('click').on('click',function () {
+            $("#edgex-support-scheduleresult-config input").removeAttr("disabled");
+            $("#edgex-support-scheduleresult-config div[name='LOCK']").hide();
+            $("#edgex-support-scheduleresult-config div[name='UNLOCK']").show('fast');
+            lock = false;
+        })
+        $("#edgex-support-scheduleresult-config div[name='UNLOCK']").off('click').on('click',function () {
+            $("#edgex-support-scheduleresult-config input").attr("disabled","disabled");
+            $("#edgex-support-scheduleresult-config div[name='UNLOCK']").hide();
+            $("#edgex-support-scheduleresult-config div[name='LOCK']").show('fast');
+        })
+        $("#edgex-support-scheduleresult-config button[name='OK']").off('click').on('click',function () {
+            if (!lock){
+                var config = {
+                    "host":$("#edgex-support-scheduleresult-config input[name='Host']").val(),
+                    "port":Number($("#edgex-support-scheduleresult-config input[name='Port']").val()),
+                    "path":$("#edgex-support-scheduleresult-config input[name='Path']").val()
+                };
+                $.ajax({
+                    url:'/export-receiver/api/v1/scheduleresult/appschedule',
+                    type:'POST',
+                    async:true,
+                    data:JSON.stringify(config),
+                });
+            }
+            $("#edgex-support-scheduleresult-config input").val();
+            $("#edgex-support-scheduleresult-config input").attr("disabled","disabled");
+            $("#edgex-support-scheduleresult-config").hide();
+        })
+        $("#edgex-support-scheduleresult-config button[name='Cancel']").off('click').on('click',function () {
+            $("#edgex-support-scheduleresult-config input").val();
+            $("#edgex-support-scheduleresult-config input").attr("disabled","disabled");;
+            $("#edgex-support-scheduleresult-config").hide();
         })
     };
 

@@ -126,22 +126,30 @@ orgEdgexFoundry.supportDeviceResource = (function(){
             deviceExistInExporter[element.edgexid] = true
         })
         $("#edgex-support-device-devicelist tbody").empty();
+        var registedcount=0, not_registedcount=0;
         $.each(devicelist,function(i,v){
             var exist = deviceExistInExporter[v.id] != null;
             var rowData = "<tr>";
-            rowData += "<td>" + (i + 1) +"</td>";
-            rowData += "<td>" +  v.id + "</td>";
-            rowData += "<td>" +  v.name + "</td>";
             if (exist==true) {
+                registedcount+=1;
+                rowData += "<td>" + (registedcount) +"</td>";
+                rowData += "<td>" +  v.id + "</td>";
+                rowData += "<td>" +  v.name + "</td>";
                 rowData += "<td>" +  "<font color = 'green'>已注册</font>" + "</td>";
+                var table = $("#edgex-support-device-devicelist table[name='registed'] tbody");
             } else {
+                not_registedcount+=1;
+                rowData += "<td>" + (not_registedcount) +"</td>";
+                rowData += "<td>" +  v.id + "</td>";
+                rowData += "<td>" +  v.name + "</td>";
                 rowData += "<td>" +  "<font color = 'red'>未注册</font>" + "</td>";
+                var table = $("#edgex-support-device-devicelist table[name='not_registed'] tbody");
             }
             rowData += '<td class="scheduler-detail-icon edgex-support-device-devicelist-detail"><input type="hidden" value=\''+JSON.stringify(v)+'\' exist=\''+exist+'\'><div class="edgexIconBtn"><i class="fa fa-eye fa-lg" aria-hidden="true"></i> </div></td>';
             rowData += '<td class="scheduler-edit-icon edgex-support-device-devicelist-edit"><input type="hidden" value=\''+JSON.stringify(v)+'\' exist=\''+exist+'\'><div class="edgexIconBtn"><i class="fa fa-edit fa-lg" aria-hidden="true"></i> </div></td>';
             rowData += '<td class="scheduler-edit-icon edgex-support-device-devicelist-delete"><input type="hidden" value=\''+JSON.stringify(v)+'\' exist=\''+exist+'\'><div class="edgexIconBtn"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i> </div></td>';
             rowData += "</tr>";
-            $("#edgex-support-device-devicelist tbody").append(rowData);
+            table.append(rowData);
         });
         if (devicelist.length == 0){
             $("#edgex-support-device-devicelist tfoot").show('fast');
@@ -319,32 +327,6 @@ orgEdgexFoundry.supportDeviceResource = (function(){
                 return false
             }
         });
-        // var core_export_registInfo = {};
-        // $.ajax({
-        //     url: '/core-export/api/v1/registration/name/Edgex-Exporter-Receiver',
-        //     type:'GET',
-        //     contentType:'application/json',
-        //     async : false,
-        //     success:function(data){
-        //         core_export_registInfo = data
-        //     },
-        //     error:function(){
-        //         alert("ERROR! 获取Edgex设备导出注册信息失败")
-        //         return false
-        //     }
-        // });
-        // core_export_registInfo.filter.deviceIdentifiers.splice($.inArray(device.name,core_export_registInfo.filter.deviceIdentifiers),1);
-        // $.ajax({
-        //     url: '/core-export/api/v1/registration',
-        //     type:'PUT',
-        //     contentType:'application/json',
-        //     async : false,
-        //     data : JSON.stringify(core_export_registInfo),
-        //     error:function(){
-        //         alert("ERROR! 更新Edgex设备导出注册信息失败")
-        //         return false
-        //     }
-        // });
     }
     //点击编辑设备按键的功能
     supportDeviceResource.prototype.editDeviceBtn = function(deviceInfo){

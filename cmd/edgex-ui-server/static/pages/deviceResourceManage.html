@@ -24,26 +24,52 @@
             </div>
         </div>
         <div>
-            <table class="table  table-responsive table-hover table-striped">
-                <thead>
-                <tr class="active">
-                    <th>#</th>
-                    <th>ID</th>
-                    <th>名称</th>
-                    <th>注册情况</th>
-                    <th>查看定义信息</th>
-                    <th>修改/新建设备在Export-Receiver中定义的信息</th>
-                    <th>删除设备定义信息</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-                <tfoot style="display:none;">
-                <tr align="center">
-                    <td colspan=13>No Data.</td>
-                </tr>
-                </tfoot>
-            </table>
+            <fieldset>
+                <legend>已注册设备列表</legend>
+                <table name="registed" class="table  table-responsive table-hover table-striped">
+                    <thead>
+                    <tr class="active">
+                        <th>#</th>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>注册情况</th>
+                        <th>查看定义信息</th>
+                        <th>修改设备定义信息</th>
+                        <th>删除设备定义信息</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot style="display:none;">
+                    <tr align="center">
+                        <td colspan=13>No Data.</td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </fieldset>
+            <fieldset>
+                <legend>未注册设备列表</legend>
+                <table name="not_registed" class="table  table-responsive table-hover table-striped">
+                    <thead>
+                    <tr class="active">
+                        <th>#</th>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>注册情况</th>
+                        <th>查看定义信息</th>
+                        <th>填写设备定义信息</th>
+                        <th>删除设备定义信息</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot style="display:none;">
+                    <tr align="center">
+                        <td colspan=13>No Data.</td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </fieldset>
         </div>
     </div>
     <!--设备列表 结束-->
