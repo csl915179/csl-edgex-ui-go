@@ -27,16 +27,16 @@ import (
 )
 
 var (
-	database      string
-	dbHost        string
-	dbPort        int64
-	dbUserName    string
-	dbPassword    string
-	gatewayScheme string
-	userScheme    string
+	database          string
+	dbHost            string
+	dbPort            int64
+	dbUserName        string
+	dbPassword        string
+	gatewayScheme     string
+	userScheme        string
 	applicationScheme string
-	taskScheme string
-	nodeScheme string
+	taskScheme        string
+	nodeScheme        string
 )
 
 type DataStore struct {
@@ -50,18 +50,15 @@ func (ds DataStore) DataStore() *DataStore {
 }
 
 func loadConf() {
-	database = configs.DBConf.Name//edgex-ui-go
-	dbHost = configs.DBConf.Host//localhost
-	dbPort = configs.DBConf.Port//27017
-	dbUserName = configs.DBConf.Username//su
-	dbPassword = configs.DBConf.Password//su
+	database = configs.DBConf.Name       //edgex-ui-go
+	dbHost = configs.DBConf.Host         //localhost
+	dbPort = configs.DBConf.Port         //27017
+	dbUserName = configs.DBConf.Username //su
+	dbPassword = configs.DBConf.Password //su
 	gatewayScheme = configs.DBConf.Scheme.Gateway
 	userScheme = configs.DBConf.Scheme.User
-	applicationScheme = configs.DBConf.Scheme.Application
-	taskScheme = configs.DBConf.Scheme.Task
-	nodeScheme = configs.DBConf.Scheme.Node
-	log.Println(fmt.Sprintf("mongoDB connection info %s in %s:%d with credential (%s / %x), with scheme: %s, %s, %s, %s,%s.",
-		database, dbHost, dbPort, dbUserName, md5.Sum([]byte(dbPassword)), gatewayScheme, userScheme, applicationScheme,taskScheme,nodeScheme))
+	log.Println(fmt.Sprintf("mongoDB connection info %s in %s:%d with credential (%s / %x), with scheme: %s, %s.",
+		database, dbHost, dbPort, dbUserName, md5.Sum([]byte(dbPassword)), gatewayScheme, userScheme))
 }
 
 func DBConnect() bool {

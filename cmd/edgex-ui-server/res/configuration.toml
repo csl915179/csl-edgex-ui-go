@@ -15,9 +15,7 @@ Password = "su"
   [Database.Scheme]
   User = "user"
   Gateway = "gateway"
-  Application = "application"
-  Task = "task"
-  Node = "node"
+
 [DynamicProxy]
 CoreDataPath     = "/core-data"
 CoreDataPort     = "48080"

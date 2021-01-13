@@ -51,10 +51,6 @@ type Service struct {
 type Scheme struct {
 	User    string
 	Gateway string
-	Device	string
-	Application string
-	Task string
-	Node string
 }
 
 type Database struct {
@@ -95,7 +91,6 @@ type DynamicProxy struct {
 
 	ExportReceiverPath string
 	ExportReceiverPort string
-
 }
 
 func LoadConfig(confFilePath string) error {
